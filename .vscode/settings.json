@@ -1,0 +1,96 @@
+{
+  "prettier.enable": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    /*
+    * tv
+    */
+    [
+      "([\"'`][^\"'`]*.*?[\"'`])",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    /*
+    * cva
+    */
+    [
+      "cva\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    /*
+    * cx
+    */
+    [
+      "cx\\(([^)]*)\\)",
+      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+    ],
+    /*
+    * tailwind-merge
+    */
+    [
+      "(?:twMerge|twJoin)\\(([^;]*)[\\);]",
+      "[`'\"`]([^'\"`;]*)[`'\"`]"
+    ],
+    /*
+    * DOM
+    */
+    [
+      "classList.(?:add|remove)\\(([^)]*)\\)",
+      "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"
+    ],
+    /*
+    * comment tagging
+    * /** @tw *\/ "px-5 text-center bg-white py-16 &:not[hidden]"
+    */
+    [
+      "@tw\\s\\*\/\\s+[\"'`]([^\"'`]*)"
+    ],
+    /*
+    * classList
+    */
+    [
+      "classList={{([^;]*)}}",
+      "\\s*?[\"'`]([^\"'`]*).*?:"
+    ],
+    /*
+    * variables
+    * const styles = "bg-red-500 text-white";
+    */
+    [
+      "(?:\\b(?:const|let|var)\\s+)?[\\w$_]*(?:[Ss]tyles|[Cc]lasses|[Cc]lassnames)[\\w\\d]*\\s*(?:=|\\+=)\\s*['\"]([^'\"]*)['\"]"
+    ],
+    /*
+    * POJO
+    */
+    [
+      ":\\s*?[\"'`]([^\"'`]*).*?,"
+    ]
+  ],
+  // "tailwindCSS.experimental.configFile": "packages/design-system/styles/globals.css"
+  "emmet.showExpandedAbbreviation": "never",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "veco.highlight.enabled": true,
+  "veco.colorize.enabled": true,
+  "veco.colorize.namedColor": false,
+  "veco.colorize.decorationType": "underline",
+}

@@ -1,0 +1,53 @@
+{
+  "name": "@workspace/hono",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bulletproof Hono 4 server template",
+  "author": "Tri Rizeki Rifandani",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "bun run --hot src/bun.ts",
+    "node:dev": "tsx watch -r dotenv/config src/node.ts",
+    "node:build": "tsc -p .",
+    "node:start": "node ./dist/node.js",
+    "test": "bun test",
+    "db:migrate:up": "tsx -r dotenv/config ./src/lib/db/migrate latest",
+    "db:migrate:down": "tsx -r dotenv/config ./src/lib/db/migrate down",
+    "db:migrate:redo": "tsx -r dotenv/config ./src/lib/db/migrate redo && bun db:generate:types",
+    "db:migrate:create": "tsx -r dotenv/config ./src/lib/db/migrate create initial",
+    "db:seed": "tsx -r dotenv/config ./src/lib/db/seed",
+    "db:reset": "bun db:migrate:redo && bun db:seed",
+    "db:generate:types": "kanel && bun db:types:prettier"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "1.2.10",
+    "@hono/node-server": "1.14.0",
+    "@hono/zod-validator": "0.4.3",
+    "@google/generative-ai": "0.24.0",
+    "@scalar/hono-api-reference": "0.8.0",
+    "@t3-oss/env-core": "0.12.0",
+    "@workspace/core": "workspace:*",
+    "ai": "4.3.4",
+    "hono": "4.7.6",
+    "hono-openapi": "0.4.6",
+    "ollama": "0.5.14",
+    "ollama-ai-provider": "1.2.0",
+    "pdf-parse": "1.1.1",
+    "ts-pattern": "5.7.0",
+    "zod": "3.24.2",
+    "zod-form-data": "2.0.7",
+    "zod-openapi": "4.2.4",
+    "zod-validation-error": "3.4.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.9",
+    "@types/node": "22.14.0",
+    "@types/pdf-parse": "1.1.5",
+    "@workspace/typescript-config": "workspace:*",
+    "dotenv": "16.4.7",
+    "tsx": "4.19.3",
+    "typescript": "5.8.3"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "bun@1.2.9",
+  "description": "AI Monorepo",
+  "author": "Tri Rizeki Rifandani",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
+    "lint": "ultracite lint",
+    "format": "ultracite format",
+    "typecheck": "run-p hono:typecheck",
+    "regression": "run-p lint hono:typecheck",
+    "hono": "bun --elide-lines=0 --filter @workspace/hono",
+    "hono:typecheck": "bun hono typecheck",
+    "hono:dev": "bun hono dev",
+    "hono:node:dev": "bun hono node:dev",
+    "hono:node:build": "bun hono node:build",
+    "hono:node:start": "bun hono node:start"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "19.8.0",
+    "@commitlint/config-conventional": "19.8.0",
+    "@types/node": "22.13.14",
+    "@workspace/typescript-config": "workspace:*",
+    "bumpp": "10.1.0",
+    "husky": "9.1.7",
+    "npm-run-all2": "7.0.2",
+    "rimraf": "6.0.1",
+    "typescript": "5.8.3",
+    "ultracite": "4.1.20"
+  },
+  "trustedDependencies": ["@biomejs/biome", "esbuild"],
+  "commitlint": {
+    "extends": ["@commitlint/config-conventional"]
+  },
+  "workspaces": ["apps/*", "packages/*"]
+}
