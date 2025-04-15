@@ -26,15 +26,15 @@
     "pino": "9.6.0"
   },
   "devDependencies": {
-    "@internationalized/date": "3.7.0",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@internationalized/date": "3.8.0",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
     "@workspace/typescript-config": "workspace:*",
-    "ky": "1.7.5",
+    "ky": "1.8.1",
     "pino-pretty": "13.0.0",
-    "radashi": "12.3.4",
-    "type-fest": "4.37.0",
-    "typescript": "5.8.2",
+    "radashi": "12.4.0",
+    "type-fest": "4.39.1",
+    "typescript": "5.8.3",
     "zod": "3.24.2"
   }
 }

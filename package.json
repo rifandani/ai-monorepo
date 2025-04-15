@@ -26,14 +26,14 @@
     "@biomejs/biome": "1.9.4",
     "@commitlint/cli": "19.8.0",
     "@commitlint/config-conventional": "19.8.0",
-    "@types/node": "22.13.14",
+    "@types/node": "22.14.1",
     "@workspace/typescript-config": "workspace:*",
     "bumpp": "10.1.0",
     "husky": "9.1.7",
     "npm-run-all2": "7.0.2",
     "rimraf": "6.0.1",
     "typescript": "5.8.3",
-    "ultracite": "4.1.20"
+    "ultracite": "4.2.1"
   },
   "trustedDependencies": ["@biomejs/biome", "esbuild"],
   "commitlint": {

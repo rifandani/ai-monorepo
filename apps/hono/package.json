@@ -16,15 +16,15 @@
     "node:start": "node ./dist/node.js"
   },
   "dependencies": {
-    "@ai-sdk/google": "1.2.10",
-    "@hono/node-server": "1.14.0",
+    "@ai-sdk/google": "1.2.11",
+    "@hono/node-server": "1.14.1",
     "@hono/zod-validator": "0.4.3",
     "@modelcontextprotocol/sdk": "1.9.0",
     "@google/generative-ai": "0.24.0",
-    "@scalar/hono-api-reference": "0.8.0",
+    "@scalar/hono-api-reference": "0.8.1",
     "@t3-oss/env-core": "0.12.0",
     "@workspace/core": "workspace:*",
-    "ai": "4.3.4",
+    "ai": "4.3.6",
     "hono": "4.7.6",
     "hono-openapi": "0.4.6",
     "ollama": "0.5.14",
@@ -38,10 +38,10 @@
   },
   "devDependencies": {
     "@types/bun": "1.2.9",
-    "@types/node": "22.14.0",
+    "@types/node": "22.14.1",
     "@types/pdf-parse": "1.1.5",
     "@workspace/typescript-config": "workspace:*",
-    "dotenv": "16.4.7",
+    "dotenv": "16.5.0",
     "tsx": "4.19.3",
     "typescript": "5.8.3"
   }
