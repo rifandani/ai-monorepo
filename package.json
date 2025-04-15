@@ -26,7 +26,7 @@
     "@biomejs/biome": "1.9.4",
     "@commitlint/cli": "19.8.0",
     "@commitlint/config-conventional": "19.8.0",
-    "@types/node": "22.13.14",
+    "@types/node": "22.14.1",
     "@workspace/typescript-config": "workspace:*",
     "bumpp": "10.1.0",
     "husky": "9.1.7",
