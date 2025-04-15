@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  lint:
+  lint-typecheck:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -24,24 +24,7 @@ jobs:
         run: bun i
 
       - name: Lint
-        run: bun lint
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4.2.2
-
-      - name: Install bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install deps
-        run: bun i
-
-      - name: Typecheck
-        run: bun typecheck
+        run: bun lint-typecheck
 
   # e2e:
   #   timeout-minutes: 30

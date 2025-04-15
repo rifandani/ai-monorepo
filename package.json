@@ -11,10 +11,9 @@
   "scripts": {
     "prepare": "husky",
     "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
-    "lint": "ultracite lint",
     "format": "ultracite format",
-    "typecheck": "run-p hono:typecheck",
-    "regression": "run-p lint hono:typecheck",
+    "lint": "ultracite lint",
+    "lint-typecheck": "run-p lint hono:typecheck",
     "hono": "bun --elide-lines=0 --filter @workspace/hono",
     "hono:typecheck": "bun --filter @workspace/hono typecheck",
     "hono:dev": "bun hono dev",
