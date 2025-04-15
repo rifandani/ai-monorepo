@@ -75,12 +75,6 @@ function cleanPrompt(prompt: LanguageModelV1Prompt) {
   });
 }
 
-/**
- * When using this caching middleware, keep these points in mind:
- * - Development Only: This approach is intended for local development, not production environments
- * - Cache Invalidation: You'll need to clear the cache (delete the cache file) when you want fresh responses
- * - Multi-Step Flows: When using maxSteps, be aware that caching occurs at the individual language model response level, not across the entire execution flow. This means that while the model's generation is cached, the tool call is not and will run on each generation.
- */
 export const cacheMiddleware: LanguageModelV1Middleware = {
   wrapGenerate: async ({ doGenerate, params }) => {
     const cacheKey = JSON.stringify({
@@ -173,6 +167,12 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
   },
 };
 
+/**
+ * When using this caching middleware, keep these points in mind:
+ * - Development Only: This approach is intended for local development, not production environments
+ * - Cache Invalidation: You'll need to clear the cache (delete the cache file) when you want fresh responses
+ * - Multi-Step Flows: When using maxSteps, be aware that caching occurs at the individual language model response level, not across the entire execution flow. This means that while the model's generation is cached, the tool call is not and will run on each generation.
+ */
 export function cached(model: LanguageModelV1) {
   return wrapLanguageModel({
     middleware: cacheMiddleware,

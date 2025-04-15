@@ -8,6 +8,7 @@ import {
   gofoodSchema,
   mockUserSchema,
   promptSchema,
+  qualityMetricsSchema,
   reasoningDetailSchema,
   textSchema,
   usageSchema,
@@ -886,6 +887,83 @@ geminiApp.post(
       steps: result.steps,
       toolCalls: result.toolCalls,
       toolResults: result.toolResults,
+    });
+  }
+);
+
+geminiApp.post(
+  '/agent/prompt-chaining',
+  describeRoute({
+    description:
+      "Write persuasive marketing copy. Use sequential processing (prompt chaining). The simplest workflow pattern executes steps in a predefined order. Each step's output becomes input for the next step, creating a clear chain of operations.",
+    responses: {
+      200: {
+        description:
+          'Successful write persuasive marketing copy with quality check',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                text: textSchema,
+                qualityMetrics: qualityMetricsSchema,
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: z.string().describe('The prompt to generate text').openapi({
+        example: 'a new product that helps people to lose weight',
+      }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    // First step: Generate marketing copy with lower cost model
+    const { text: copy } = await generateText({
+      model: flash15,
+      prompt: `Write persuasive marketing copy for: ${prompt}. Focus on benefits and emotional appeal.`,
+    });
+
+    // Second step: Perform quality check on copy with same model
+    const { object: qualityMetrics } = await generateObject({
+      model: flash15,
+      schema: qualityMetricsSchema,
+      prompt: `Evaluate this marketing copy for:
+    1. Presence of call to action (true/false)
+    2. Emotional appeal (1-10)
+    3. Clarity (1-10)
+
+    Copy to evaluate: ${copy}`,
+    });
+
+    if (
+      !qualityMetrics.hasCallToAction ||
+      qualityMetrics.emotionalAppeal < 7 ||
+      qualityMetrics.clarity < 7
+    ) {
+      // Third step: If quality check fails, regenerate with more specific instructions with higher cost model
+      const result = await generateText({
+        model: flash20,
+        prompt: `Rewrite this marketing copy with:
+      ${qualityMetrics.hasCallToAction ? '' : '- A clear call to action'}
+      ${qualityMetrics.emotionalAppeal < 7 ? '- Stronger emotional appeal' : ''}
+      ${qualityMetrics.clarity < 7 ? '- Improved clarity and directness' : ''}
+
+      Original copy: ${copy}`,
+      });
+
+      return ctx.json({ text: result.text, qualityMetrics });
+    }
+
+    return ctx.json({
+      text: copy,
+      qualityMetrics,
     });
   }
 );

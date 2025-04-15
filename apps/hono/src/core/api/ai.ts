@@ -67,6 +67,17 @@ export const gofoodSchema = z.object({
     }),
   }),
 });
+export const qualityMetricsSchema = z.object({
+  hasCallToAction: z.boolean().openapi({
+    example: true,
+  }),
+  emotionalAppeal: z.number().min(1).max(10).openapi({
+    example: 7,
+  }),
+  clarity: z.number().min(1).max(10).openapi({
+    example: 7,
+  }),
+});
 
 export const promptSchema = z.string().openapi({
   example: 'What is the capital of France?',
