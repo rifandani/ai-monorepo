@@ -3,5 +3,19 @@
   "extends": ["ultracite"],
   "files": {
     "ignore": ["**/.cache.json"]
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        "useTopLevelRegex": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "nursery": {
+        "noExportedImports": "off",
+        "noNestedTernary": "off"
+      }
+    }
   }
 }

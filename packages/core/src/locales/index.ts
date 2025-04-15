@@ -1,6 +1,4 @@
-// biome-ignore lint/nursery/noExportedImports: <explanation>
 import { enLocale } from '@workspace/core/locales/en';
-// biome-ignore lint/nursery/noExportedImports: <explanation>
 import { idLocale } from '@workspace/core/locales/id';
 import type { LocaleDict } from '@workspace/core/locales/type';
 

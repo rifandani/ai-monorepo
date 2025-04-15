@@ -43,16 +43,12 @@ export function indonesianPhoneNumberFormat(phoneNumber: string) {
   let regexp: RegExp;
 
   if (uniqNumber.length <= 6) {
-    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     regexp = /(\d{3})(\d+)/;
   } else if (uniqNumber.length === 7) {
-    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     regexp = /(\d{3})(\d{4})/;
   } else if (uniqNumber.length === 8) {
-    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     regexp = /(\d{4})(\d{4})/;
   } else {
-    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     regexp = /(\d{4})(\d{5,})/;
   }
 
@@ -76,7 +72,6 @@ export function toCamelCase<T>(object: unknown): T {
       transformedObject = {};
       for (const key of Object.keys(object)) {
         if ((object as Record<string, unknown>)[key] !== undefined) {
-          // biome-ignore lint/performance/useTopLevelRegex: <explanation>
           const firstUnderscore = key.replace(/^_/, '');
           const newKey = firstUnderscore.replace(/(_\w)|(-\w)/g, (k) =>
             (k[1] as string).toUpperCase()
@@ -111,7 +106,6 @@ export function toSnakeCase<T>(object: unknown): T {
               /\.?([A-Z]+)/g,
               (_, y) => `_${y ? (y as string).toLowerCase() : ''}`
             )
-            // biome-ignore lint/performance/useTopLevelRegex: <explanation>
             .replace(/^_/, '');
           transformedObject[newKey] = toSnakeCase(
             (object as Record<string, unknown>)[key]
@@ -127,13 +121,10 @@ export function toSnakeCase<T>(object: unknown): T {
  * Remove leading zero
  */
 export function removeLeadingZeros(value: string) {
-  // biome-ignore lint/performance/useTopLevelRegex: <explanation>
   if (/^0+[1-9]+/.test(value)) {
-    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     return value.replace(/^(0)/, '');
   }
 
-  // biome-ignore lint/performance/useTopLevelRegex: <explanation>
   return value.replace(/^0{2,}/, '0');
 }
 
@@ -144,9 +135,7 @@ export function removeLeadingWhitespace(value?: string) {
   if (!value) {
     return '';
   }
-  // biome-ignore lint/performance/useTopLevelRegex: <explanation>
   if (/^\s*$/.test(value)) {
-    // biome-ignore lint/performance/useTopLevelRegex: <explanation>
     return value.replace(/^\s*/, '');
   }
 

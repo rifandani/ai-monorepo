@@ -1,0 +1,32 @@
+{
+  "core": {
+    "welcome": "Selamat Datang Kembali",
+    "language": "Bahasa",
+    "theme": "Tema",
+    "system": "Sistem",
+    "light": "Terang",
+    "dark": "Gelap",
+    "account": "Akun",
+    "profile": "Profil",
+    "settings": "Pengaturan",
+    "logout": "Keluar",
+    "backTo": "Kembali ke halaman {target}"
+  },
+  "home": {
+    "title": "Beranda"
+  },
+  "auth": {
+    "title": "Masuk",
+    "username": "Username",
+    "usernamePlaceholder": "Masukkan username Anda...",
+    "password": "Password",
+    "passwordPlaceholder": "Masukkan password Anda...",
+    "loginLoading": "Masuk...",
+    "login": "Masuk",
+    "logout": "Keluar",
+    "notFound": "Tidak Ditemukan",
+    "gone": "Maaf, kami tidak dapat menemukan halaman yang Anda cari",
+    "noAccount": "Tidak memiliki akun?",
+    "registerHere": "Daftar di sini"
+  }
+}

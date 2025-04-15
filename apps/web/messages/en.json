@@ -1,0 +1,32 @@
+{
+  "core": {
+    "welcome": "Welcome Back",
+    "language": "Language",
+    "theme": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "account": "Account",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "backTo": "Back to {target} page"
+  },
+  "home": {
+    "title": "Home"
+  },
+  "auth": {
+    "title": "Login",
+    "username": "Username",
+    "usernamePlaceholder": "Your username...",
+    "password": "Password",
+    "passwordPlaceholder": "Your password...",
+    "loginLoading": "Logging in...",
+    "login": "Login",
+    "logout": "Logout",
+    "notFound": "Not Found",
+    "gone": "Sorry, we couldn't find the page you're looking for",
+    "noAccount": "Don't have an account?",
+    "registerHere": "Register here"
+  }
+}

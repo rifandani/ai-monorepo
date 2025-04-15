@@ -10,6 +10,7 @@
     "./apis/*": "./src/apis/*.ts",
     "./assets/*": "./src/assets/*",
     "./constants/*": "./src/constants/*.ts",
+    "./hooks/*": "./src/hooks/*.ts",
     "./locales/*": "./src/locales/*.ts",
     "./services/*": "./src/services/*.ts",
     "./types/*": "./src/types/*.ts",
