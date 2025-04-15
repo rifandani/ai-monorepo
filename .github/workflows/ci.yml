@@ -71,7 +71,7 @@ jobs:
         run: bun spa:test:ci
 
       - name: Save playwright report as artifact
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
           name: playwright-report-${{ matrix.shardIndex }}
