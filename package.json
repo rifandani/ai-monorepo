@@ -16,7 +16,7 @@
     "typecheck": "run-p hono:typecheck",
     "regression": "run-p lint hono:typecheck",
     "hono": "bun --elide-lines=0 --filter @workspace/hono",
-    "hono:typecheck": "bun hono typecheck",
+    "hono:typecheck": "bun --filter @workspace/hono typecheck",
     "hono:dev": "bun hono dev",
     "hono:node:dev": "bun hono node:dev",
     "hono:node:build": "bun hono node:build",
