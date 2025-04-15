@@ -30,7 +30,7 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@workspace/typescript-config": "workspace:*",
-    "ky": "1.7.5",
+    "ky": "1.8.1",
     "pino-pretty": "13.0.0",
     "radashi": "12.3.4",
     "type-fest": "4.37.0",
