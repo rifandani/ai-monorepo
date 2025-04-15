@@ -975,7 +975,6 @@ geminiApp.post(
   '/agent/routing',
   describeRoute({
     description: `
-      Use routing workflow.
       This pattern allows the model to make decisions about which path to take through a workflow based on context and intermediate results.
       The model acts as an intelligent router, directing the flow of execution between different branches of your workflow.
     `,
@@ -1061,7 +1060,6 @@ geminiApp.post(
   '/agent/parallel',
   describeRoute({
     description: `
-      Use parallel processing workflow.
       This pattern takes advantage of parallel execution to improve efficiency while maintaining the benefits of structured workflows.
     `,
     responses: {
@@ -1171,10 +1169,8 @@ geminiApp.post(
   '/agent/orchestrator-worker',
   describeRoute({
     description: `
-      Use orchestrator-worker workflow.
       In this pattern, a primary model (orchestrator) coordinates the execution of specialized workers. 
       Each worker is optimized for a specific subtask, while the orchestrator maintains overall context and ensures coherent results. 
-      This pattern excels at complex tasks requiring different types of expertise or processing.
     `,
     responses: {
       200: {
@@ -1283,6 +1279,132 @@ geminiApp.post(
     return ctx.json({
       implementationPlan,
       fileChanges,
+    });
+  }
+);
+
+geminiApp.post(
+  '/agent/evaluator-optimizer',
+  describeRoute({
+    description: `
+      This pattern introduces quality control into workflows by having dedicated evaluation steps that assess intermediate results. 
+      Based on the evaluation, the workflow can either proceed, retry with adjusted parameters, or take corrective action.
+    `,
+    responses: {
+      200: {
+        description: 'Successful using evaluator-optimizer workflow',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                translation: textSchema,
+                iterations: z.number().openapi({
+                  example: 2,
+                }),
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      targetLanguage: z.string().openapi({
+        example: 'Indonesian',
+      }),
+      text: z.string().openapi({
+        example: `I didn't mean to create a frog cult.
+          I named the first one Cletus, after a guy my dad used to buy pills from. It felt right. Greasy name. Like something that would survive the apocalypse by crawling into the crawlspace and licking the mold off the copper pipes.
+          Cletus stared at me through the glass like he knew I was broken. Like he approved.
+          Dumpy tree frog. Litoria caerulea, if you’re trying to impress a vet tech. People call them “Dumpy” like that’s an insult. Like their weight’s a problem. These frogs don’t give a shit. They sag and spread and cling to your window like a melted scoop of pistachio ice cream with eyes.
+          You ever see something that ugly and just… feel better?
+          Cuban tree frogs are already here. They came first. They get into your toilets and eat the local ones and probably your happiness too. Nobody invited them, but they’re winning.
+          I thought — if Florida’s going to be swallowed whole, maybe it should be by something with a face like Cletus.
+          I didn’t plan to breed them. One day I had a frog. A week later I had two. Then twenty. Then the bathroom sounded like an alien sex swamp. If the neighbors heard the noises, they never knocked. Florida people know when to look away. I was one croak away from an eviction.
+          The tadpoles lived in takeout containers. The feeders took over the cereal shelf. One morning I woke up with a frog on my eyelid like a warning label that grew legs. That’s when I realized I wasn’t collecting them. They were multiplying through me. Like I was just the host.
+          Florida’s already invasive. Hell even the weather's invasive. The snowbirds are invasive. Half the plants are colonial holdovers. Every lizard looks like it escaped from a reptile expo and developed a nicotine addiction. like evolution just gave up halfway through. People come here to rot in peace. It’s like the whole state is a hospice for ecosystems.
+          So I thought:
+          If the apocalypse is already happening, why not curate it? if it’s already broken, why not break it on purpose? Why not fill the cracks with something soft?
+        `,
+      }),
+    })
+  ),
+  async (ctx) => {
+    const { targetLanguage, text } = ctx.req.valid('json');
+
+    let currentTranslation = '';
+    let iterations = 0;
+    const MAX_ITERATIONS = 3;
+
+    // Initial translation
+    const { text: translation } = await generateText({
+      model: flash15, // use small model for first attempt
+      system: 'You are an expert literary translator.',
+      prompt: `Translate this text to ${targetLanguage}, preserving tone and cultural nuances:
+    ${text}`,
+    });
+
+    currentTranslation = translation;
+
+    // Evaluation-optimization loop
+    while (iterations < MAX_ITERATIONS) {
+      // Evaluate current translation
+      const { object: evaluation } = await generateObject({
+        model: flash20, // use a larger model to evaluate
+        schema: z.object({
+          qualityScore: z.number().min(0).max(10),
+          preservesTone: z.boolean(),
+          preservesNuance: z.boolean(),
+          culturallyAccurate: z.boolean(),
+          specificIssues: z.array(z.string()),
+          improvementSuggestions: z.array(z.string()),
+        }),
+        system: 'You are an expert in evaluating literary translations.',
+        prompt: `Evaluate this translation:
+
+      Original: ${text}
+      Translation: ${currentTranslation}
+
+      Consider:
+      1. Overall quality
+      2. Preservation of tone
+      3. Preservation of nuance
+      4. Cultural accuracy`,
+      });
+
+      // Check if quality meets threshold
+      if (
+        evaluation.qualityScore > 7 &&
+        evaluation.preservesTone &&
+        evaluation.preservesNuance &&
+        evaluation.culturallyAccurate
+      ) {
+        break;
+      }
+
+      // Generate improved translation based on feedback
+      const { text: improvedTranslation } = await generateText({
+        model: flash20, // use a larger model which excel at translation
+        system: 'You are an expert literary translator.',
+        prompt: `Improve this translation based on the following feedback:
+      ${evaluation.specificIssues.join('\n')}
+      ${evaluation.improvementSuggestions.join('\n')}
+
+      Original: ${text}
+      Current Translation: ${currentTranslation}
+      
+      If the translation is good enough, please return the current translation text ONLY, no other text.`,
+      });
+
+      currentTranslation = improvedTranslation;
+      iterations++;
+    }
+
+    return ctx.json({
+      translation: currentTranslation,
+      iterations,
     });
   }
 );
