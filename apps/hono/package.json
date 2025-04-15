@@ -16,7 +16,7 @@
     "node:start": "node ./dist/node.js"
   },
   "dependencies": {
-    "@ai-sdk/google": "1.2.10",
+    "@ai-sdk/google": "1.2.11",
     "@hono/node-server": "1.14.0",
     "@hono/zod-validator": "0.4.3",
     "@modelcontextprotocol/sdk": "1.9.0",
