@@ -9,22 +9,17 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "bun run --hot src/bun.ts",
+    "dev:mcp": "bun run --hot src/mcp.ts",
+    "test": "bun test",
     "node:dev": "tsx watch -r dotenv/config src/node.ts",
     "node:build": "tsc -p .",
-    "node:start": "node ./dist/node.js",
-    "test": "bun test",
-    "db:migrate:up": "tsx -r dotenv/config ./src/lib/db/migrate latest",
-    "db:migrate:down": "tsx -r dotenv/config ./src/lib/db/migrate down",
-    "db:migrate:redo": "tsx -r dotenv/config ./src/lib/db/migrate redo && bun db:generate:types",
-    "db:migrate:create": "tsx -r dotenv/config ./src/lib/db/migrate create initial",
-    "db:seed": "tsx -r dotenv/config ./src/lib/db/seed",
-    "db:reset": "bun db:migrate:redo && bun db:seed",
-    "db:generate:types": "kanel && bun db:types:prettier"
+    "node:start": "node ./dist/node.js"
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.10",
     "@hono/node-server": "1.14.0",
     "@hono/zod-validator": "0.4.3",
+    "@modelcontextprotocol/sdk": "1.9.0",
     "@google/generative-ai": "0.24.0",
     "@scalar/hono-api-reference": "0.8.0",
     "@t3-oss/env-core": "0.12.0",

@@ -10,7 +10,7 @@ import {
   wrapLanguageModel,
 } from 'ai';
 
-const CACHE_FILE = path.join(process.cwd(), '../../../.cache/ai-cache.json');
+const CACHE_FILE = path.join(process.cwd(), '.cache/ai-cache.json');
 
 function ensureCacheFile() {
   const cacheDir = path.dirname(CACHE_FILE);

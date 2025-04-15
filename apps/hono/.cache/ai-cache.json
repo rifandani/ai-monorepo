@@ -1,0 +1,111 @@
+{
+  "{\"0\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"What is the capital of France?\"}]},\"_function\":\"stream\"}": [
+    {
+      "type": "text-delta",
+      "textDelta": "Paris"
+    },
+    {
+      "type": "text-delta",
+      "textDelta": "\n"
+    },
+    {
+      "type": "finish",
+      "finishReason": "stop",
+      "usage": {
+        "promptTokens": 7,
+        "completionTokens": 2
+      },
+      "providerMetadata": {
+        "google": {
+          "groundingMetadata": null,
+          "safetyRatings": null
+        }
+      }
+    }
+  ],
+  "{\"0\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"What is the capital of Indonesia?\"}]},\"_function\":\"generate\"}": {
+    "text": "The capital of Indonesia is **Jakarta**.\n",
+    "files": [],
+    "finishReason": "stop",
+    "usage": {
+      "promptTokens": 7,
+      "completionTokens": 9
+    },
+    "rawCall": {
+      "rawPrompt": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "What is the capital of Indonesia?"
+            }
+          ]
+        }
+      ],
+      "rawSettings": {
+        "generationConfig": {
+          "temperature": 0
+        }
+      }
+    },
+    "rawResponse": {
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=UTF-8",
+        "date": "Mon, 14 Apr 2025 10:53:34 GMT",
+        "server": "scaffolding on HTTPServer2",
+        "server-timing": "gfet4t7; dur=551",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, X-Origin, Referer",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN",
+        "x-xss-protection": "0"
+      },
+      "body": {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "The capital of Indonesia is **Jakarta**.\n"
+                }
+              ],
+              "role": "model"
+            },
+            "finishReason": "STOP",
+            "avgLogprobs": -0.03785862194167243
+          }
+        ],
+        "usageMetadata": {
+          "promptTokenCount": 7,
+          "candidatesTokenCount": 9,
+          "totalTokenCount": 16,
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 7
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 9
+            }
+          ]
+        },
+        "modelVersion": "gemini-1.5-flash"
+      }
+    },
+    "warnings": [],
+    "providerMetadata": {
+      "google": {
+        "groundingMetadata": null,
+        "safetyRatings": null
+      }
+    },
+    "request": {
+      "body": "{\"generationConfig\":{\"temperature\":0},\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"What is the capital of Indonesia?\"}]}]}"
+    }
+  }
+}
