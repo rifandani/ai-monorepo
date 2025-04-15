@@ -1058,6 +1058,116 @@ geminiApp.post(
 );
 
 geminiApp.post(
+  '/agent/parallel',
+  describeRoute({
+    description: `
+      Use parallel processing workflow.
+      This pattern takes advantage of parallel execution to improve efficiency while maintaining the benefits of structured workflows.
+    `,
+    responses: {
+      200: {
+        description: 'Successful using parallel processing workflow',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                text: textSchema,
+                reviews: z.array(
+                  z.object({
+                    type: z.enum([
+                      'security',
+                      'performance',
+                      'maintainability',
+                    ]),
+                    issues: z.array(z.string()),
+                    riskLevel: z.enum(['low', 'medium', 'high']),
+                    suggestions: z.array(z.string()),
+                  })
+                ),
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: z.string().openapi({
+        example: `const express = require('express');\nconst app = express();\n\n// SQL injection vulnerability\napp.get('/users', (req, res) => {\n  const query = \`SELECT * FROM users WHERE id = \${req.query.id}\`;\n  db.query(query, (err, result) => {\n    res.json(result);\n  });\n});\n\n// Memory leak\nlet cache = {};\napp.get('/data', (req, res) => {\n  if (!cache[req.query.key]) {\n    cache[req.query.key] = fetchData(req.query.key);\n  }\n  res.json(cache[req.query.key]);\n});\n\n// Poor error handling\napp.post('/login', (req, res) => {\n  const { username, password } = req.body;\n  if (username === 'admin' && password === 'password') {\n    res.json({ success: true });\n  } else {\n    res.json({ success: false });\n  }\n});\n\n// Inefficient nested loops\napp.get('/process', (req, res) => {\n  const data = getLargeDataSet();\n  const result = [];\n  for (let i = 0; i < data.length; i++) {\n    for (let j = 0; j < data.length; j++) {\n      result.push(data[i] * data[j]);\n    }\n  }\n  res.json(result);\n});\n\napp.listen(3000);
+          `,
+      }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    // Run parallel reviews
+    const [securityReview, performanceReview, maintainabilityReview] =
+      await Promise.all([
+        generateObject({
+          model: flash15,
+          system:
+            'You are an expert in code security. Focus on identifying security vulnerabilities, injection risks, and authentication issues.',
+          schema: z.object({
+            issues: z.array(z.string()),
+            riskLevel: z.enum(['low', 'medium', 'high']),
+            suggestions: z.array(z.string()),
+          }),
+          prompt: `Review this code:
+      ${prompt}`,
+        }),
+
+        generateObject({
+          model: flash15,
+          system:
+            'You are an expert in code performance. Focus on identifying performance bottlenecks, memory leaks, and optimization opportunities.',
+          schema: z.object({
+            issues: z.array(z.string()),
+            riskLevel: z.enum(['low', 'medium', 'high']),
+            suggestions: z.array(z.string()),
+          }),
+          prompt: `Review this code:
+      ${prompt}`,
+        }),
+
+        generateObject({
+          model: flash15,
+          system:
+            'You are an expert in code quality. Focus on code structure, readability, and adherence to best practices.',
+          schema: z.object({
+            issues: z.array(z.string()),
+            riskLevel: z.enum(['low', 'medium', 'high']),
+            suggestions: z.array(z.string()),
+          }),
+          prompt: `Review this code:
+      ${prompt}`,
+        }),
+      ]);
+
+    const reviews = [
+      { ...securityReview.object, type: 'security' },
+      { ...performanceReview.object, type: 'performance' },
+      { ...maintainabilityReview.object, type: 'maintainability' },
+    ];
+
+    // Aggregate results using another model instance
+    const result = await generateText({
+      model: flash20,
+      system: 'You are a technical lead summarizing multiple code reviews.',
+      prompt: `Synthesize these code review results into a concise summary with key actions:
+    ${JSON.stringify(reviews, null, 2)}`,
+    });
+
+    return ctx.json({
+      reviews,
+      text: result.text,
+    });
+  }
+);
+
+geminiApp.post(
   '/web-search-native',
   describeRoute({
     description: 'Use web search native',
