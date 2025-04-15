@@ -894,12 +894,15 @@ geminiApp.post(
 geminiApp.post(
   '/agent/prompt-chaining',
   describeRoute({
-    description:
-      "Write persuasive marketing copy. Use sequential processing (prompt chaining). The simplest workflow pattern executes steps in a predefined order. Each step's output becomes input for the next step, creating a clear chain of operations.",
+    description: `
+      Use sequential processing (prompt chaining) workflow.
+      The simplest workflow pattern executes steps in a predefined order.
+      Each step's output becomes input for the next step, creating a clear chain of operations.
+    `,
     responses: {
       200: {
         description:
-          'Successful write persuasive marketing copy with quality check',
+          'Successful using sequential processing (prompt chaining) workflow',
         content: {
           'application/json': {
             schema: resolver(
@@ -964,6 +967,92 @@ geminiApp.post(
     return ctx.json({
       text: copy,
       qualityMetrics,
+    });
+  }
+);
+
+geminiApp.post(
+  '/agent/routing',
+  describeRoute({
+    description: `
+      Use routing workflow.
+      This pattern allows the model to make decisions about which path to take through a workflow based on context and intermediate results.
+      The model acts as an intelligent router, directing the flow of execution between different branches of your workflow.
+    `,
+    responses: {
+      200: {
+        description: 'Successful using routing workflow',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                text: textSchema,
+                classification: z.object({
+                  reasoning: z.string().openapi({
+                    example: 'The customer is asking for a refund',
+                  }),
+                  type: z.enum(['general', 'refund', 'technical']).openapi({
+                    example: 'general',
+                  }),
+                  complexity: z.enum(['simple', 'complex']).openapi({
+                    example: 'simple',
+                  }),
+                }),
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: z.string().describe('The prompt to generate text').openapi({
+        example: 'I want to get a refund for my laptop order',
+      }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    // First step: Classify the query type
+    const { object: classification } = await generateObject({
+      model: flash15,
+      schema: z.object({
+        reasoning: z.string(),
+        type: z.enum(['general', 'refund', 'technical']),
+        complexity: z.enum(['simple', 'complex']),
+      }),
+      prompt: `Classify this customer query:
+    ${prompt}
+
+    Determine:
+    1. Query type (general, refund, or technical)
+    2. Complexity (simple or complex)
+    3. Brief reasoning for classification`,
+    });
+
+    /**
+     * Route based on classification
+     * Set model and system prompt based on query type and complexity
+     */
+    const result = await generateText({
+      model: classification.complexity === 'simple' ? flash15 : flash20,
+      system: {
+        general:
+          'You are an expert customer service agent handling general inquiries.',
+        refund:
+          'You are a customer service agent specializing in refund requests. Follow company policy and collect necessary information.',
+        technical:
+          'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
+      }[classification.type],
+      prompt,
+    });
+
+    return ctx.json({
+      classification,
+      text: result.text,
     });
   }
 );
