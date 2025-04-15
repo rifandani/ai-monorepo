@@ -1,5 +1,5 @@
-import { createEnv } from '@t3-oss/env-core'
-import { z } from 'zod'
+import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
 
 export const ENV = createEnv({
   server: {
@@ -10,4 +10,4 @@ export const ENV = createEnv({
     DATABASE_NAME: z.string().min(1),
   },
   runtimeEnv: process.env,
-})
+});

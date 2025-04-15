@@ -1,19 +1,20 @@
-const validIANATimezoneCache: Record<string, boolean> = {}
+const validIANATimezoneCache: Record<string, boolean> = {};
 
 /**
  * check if the provided timezone is supported or not
  */
 export function isValidTimezoneIANAString(timeZoneString: string) {
-  if (validIANATimezoneCache[timeZoneString])
-    return true
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: timeZoneString })
-    validIANATimezoneCache[timeZoneString] = true
-    return true
+  if (validIANATimezoneCache[timeZoneString]) {
+    return true;
   }
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  catch (_err) {
-    return false
+
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: timeZoneString });
+    validIANATimezoneCache[timeZoneString] = true;
+    return true;
+  } catch (_err) {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    return false;
   }
 }
 
@@ -23,5 +24,5 @@ export function isValidTimezoneIANAString(timeZoneString: string) {
 export function getLocalTimeZone() {
   return Intl.DateTimeFormat('id-ID', {
     timeZone: 'GMT', // Asia/Jakarta
-  }).resolvedOptions().timeZone
+  }).resolvedOptions().timeZone;
 }

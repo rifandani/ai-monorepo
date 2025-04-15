@@ -112,6 +112,7 @@ class SequentialThinkingServer {
       }
 
       const formattedThought = this.formatThought(validatedInput);
+      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error(formattedThought);
 
       return {
@@ -299,10 +300,12 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
 async function runServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  // biome-ignore lint/suspicious/noConsole: <explanation>
   console.error('Sequential Thinking MCP Server running on stdio');
 }
 
 runServer().catch((error) => {
+  // biome-ignore lint/suspicious/noConsole: <explanation>
   console.error('Fatal error running server:', error);
   process.exit(1);
 });

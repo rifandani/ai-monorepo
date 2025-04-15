@@ -1,13 +1,13 @@
-import type { Http } from '@workspace/core/services/http'
-import type { Options } from 'ky'
-import { z } from 'zod'
+import type { Http } from '@workspace/core/services/http';
+import type { Options } from 'ky';
+import { z } from 'zod';
 
 // #region API SCHEMAS
 export const authLoginRequestSchema = z.object({
   username: z.string().min(3, 'username must contain at least 3 characters'),
   password: z.string().min(6, 'password must contain at least 6 characters'),
   expiresInMins: z.number().optional(),
-})
+});
 export const authLoginResponseSchema = z.object({
   id: z.number().positive(),
   username: z.string(),
@@ -18,19 +18,19 @@ export const authLoginResponseSchema = z.object({
   image: z.string().url(),
   accessToken: z.string(),
   refreshToken: z.string(),
-})
+});
 // #endregion API SCHEMAS
 
 // #region SCHEMAS TYPES
-export type AuthLoginRequestSchema = z.infer<typeof authLoginRequestSchema>
-export type AuthLoginResponseSchema = z.infer<typeof authLoginResponseSchema>
+export type AuthLoginRequestSchema = z.infer<typeof authLoginRequestSchema>;
+export type AuthLoginResponseSchema = z.infer<typeof authLoginResponseSchema>;
 // #endregion SCHEMAS TYPES
 
 export const authKeys = {
   all: ['auth'] as const,
   login: (params: AuthLoginRequestSchema | undefined) =>
     [...authKeys.all, 'login', ...(params ? [params] : [])] as const,
-}
+};
 
 export function authRepositories(http: InstanceType<typeof Http>) {
   return {
@@ -41,7 +41,7 @@ export function authRepositories(http: InstanceType<typeof Http>) {
      */
     login: async (
       { json }: { json: AuthLoginRequestSchema },
-      options?: Options,
+      options?: Options
     ) => {
       const resp = await http.instance
         .post('auth/login', {
@@ -50,14 +50,15 @@ export function authRepositories(http: InstanceType<typeof Http>) {
             afterResponse: [
               async (request, _options, response) => {
                 if (response.status === 200) {
-                  const data = (await response.json()) as AuthLoginResponseSchema
+                  const data =
+                    (await response.json()) as AuthLoginResponseSchema;
 
                   if ('accessToken' in data) {
                     // set 'Authorization' headers
                     request.headers.set(
                       'Authorization',
-                      `Bearer ${data.accessToken}`,
-                    )
+                      `Bearer ${data.accessToken}`
+                    );
                   }
                 }
               },
@@ -65,9 +66,9 @@ export function authRepositories(http: InstanceType<typeof Http>) {
           },
           ...options,
         })
-        .json()
+        .json();
 
-      return authLoginResponseSchema.parse(resp)
+      return authLoginResponseSchema.parse(resp);
     },
-  } as const
+  } as const;
 }

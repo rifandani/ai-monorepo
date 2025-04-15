@@ -17,6 +17,7 @@ stats.html
 .DS_Store
 **/.env
 **/.env.*
+**/.cache.json
 !**/.env.example
 !**/.env.*.example
 node_modules

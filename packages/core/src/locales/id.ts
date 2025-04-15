@@ -46,4 +46,4 @@ export const idLocale = {
   // #region HOME
   title: 'Home',
   // #endregion HOME
-} as const
+} as const;

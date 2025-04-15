@@ -5,4 +5,4 @@
  */
 export const RESOLVED_DATE_TIME_FORMAT_OPTIONS = Intl.DateTimeFormat('id-ID', {
   timeZone: 'GMT', // Asia/Jakarta
-}).resolvedOptions()
+}).resolvedOptions();

@@ -1,18 +1,18 @@
-import type { Options } from 'ky'
-import ky from 'ky'
+import type { Options } from 'ky';
+import ky from 'ky';
 
 export class Http {
   /**
    * @description Ky instance
    */
-  instance: typeof ky
+  instance: typeof ky;
 
   /**
    * @description Create a new instance of Http service
    * @param {Options} config Ky config options
    */
   constructor(config: Options) {
-    this.instance = ky.create(config)
+    this.instance = ky.create(config);
   }
 
   /**
@@ -20,7 +20,7 @@ export class Http {
    * @param {Options} newConfig New configuration options
    */
   updateConfig(newConfig: Options): void {
-    this.instance = ky.extend(newConfig)
+    this.instance = ky.extend(newConfig);
   }
 
   /**
@@ -28,6 +28,6 @@ export class Http {
    * @param {Options} newConfig New configuration options
    */
   resetConfig(newConfig: Options): void {
-    this.instance = ky.create(newConfig)
+    this.instance = ky.create(newConfig);
   }
 }

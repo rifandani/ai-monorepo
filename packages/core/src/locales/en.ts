@@ -39,13 +39,13 @@ export const enLocale = {
   login: 'Login',
   logout: 'Logout',
   notFound: 'Not Found',
-  gone: 'Sorry, we couldn\'t find the page you\'re looking for',
+  gone: "Sorry, we couldn't find the page you're looking for",
   welcome: 'Welcome Back',
-  noAccount: 'Don\'t have an account?',
+  noAccount: "Don't have an account?",
   registerHere: 'Register here',
   // #endregion AUTH
 
   // #region HOME
   title: 'Home',
   // #endregion HOME
-} as const
+} as const;

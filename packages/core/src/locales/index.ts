@@ -1,10 +1,12 @@
-import type { LocaleDict } from '@workspace/core/locales/type'
-import { enLocale } from '@workspace/core/locales/en'
-import { idLocale } from '@workspace/core/locales/id'
+// biome-ignore lint/nursery/noExportedImports: <explanation>
+import { enLocale } from '@workspace/core/locales/en';
+// biome-ignore lint/nursery/noExportedImports: <explanation>
+import { idLocale } from '@workspace/core/locales/id';
+import type { LocaleDict } from '@workspace/core/locales/type';
 
 const localeDict: LocaleDict = {
   'en-US': enLocale,
   'id-ID': idLocale,
-} as const
+} as const;
 
-export { enLocale, idLocale, localeDict }
+export { enLocale, idLocale, localeDict };

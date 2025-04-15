@@ -18,12 +18,8 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/next",
-      "runtimeArgs": [
-        "--inspect"
-      ],
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": ["<node_internals>/**"],
       "serverReadyAction": {
         "action": "debugWithEdge",
         "killOnServerStop": true,
@@ -31,14 +27,6 @@
         "uriFormat": "%s",
         "webRoot": "${workspaceFolder}"
       }
-    },
-    {
-      "type": "expo",
-      "request": "attach",
-      "name": "Debug Expo app",
-      "projectRoot": "${workspaceFolder}/apps/expo",
-      "bundlerPort": "8081",
-      "bundlerHost": "127.0.0.1"
     }
   ]
 }

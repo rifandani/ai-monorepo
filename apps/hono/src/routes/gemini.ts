@@ -58,9 +58,12 @@ import pdf from 'pdf-parse/lib/pdf-parse.js';
 // example fetch wrapper that logs the input to the API call:
 const google = createGoogleGenerativeAI({
   // @ts-expect-error preconnect is bun specific
-  fetch: async (url, options) => {
+  fetch: async (
+    url: Parameters<typeof fetch>[0],
+    options: Parameters<typeof fetch>[1]
+  ) => {
     logger.info(
-      { url, headers: options.headers, body: options.body },
+      { url, headers: options?.headers, body: options?.body },
       'FETCH_CALL'
     );
     return await fetch(url, options);
