@@ -1168,6 +1168,126 @@ geminiApp.post(
 );
 
 geminiApp.post(
+  '/agent/orchestrator-worker',
+  describeRoute({
+    description: `
+      Use orchestrator-worker workflow.
+      In this pattern, a primary model (orchestrator) coordinates the execution of specialized workers. 
+      Each worker is optimized for a specific subtask, while the orchestrator maintains overall context and ensures coherent results. 
+      This pattern excels at complex tasks requiring different types of expertise or processing.
+    `,
+    responses: {
+      200: {
+        description: 'Successful using orchestrator-worker workflow',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                implementationPlan: z.object({
+                  files: z.array(
+                    z.object({
+                      purpose: z.string(),
+                      filePath: z.string(),
+                      changeType: z.enum(['create', 'modify', 'delete']),
+                    })
+                  ),
+                  estimatedComplexity: z.enum(['low', 'medium', 'high']),
+                }),
+                fileChanges: z.array(
+                  z.object({
+                    file: z.object({
+                      purpose: z.string(),
+                      filePath: z.string(),
+                      changeType: z.enum(['create', 'modify', 'delete']),
+                    }),
+                    implementation: z.object({
+                      explanation: z.string(),
+                      code: z.string(),
+                    }),
+                  })
+                ),
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: z.string().openapi({
+        example: `
+          Implement a new feature to add a new endpoint for user authentication with refresh token. 
+          Make sure to add unit test and documentation.
+        `,
+      }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    // Orchestrator: Plan the implementation
+    const { object: implementationPlan } = await generateObject({
+      model: flash20,
+      schema: z.object({
+        files: z.array(
+          z.object({
+            purpose: z.string(),
+            filePath: z.string(),
+            changeType: z.enum(['create', 'modify', 'delete']),
+          })
+        ),
+        estimatedComplexity: z.enum(['low', 'medium', 'high']),
+      }),
+      system:
+        'You are a senior software architect planning feature implementations.',
+      prompt: `Analyze this feature request and create an implementation plan:
+    ${prompt}`,
+    });
+
+    // Workers: Execute the planned changes
+    const fileChanges = await Promise.all(
+      implementationPlan.files.map(async (file) => {
+        // Each worker is specialized for the type of change
+        const workerSystemPrompt = {
+          create:
+            'You are an expert at implementing new files following best practices and project patterns.',
+          modify:
+            'You are an expert at modifying existing code while maintaining consistency and avoiding regressions.',
+          delete:
+            'You are an expert at safely removing code while ensuring no breaking changes.',
+        }[file.changeType];
+
+        const { object: change } = await generateObject({
+          model: flash20,
+          schema: z.object({
+            explanation: z.string(),
+            code: z.string(),
+          }),
+          system: workerSystemPrompt,
+          prompt: `Implement the changes for ${file.filePath} to support:
+        ${file.purpose}
+
+        Consider the overall feature context:
+        ${prompt}`,
+        });
+
+        return {
+          file,
+          implementation: change,
+        };
+      })
+    );
+
+    return ctx.json({
+      implementationPlan,
+      fileChanges,
+    });
+  }
+);
+
+geminiApp.post(
   '/web-search-native',
   describeRoute({
     description: 'Use web search native',
