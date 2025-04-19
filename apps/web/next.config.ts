@@ -16,6 +16,12 @@ let config: NextConfig = withNextIntl({
   serverExternalPackages: ['pino', 'pino-pretty'],
   images: {
     formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   experimental: {
     // testProxy: true, // need to enable for e2e testing

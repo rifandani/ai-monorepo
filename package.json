@@ -14,20 +14,11 @@
     "run-postgres": "./scripts/run-postgres.sh",
     "format": "ultracite format",
     "lint": "ultracite lint",
-    "lint-typecheck": "run-p lint hono:typecheck",
+    "lint-typecheck": "run-p lint hono:typecheck web:typecheck",
     "hono": "bun --elide-lines=0 --filter @workspace/hono",
     "web": "bun --elide-lines=0 --filter @workspace/web",
     "hono:typecheck": "bun --filter @workspace/hono typecheck",
-    "hono:dev": "bun hono dev",
-    "hono:node:dev": "bun hono node:dev",
-    "hono:node:build": "bun hono node:build",
-    "hono:node:start": "bun hono node:start",
-    "web:typecheck": "bun --filter @workspace/web typecheck",
-    "web:dev": "bun web dev",
-    "web:dev:prod": "bun web dev:prod",
-    "web:build": "bun web build",
-    "web:build:prod": "bun web build:prod",
-    "web:build:prod:analyze": "bun web build:prod:analyze"
+    "web:typecheck": "bun --filter @workspace/web typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -40,6 +31,7 @@
     "npm-run-all2": "7.0.2",
     "rimraf": "6.0.1",
     "typescript": "5.8.3",
+    "tsx": "4.19.3",
     "ultracite": "4.2.1"
   },
   "trustedDependencies": ["@biomejs/biome", "esbuild", "sharp"],

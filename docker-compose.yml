@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17 # PostgreSQL with pgvector support
+    container_name: pgvector_db
+    environment:
+      POSTGRES_DB: pgvector_db
+      POSTGRES_USER: pgvector_db
+      POSTGRES_PASSWORD: pgvector_db
+    # DATABASE_URL === postgres://pgvector_db:pgvector_db@db:5432/pgvector_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector_db_data:/var/lib/postgresql/data
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_cache_data:/data
+    restart: unless-stopped
+
+# Stores data outside the container to ensure persistence
+volumes:
+  pgvector_db_data:
+  redis_cache_data: 
