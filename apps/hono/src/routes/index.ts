@@ -10,9 +10,6 @@ export function routes(
     Variables: Variables;
   }>
 ) {
-  // custom middleware example
-  // app.get('/', hello(), ctx => ctx.json({ 1: 'Hello', 2: 'World' }))
-
   app.route('/ollama', ollamaApp);
   app.route('/gemini', geminiApp);
 

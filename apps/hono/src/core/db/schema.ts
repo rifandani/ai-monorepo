@@ -12,7 +12,7 @@ import type { z } from 'zod';
 const timestamps = {
   createdAt: timestamp().defaultNow().notNull(),
   updatedAt: timestamp(),
-  deletedAt: timestamp(),
+  // deletedAt: timestamp(),
 };
 
 // #region IMAGES
@@ -27,7 +27,6 @@ export const imagesTable = pgTable('images', {
 });
 export const selectImagesTableSchema = createSelectSchema(imagesTable);
 export const insertImagesTableSchema = createInsertSchema(imagesTable);
-
 export type ImageTable = z.infer<typeof selectImagesTableSchema>;
 // #endregion IMAGES
 
@@ -40,6 +39,8 @@ export const userTable = pgTable('user', {
   image: text(),
   ...timestamps,
 });
+export const selectUserTableSchema = createSelectSchema(userTable);
+export type UserTable = z.infer<typeof selectUserTableSchema>;
 
 export const sessionTable = pgTable('session', {
   id: text().primaryKey(),
@@ -52,6 +53,8 @@ export const sessionTable = pgTable('session', {
     .references(() => userTable.id, { onDelete: 'cascade' }),
   ...timestamps,
 });
+export const selectSessionTableSchema = createSelectSchema(sessionTable);
+export type SessionTable = z.infer<typeof selectSessionTableSchema>;
 
 export const accountTable = pgTable('account', {
   id: text().primaryKey(),
@@ -69,6 +72,8 @@ export const accountTable = pgTable('account', {
   password: text(),
   ...timestamps,
 });
+export const selectAccountTableSchema = createSelectSchema(accountTable);
+export type AccountTable = z.infer<typeof selectAccountTableSchema>;
 
 export const verificationTable = pgTable('verification', {
   id: text().primaryKey(),
@@ -77,4 +82,7 @@ export const verificationTable = pgTable('verification', {
   expiresAt: timestamp().notNull(),
   ...timestamps,
 });
+export const selectVerificationTableSchema =
+  createSelectSchema(verificationTable);
+export type VerificationTable = z.infer<typeof selectVerificationTableSchema>;
 // #endregion AUTH

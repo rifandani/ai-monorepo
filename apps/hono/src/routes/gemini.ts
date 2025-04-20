@@ -1735,7 +1735,7 @@ geminiApp.post(
     try {
       // Initialize an MCP client to connect to a `stdio` MCP server:
       const transport = new Experimental_StdioMCPTransport({
-        command: 'tsx -r dotenv/config',
+        command: 'dotenvx run -- tsx',
         args: ['./src/core/mcp/sequentialthinking.ts'],
       });
       const stdioClient = await experimental_createMCPClient({

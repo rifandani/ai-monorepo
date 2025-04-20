@@ -1,5 +1,8 @@
+import { auth } from '@/auth/libs';
+import { ENV } from '@/core/constants/env';
 import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { showRoutes } from 'hono/dev';
 import { languageDetector } from 'hono/language';
@@ -19,6 +22,13 @@ const app = new Hono<{
 
 app.use(
   '*',
+  cors({
+    origin: ENV.APP_URL,
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    exposeHeaders: ['Content-Length'],
+    credentials: true,
+  }),
   loggerMiddleware(),
   prettyJSON(),
   requestId(),
@@ -36,6 +46,7 @@ app.use(
 );
 
 routes(app);
+app.on(['POST', 'GET'], '/api/auth/**', (c) => auth.handler(c.req.raw));
 showRoutes(app, {
   colorize: true,
 });
@@ -46,7 +57,7 @@ app.onError((error, c) => {
 
   // Log error service, like Sentry, etc
   // captureException({
-  //   error: error,
+  //   error,
   //   extra: {
   //     function: '[FILENAME:FUNCTIONAME]',
   //   },

@@ -1,16 +1,9 @@
-import path from 'node:path';
 import { google } from '@ai-sdk/google';
 import { logger } from '@workspace/core/utils/logger';
 import { embedMany } from 'ai';
-import dotenv from 'dotenv';
 import { reset } from 'drizzle-seed';
-import { db } from './';
+import { db } from '.';
 import { type ImageTable, imagesTable } from './schema';
-
-// dev env
-dotenv.config({
-  path: path.resolve(process.cwd(), '.env.local'),
-});
 
 const textEmbedding004 = google.textEmbeddingModel('text-embedding-004');
 const mockImagesWithoutEmbedding: Omit<ImageTable, 'id'>[] = [
