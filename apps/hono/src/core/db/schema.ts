@@ -19,11 +19,11 @@ const timestamps = {
 export const imagesTable = pgTable('images', {
   // id: integer().primaryKey().generatedAlwaysAsIdentity(),
   id: uuid().defaultRandom().primaryKey(),
-  title: text('title').notNull(),
-  description: text('description').notNull(),
-  path: text('path').notNull(),
+  title: text().notNull(),
+  description: text().notNull(),
+  path: text().notNull(),
   // gemini output dimensions is 768
-  embedding: vector('embedding', { dimensions: 768 }).notNull(),
+  embedding: vector({ dimensions: 768 }).notNull(),
 });
 export const selectImagesTableSchema = createSelectSchema(imagesTable);
 export const insertImagesTableSchema = createInsertSchema(imagesTable);

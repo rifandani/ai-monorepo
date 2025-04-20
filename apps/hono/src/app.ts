@@ -23,7 +23,7 @@ const app = new Hono<{
 app.use(
   '*',
   cors({
-    origin: ENV.APP_URL,
+    origin: [ENV.APP_URL, 'http://localhost:3002'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Content-Length'],

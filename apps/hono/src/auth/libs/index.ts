@@ -10,9 +10,15 @@ export const auth = betterAuth({
   baseURL: ENV.APP_URL,
   database: drizzleAdapter(db, {
     provider: 'pg',
-    schema,
+    schema: {
+      user: schema.userTable,
+      session: schema.sessionTable,
+      account: schema.accountTable,
+      verification: schema.verificationTable,
+      images: schema.imagesTable,
+    },
   }),
-  trustedOrigins: [ENV.APP_URL],
+  trustedOrigins: [ENV.APP_URL, 'http://localhost:3002'],
   emailAndPassword: { enabled: true },
   plugins: [openAPI()],
 });
