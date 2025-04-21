@@ -1,5 +1,7 @@
 import { auth } from '@/auth/libs';
 import { ENV } from '@/core/constants/env';
+import type { Variables } from '@/core/types/hono';
+import { routes } from '@/routes';
 import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -13,8 +15,6 @@ import { secureHeaders } from 'hono/secure-headers';
 import { timing } from 'hono/timing';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
-import type { Variables } from './core/types/hono';
-import { routes } from './routes';
 
 const app = new Hono<{
   Variables: Variables;
@@ -46,7 +46,9 @@ app.use(
 );
 
 routes(app);
-app.on(['POST', 'GET'], '/api/auth/**', (c) => auth.handler(c.req.raw));
+app.on(['POST', 'GET'], '/api/auth/**', (c) => {
+  return auth.handler(c.req.raw);
+});
 showRoutes(app, {
   colorize: true,
 });

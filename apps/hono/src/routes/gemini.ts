@@ -39,11 +39,11 @@ import {
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator as zValidator } from 'hono-openapi/zod';
-import type { RequestIdVariables } from 'hono/request-id';
 import { stream } from 'hono/streaming';
 import { z } from 'zod';
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
+import type { Variables } from '@/core/types/hono';
 import { cached } from '@/core/utils/middleware';
 import {
   getCityAttractionTool,
@@ -113,7 +113,7 @@ type GoogleModelCacheableId =
 const cacheModelId: GoogleModelCacheableId = 'models/gemini-1.5-flash-001';
 
 export const geminiApp = new Hono<{
-  Variables: RequestIdVariables;
+  Variables: Variables;
 }>(); // .basePath('/api/v1');
 
 geminiApp.post(

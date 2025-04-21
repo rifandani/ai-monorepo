@@ -1,5 +1,6 @@
 import type { Variables } from '@/core/types/hono';
 import { geminiApp } from '@/routes/gemini';
+import { llmsTextApp } from '@/routes/llms-text';
 import { ollamaApp } from '@/routes/ollama';
 import { Scalar } from '@scalar/hono-api-reference';
 import type { Hono } from 'hono';
@@ -12,6 +13,7 @@ export function routes(
 ) {
   app.route('/ollama', ollamaApp);
   app.route('/gemini', geminiApp);
+  app.route('/llms-text', llmsTextApp);
 
   app.get(
     '/openapi',

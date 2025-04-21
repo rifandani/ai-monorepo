@@ -4,11 +4,11 @@ import {
   promptSchema,
   textSchema,
 } from '@/core/api/ai';
+import type { Variables } from '@/core/types/hono';
 import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator as zValidator } from 'hono-openapi/zod';
-import type { RequestIdVariables } from 'hono/request-id';
 import { streamText } from 'hono/streaming';
 import ollama, { type Message } from 'ollama';
 import { z } from 'zod';
@@ -16,7 +16,7 @@ import { z } from 'zod';
 import 'zod-openapi/extend';
 
 export const ollamaApp = new Hono<{
-  Variables: RequestIdVariables;
+  Variables: Variables;
 }>(); // .basePath('/api/v1');
 
 ollamaApp.get(
