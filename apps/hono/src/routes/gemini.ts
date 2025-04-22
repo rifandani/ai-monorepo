@@ -17,6 +17,13 @@ import {
   CACHE_CONTENT_EXPLICIT_CONTENT,
   CACHE_CONTENT_RECIPES,
 } from '@/core/constants/cache';
+import type { Variables } from '@/core/types/hono';
+import { cached } from '@/core/utils/middleware';
+import {
+  getCityAttractionTool,
+  getWeatherTool,
+  logToConsoleTool,
+} from '@/core/utils/tool';
 import {
   type GoogleGenerativeAIProviderMetadata,
   createGoogleGenerativeAI,
@@ -36,23 +43,17 @@ import {
   streamObject,
   streamText,
 } from 'ai';
+import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator as zValidator } from 'hono-openapi/zod';
 import { stream } from 'hono/streaming';
-import { z } from 'zod';
-// For extending the Zod schema with OpenAPI properties
-import 'zod-openapi/extend';
-import type { Variables } from '@/core/types/hono';
-import { cached } from '@/core/utils/middleware';
-import {
-  getCityAttractionTool,
-  getWeatherTool,
-  logToConsoleTool,
-} from '@/core/utils/tool';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { endTime, startTime } from 'hono/timing';
 import pdf from 'pdf-parse/lib/pdf-parse.js';
+import { z } from 'zod';
+
+// For extending the Zod schema with OpenAPI properties
+import 'zod-openapi/extend';
 
 // by default use GOOGLE_GENERATIVE_AI_API_KEY
 // example fetch wrapper that logs the input to the API call:
@@ -201,10 +202,13 @@ geminiApp.post(
       pdf: z.instanceof(File).optional().openapi({
         description: 'PDF to be used for the prompt',
       }),
+      audio: z.instanceof(File).optional().openapi({
+        description: 'Audio to be used for the prompt',
+      }),
     })
   ),
   async (c) => {
-    const { prompt, image, pdf } = c.req.valid('form');
+    const { prompt, image, pdf, audio } = c.req.valid('form');
 
     const messages: CoreMessage[] = [
       {
@@ -219,6 +223,7 @@ geminiApp.post(
                 {
                   type: 'image',
                   image: await image.arrayBuffer(),
+                  mimeType: image.type,
                 } as ImagePart,
               ]
             : []),
@@ -227,7 +232,16 @@ geminiApp.post(
                 {
                   type: 'file',
                   data: await pdf.arrayBuffer(),
-                  mimeType: 'application/pdf',
+                  mimeType: pdf.type,
+                } as FilePart,
+              ]
+            : []),
+          ...(audio
+            ? [
+                {
+                  type: 'file',
+                  data: await audio.arrayBuffer(),
+                  mimeType: audio.type,
                 } as FilePart,
               ]
             : []),
@@ -279,10 +293,13 @@ geminiApp.post(
       pdf: z.instanceof(File).optional().openapi({
         description: 'PDF to be used for the prompt',
       }),
+      audio: z.instanceof(File).optional().openapi({
+        description: 'Audio to be used for the prompt',
+      }),
     })
   ),
   async (c) => {
-    const { prompt, image, pdf } = c.req.valid('form');
+    const { prompt, image, pdf, audio } = c.req.valid('form');
 
     const messages: CoreMessage[] = [
       {
@@ -297,6 +314,7 @@ geminiApp.post(
                 {
                   type: 'image',
                   image: await image.arrayBuffer(),
+                  mimeType: image.type,
                 } as ImagePart,
               ]
             : []),
@@ -305,7 +323,16 @@ geminiApp.post(
                 {
                   type: 'file',
                   data: await pdf.arrayBuffer(),
-                  mimeType: 'application/pdf',
+                  mimeType: pdf.type,
+                } as FilePart,
+              ]
+            : []),
+          ...(audio
+            ? [
+                {
+                  type: 'file',
+                  data: await audio.arrayBuffer(),
+                  mimeType: audio.type,
                 } as FilePart,
               ]
             : []),
@@ -316,8 +343,6 @@ geminiApp.post(
     const result = await generateObject({
       model: flash15,
       messages,
-      schemaName: 'Gofood order',
-      schemaDescription: 'Gofood order schema',
       schema: gofoodSchema,
     });
 
@@ -1435,7 +1460,9 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().openapi({
+        example: 'What do you need to be a D1 shotput athlete?',
+      }),
     })
   ),
   async (ctx) => {

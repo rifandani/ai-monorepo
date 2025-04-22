@@ -6,7 +6,6 @@ import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
-import { showRoutes } from 'hono/dev';
 import { languageDetector } from 'hono/language';
 import { logger as loggerMiddleware } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
@@ -49,9 +48,9 @@ routes(app);
 app.on(['POST', 'GET'], '/api/auth/**', (c) => {
   return auth.handler(c.req.raw);
 });
-showRoutes(app, {
-  colorize: true,
-});
+// showRoutes(app, {
+//   colorize: true,
+// });
 
 app.onError((error, c) => {
   const requestId = c.get('requestId');
