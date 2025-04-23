@@ -39,13 +39,11 @@ import {
   cosineSimilarity,
   embed,
   embedMany,
-  experimental_createMCPClient,
   generateObject,
   generateText,
   streamObject,
   streamText,
 } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator as zValidator } from 'hono-openapi/zod';
@@ -164,6 +162,10 @@ geminiApp.post(
       model: flash15,
       system: 'Answer in pirate language',
       messages,
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: 'generate',
+      },
     });
 
     return c.json({
@@ -1792,94 +1794,6 @@ geminiApp.post(
       chunks,
       context,
     });
-  }
-);
-
-// can't run the mcp with bun
-geminiApp.post(
-  '/mcp',
-  describeRoute({
-    description: 'Model Context Protocol',
-    responses: {
-      200: {
-        description: 'Successful use Model Context Protocol',
-        content: {
-          'text/plain': {
-            schema: resolver(textSchema),
-          },
-        },
-      },
-    },
-  }),
-  zValidator(
-    'json',
-    z.object({
-      prompt: promptSchema,
-    })
-  ),
-  async (ctx) => {
-    const { prompt } = ctx.req.valid('json');
-
-    try {
-      // Initialize an MCP client to connect to a `stdio` MCP server:
-      const transport = new Experimental_StdioMCPTransport({
-        command: 'dotenvx run -- tsx',
-        args: ['./src/core/mcp/sequentialthinking.ts'],
-      });
-      const stdioClient = await experimental_createMCPClient({
-        transport,
-      });
-
-      // Alternatively, you can connect to a Server-Sent Events (SSE) MCP server:
-      const sseClient = await experimental_createMCPClient({
-        transport: {
-          type: 'sse',
-          url: 'https://actions.zapier.com/mcp/[YOUR_KEY]/sse',
-        },
-      });
-
-      // Similarly to the stdio example, you can pass in your own custom transport as long as it implements the `MCPTransport` interface:
-      // const transport = new MyCustomTransport({
-      //   // ...
-      // });
-      // const customTransportClient = await experimental_createMCPClient({
-      //   transport,
-      // });
-
-      const toolSetOne = await stdioClient.tools();
-      const toolSetTwo = await sseClient.tools();
-      // const toolSetThree = await customTransportClient.tools();
-
-      const result = streamText({
-        model: flash20,
-        tools: {
-          ...toolSetOne,
-          ...toolSetTwo,
-          // ...toolSetThree, // note: this approach causes subsequent tool sets to override tools with the same name
-        },
-        prompt,
-        // When streaming, the client should be closed after the response is finished:
-        onFinish: async () => {
-          await stdioClient.close();
-          await sseClient.close();
-          // await customTransportClient.close();
-        },
-      });
-
-      for await (const textPart of result.textStream) {
-        // biome-ignore lint/suspicious/noConsoleLog: aaa
-        // biome-ignore lint/suspicious/noConsole: aaa
-        console.log(textPart);
-      }
-
-      // Mark the response as a v1 data stream:
-      ctx.header('X-Vercel-AI-Data-Stream', 'v1');
-      ctx.header('Content-Type', 'text/plain; charset=utf-8');
-
-      return stream(ctx, (stream) => stream.pipe(result.toDataStream()));
-    } catch (error) {
-      return ctx.body(JSON.stringify(error), 500);
-    }
   }
 );
 
