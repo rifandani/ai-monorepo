@@ -2,73 +2,160 @@ import type { Http } from '@workspace/core/services/http';
 import type { Options } from 'ky';
 import { z } from 'zod';
 
-// #region API SCHEMAS
-export const authLoginRequestSchema = z.object({
-  username: z.string().min(3, 'username must contain at least 3 characters'),
-  password: z.string().min(6, 'password must contain at least 6 characters'),
-  expiresInMins: z.number().optional(),
+// #region ENTITY
+export const authSessionSchema = z.object({
+  id: z.string(),
+  expiresAt: z.string().date(),
+  token: z.string(),
+  createdAt: z.string().date(),
+  updatedAt: z.string().date(),
+  ipAddress: z.string(),
+  userAgent: z.string(),
+  userId: z.string(),
 });
-export const authLoginResponseSchema = z.object({
-  id: z.number().positive(),
-  username: z.string(),
+export type AuthSessionSchema = z.infer<typeof authSessionSchema>;
+
+export const authUserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
   email: z.string().email(),
-  firstName: z.string(),
-  lastName: z.string(),
-  gender: z.union([z.literal('male'), z.literal('female')]),
-  image: z.string().url(),
-  accessToken: z.string(),
-  refreshToken: z.string(),
+  emailVerified: z.boolean(),
+  image: z.string().nullable(),
+  createdAt: z.string().date(),
+  updatedAt: z.string().date(),
 });
+export type AuthUserSchema = z.infer<typeof authUserSchema>;
+// #endregion ENTITY
+
+// #region API SCHEMAS
+export const authGetSessionResponseSchema = z
+  .object({
+    session: authSessionSchema,
+    user: authUserSchema,
+  })
+  .nullable();
+export type AuthGetSessionResponseSchema = z.infer<
+  typeof authGetSessionResponseSchema
+>;
+
+export const authSignUpEmailRequestSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  name: z.string().min(3),
+  callbackURL: z.string().optional(),
+});
+export type AuthSignUpEmailRequestSchema = z.infer<
+  typeof authSignUpEmailRequestSchema
+>;
+
+export const authSignUpEmailResponseSchema = z.object({
+  token: z.string().nullable(),
+});
+export type AuthSignUpEmailResponseSchema = z.infer<
+  typeof authSignUpEmailResponseSchema
+>;
+
+export const authSignInEmailRequestSchema = authSignUpEmailRequestSchema
+  .omit({
+    name: true,
+  })
+  .extend({
+    rememberMe: z.boolean(),
+  });
+export type AuthSignInEmailRequestSchema = z.infer<
+  typeof authSignInEmailRequestSchema
+>;
+
+export const authSignInEmailResponseSchema = z.object({
+  redirect: z.boolean(),
+  token: z.string(),
+  url: z.string().nullable(),
+});
+export type AuthSignInEmailResponseSchema = z.infer<
+  typeof authSignInEmailResponseSchema
+>;
+
+export const authSignOutResponseSchema = z.object({
+  success: z.boolean(),
+});
+export type AuthSignOutResponseSchema = z.infer<
+  typeof authSignOutResponseSchema
+>;
 // #endregion API SCHEMAS
 
-// #region SCHEMAS TYPES
-export type AuthLoginRequestSchema = z.infer<typeof authLoginRequestSchema>;
-export type AuthLoginResponseSchema = z.infer<typeof authLoginResponseSchema>;
-// #endregion SCHEMAS TYPES
-
 export const authKeys = {
-  all: ['auth'] as const,
-  login: (params: AuthLoginRequestSchema | undefined) =>
-    [...authKeys.all, 'login', ...(params ? [params] : [])] as const,
+  all: () => ['auth'] as const,
+  signUpEmail: (params: AuthSignUpEmailRequestSchema | undefined) =>
+    [...authKeys.all(), 'signUpEmail', ...(params ? [params] : [])] as const,
+  signInEmail: (params: AuthSignInEmailRequestSchema | undefined) =>
+    [...authKeys.all(), 'signInEmail', ...(params ? [params] : [])] as const,
+  signOut: () => [...authKeys.all(), 'signOut'] as const,
 };
 
 export function authRepositories(http: InstanceType<typeof Http>) {
   return {
     /**
      * @access public
-     * @url POST ${env.apiBaseUrl}/auth/login
+     * @url GET ${env.apiBaseUrl}/api/auth/get-session
      * @throws HTTPError | TimeoutError | ZodError
      */
-    login: async (
-      { json }: { json: AuthLoginRequestSchema },
-      options?: Options
+    getSession: async (options?: Options) => {
+      const resp = await http.instance.get('api/auth/get-session', {
+        ...options,
+      });
+      const json = await resp.json();
+      const parsed = authGetSessionResponseSchema.parse(json);
+
+      return { headers: resp.headers, json: parsed };
+    },
+
+    /**
+     * @access public
+     * @url POST ${env.apiBaseUrl}/api/auth/sign-in/email
+     * @throws HTTPError | TimeoutError | ZodError
+     */
+    signInEmail: async (
+      options?: Options & { json: AuthSignInEmailRequestSchema }
     ) => {
-      const resp = await http.instance
-        .post('auth/login', {
-          json,
-          hooks: {
-            afterResponse: [
-              async (request, _options, response) => {
-                if (response.status === 200) {
-                  const data =
-                    (await response.json()) as AuthLoginResponseSchema;
+      const resp = await http.instance.post('api/auth/sign-in/email', {
+        ...options,
+      });
+      const json = await resp.json();
+      const parsed = authSignInEmailResponseSchema.parse(json);
 
-                  if ('accessToken' in data) {
-                    // set 'Authorization' headers
-                    request.headers.set(
-                      'Authorization',
-                      `Bearer ${data.accessToken}`
-                    );
-                  }
-                }
-              },
-            ],
-          },
-          ...options,
-        })
-        .json();
+      return { headers: resp.headers, json: parsed };
+    },
 
-      return authLoginResponseSchema.parse(resp);
+    /**
+     * @access public
+     * @url POST ${env.apiBaseUrl}/api/auth/sign-up/email
+     * @throws HTTPError | TimeoutError | ZodError
+     */
+    signUpEmail: async (
+      options?: Options & { json: AuthSignUpEmailRequestSchema }
+    ) => {
+      const resp = await http.instance.post('api/auth/sign-up/email', {
+        ...options,
+      });
+      const json = await resp.json();
+      const parsed = authSignUpEmailResponseSchema.parse(json);
+
+      return { headers: resp.headers, json: parsed };
+    },
+
+    /**
+     * @access public
+     * @url POST ${env.apiBaseUrl}/api/auth/sign-out
+     * @throws HTTPError | TimeoutError | ZodError
+     */
+    signOut: async (options?: Options) => {
+      const resp = await http.instance.post('api/auth/sign-out', {
+        ...options,
+      });
+      const json = await resp.json();
+      const parsed = authSignOutResponseSchema.parse(json);
+
+      return { headers: resp.headers, json: parsed };
     },
   } as const;
 }

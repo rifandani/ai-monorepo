@@ -34,6 +34,7 @@
     "@vercel/otel": "1.11.0",
     "@workspace/core": "workspace:*",
     "ai": "4.3.6",
+    "better-auth": "1.2.7",
     "embla-carousel-react": "8.6.0",
     "flags": "3.2.0",
     "input-otp": "1.4.2",

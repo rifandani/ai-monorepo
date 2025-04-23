@@ -1,36 +1,27 @@
-import { LoginForm } from '@/auth/components/login-form.client';
+import { RegisterForm } from '@/auth/components/register-form.client';
 import { Link } from '@/core/components/ui';
 import { createMetadata } from '@/core/utils/seo';
 import { Icon } from '@iconify/react';
-import { useTranslations } from 'next-intl';
 
 export const metadata = createMetadata({
-  title: 'Login',
+  title: 'Register',
   description:
-    'Sign in to your account to access personalized features, manage your profile, and enjoy a seamless experience across our platform.',
+    'Create an account to access personalized features, manage your profile, and enjoy a seamless experience across our platform.',
 });
 
-export default function LoginPage() {
-  const t = useTranslations();
-
+export default function RegisterPage() {
   return (
     <div className="flex min-h-screen w-full">
       {/* form */}
       <section className="flex min-h-screen w-full flex-col justify-center px-10 md:w-1/2 xl:px-20">
-        <h1 className="text-center text-3xl text-primary">
-          {t('core.welcome')}
-        </h1>
+        <h1 className="text-center text-3xl text-primary">Welcome</h1>
 
-        <LoginForm />
+        <RegisterForm />
 
         <p className="py-12 text-center">
-          {t('auth.noAccount')}{' '}
-          <Link
-            aria-label={t('auth.registerHere')}
-            className="hover:underline"
-            href="/register"
-          >
-            {t('auth.registerHere')}
+          Already have an account?{' '}
+          <Link aria-label="Login" className="hover:underline" href="/login">
+            Login
           </Link>
         </p>
       </section>

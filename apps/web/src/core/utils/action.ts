@@ -1,5 +1,5 @@
 import { AUTH_COOKIE_NAME } from '@/auth/constants/auth';
-import { authLoginResponseSchema } from '@workspace/core/apis/auth';
+import { authSignInEmailResponseSchema } from '@workspace/core/apis/auth';
 import { logger } from '@workspace/core/utils/logger';
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -68,7 +68,7 @@ export const authActionClient = actionClient
       throw new Error('[authActionClient]: Unauthorized: No session found');
     }
 
-    const parsedSession = authLoginResponseSchema.safeParse(
+    const parsedSession = authSignInEmailResponseSchema.safeParse(
       JSON.parse(atob(session))
     );
     if (parsedSession.error) {

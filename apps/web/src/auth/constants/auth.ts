@@ -1,1 +1,1 @@
-export const AUTH_COOKIE_NAME = 'NEXT_AUTH' as const;
+export const AUTH_COOKIE_NAME = 'better-auth.session_token' as const;

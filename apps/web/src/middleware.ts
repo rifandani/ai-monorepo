@@ -1,7 +1,5 @@
-import { AUTH_COOKIE_NAME } from '@/auth/constants/auth';
 import { createMiddleware, defaults } from '@nosecone/next';
-import { authLoginResponseSchema } from '@workspace/core/apis/auth';
-import { cookies } from 'next/headers';
+import { getSessionCookie } from 'better-auth/cookies';
 import type { MiddlewareConfig, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -29,26 +27,21 @@ const securityMiddleware = createMiddleware({
  * Then, based on the incoming request, you can modify the response by rewriting, redirecting, modifying the request or response headers, or responding directly.
  * Middleware runs before cached content and ANY routes are matched.
  */
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   // Check if the current route is protected or public
   const path = req.nextUrl.pathname;
   const isProtectedRoute = protectedRoutes.includes(path);
   const isPublicRoute = publicRoutes.includes(path);
-
-  // Parse the session from the cookie
-  const cookie = await cookies();
-  const session = cookie.get(AUTH_COOKIE_NAME)?.value;
-  const parsedSession = session
-    ? authLoginResponseSchema.safeParse(JSON.parse(atob(session)))
-    : null;
+  // get and parse session from the req.headers
+  const session = getSessionCookie(req);
 
   // Redirect to login if there is no session or the session is invalid
-  if ((!session || parsedSession?.error) && isProtectedRoute) {
+  if (!session && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
   // Redirect to home if session is valid and in public route
-  if (session && parsedSession?.success && isPublicRoute) {
+  if (session && isPublicRoute) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 

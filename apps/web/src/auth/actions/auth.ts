@@ -6,10 +6,12 @@ import type { ActionResult } from '@/core/utils/action';
 import { actionClient } from '@/core/utils/action';
 import { repositoryErrorMapper } from '@/core/utils/error';
 import {
-  authLoginRequestSchema,
   authRepositories,
+  authSignInEmailRequestSchema,
+  authSignUpEmailRequestSchema,
 } from '@workspace/core/apis/auth';
 import { logger } from '@workspace/core/utils/logger';
+import { parseSetCookieHeader } from 'better-auth/cookies';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { tryit } from 'radashi';
@@ -18,34 +20,55 @@ import { tryit } from 'radashi';
  * Server action to handle user login.
  *
  * @description
- * 1. Validates the login form data
- * 2. Attempts to authenticate with the server
- * 3. On success: Sets an HTTP-only auth cookie and redirects to home
- * 4. On failure: Returns validation or server error messages
+ * 1. Attempts to sign in using email and password
+ * 2. On success: Sets an HTTP-only auth cookie and redirects to home
+ * 3. On failure: Returns validation or server error messages
  *
  * @returns {Promise<LoginActionResult | void>} Returns error object if login fails (zod error or server error), void if successful (redirects)
  */
 export const loginAction = actionClient
   .metadata({ actionName: 'login' })
-  .schema(authLoginRequestSchema)
+  .schema(
+    authSignInEmailRequestSchema.omit({ callbackURL: true, rememberMe: true })
+  )
   .action<ActionResult<null>>(async ({ parsedInput }) => {
     logger.info(parsedInput, '[login]: Start login');
-    const [error, response] = await tryit(authRepositories(http).login)({
-      json: parsedInput,
+    const [error, data] = await tryit(authRepositories(http).signInEmail)({
+      json: {
+        email: parsedInput.email,
+        password: parsedInput.password,
+        rememberMe: true,
+        callbackURL: '/',
+      },
     });
     if (error) {
       return await repositoryErrorMapper(error);
     }
 
-    logger.info(response, '[login]: Start set session cookie');
+    // INFO: hono backend doesn't set the cookie & we can't use headers from next/headers
+    logger.info(data, '[login]: Start set session cookie');
+    const setCookies = data.headers.get('Set-Cookie');
+    const parsed = parseSetCookieHeader(setCookies ?? '');
     const cookie = await cookies();
-    cookie.set(AUTH_COOKIE_NAME, btoa(JSON.stringify(response)), {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 1, // 1 days
-      path: '/',
-    });
+    for (const [name, value] of parsed) {
+      if (!name) {
+        continue;
+      }
+
+      const opts = {
+        sameSite: value.samesite,
+        secure: value.secure,
+        maxAge: value['max-age'],
+        httpOnly: value.httponly,
+        domain: value.domain,
+        path: value.path,
+      } as const;
+      try {
+        cookie.set(name, decodeURIComponent(value.value), opts);
+      } catch (_) {
+        // this will fail if the cookie is being set on server component
+      }
+    }
 
     // INFO: we can't use redirect in try catch block, because redirect will throw an error object
     logger.info('[login]: Start redirect to /');
@@ -53,7 +76,61 @@ export const loginAction = actionClient
   });
 
 /**
+ * Server action to handle user register.
+ *
+ * @description
+ * 1. Attempts to sign up using email and password
+ * 2. On success: Sets an HTTP-only auth cookie and redirects to home
+ * 3. On failure: Returns validation or server error messages
+ *
+ * @returns {Promise<LoginActionResult | void>} Returns error object if register fails (zod error or server error), void if successful (redirects)
+ */
+export const registerAction = actionClient
+  .metadata({ actionName: 'register' })
+  .schema(authSignUpEmailRequestSchema)
+  .action<ActionResult<null>>(async ({ parsedInput }) => {
+    logger.info(parsedInput, '[register]: Start register');
+    const [error, data] = await tryit(authRepositories(http).signUpEmail)({
+      json: parsedInput,
+    });
+    if (error) {
+      return await repositoryErrorMapper(error);
+    }
+
+    // INFO: hono backend doesn't set the cookie & we can't use headers from next/headers
+    logger.info(data, '[register]: Start set session cookie');
+    const setCookies = data.headers.get('Set-Cookie');
+    const parsed = parseSetCookieHeader(setCookies ?? '');
+    const cookie = await cookies();
+    for (const [name, value] of parsed) {
+      if (!name) {
+        continue;
+      }
+
+      const opts = {
+        sameSite: value.samesite,
+        secure: value.secure,
+        maxAge: value['max-age'],
+        httpOnly: value.httponly,
+        domain: value.domain,
+        path: value.path,
+      } as const;
+      try {
+        cookie.set(name, decodeURIComponent(value.value), opts);
+      } catch (_) {
+        // this will fail if the cookie is being set on server component
+      }
+    }
+
+    // INFO: we can't use redirect in try catch block, because redirect will throw an error object
+    logger.info('[register]: Start redirect to /');
+    redirect('/');
+  });
+
+/**
  * Server action to handle user logout.
+ *
+ * @note we don't clear session in database. I've tried to use `authClient.signOut` -> 400 error, `authRepositories.signOut` -> 403 error
  *
  * @description
  * 1. Removes the authentication cookie
@@ -64,9 +141,9 @@ export const loginAction = actionClient
 export const logoutAction = actionClient
   .metadata({ actionName: 'logoutAction' })
   .action(async () => {
-    logger.info('[logout]: Start clearing auth cookie');
-    const cookie = await cookies();
-    cookie.delete(AUTH_COOKIE_NAME);
+    logger.info('[logout]: Start logging out');
+    const cookieStore = await cookies();
+    cookieStore.delete(AUTH_COOKIE_NAME);
 
     logger.info('[logout]: Start redirect to /login');
     redirect('/login');
