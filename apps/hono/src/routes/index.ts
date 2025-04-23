@@ -3,6 +3,7 @@ import { deepResearchApp } from '@/routes/deep-research';
 import { geminiApp } from '@/routes/gemini';
 import { llmsTextApp } from '@/routes/llms-text';
 import { ollamaApp } from '@/routes/ollama';
+import { ventureCapitalApp } from '@/routes/venture-capital';
 import { Scalar } from '@scalar/hono-api-reference';
 import type { Hono } from 'hono';
 import { openAPISpecs } from 'hono-openapi';
@@ -15,6 +16,7 @@ export function routes(
   app.route('/ollama', ollamaApp);
   app.route('/gemini', geminiApp);
   app.route('/deep-research', deepResearchApp);
+  app.route('/venture-capital', ventureCapitalApp);
   app.route('/llms-text', llmsTextApp);
 
   app.get(
