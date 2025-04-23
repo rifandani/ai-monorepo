@@ -9,12 +9,14 @@ import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
+import { HTTPException } from 'hono/http-exception';
 import { languageDetector } from 'hono/language';
 import { logger as loggerMiddleware } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import { timing } from 'hono/timing';
+import { HTTPError } from 'ky';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
@@ -64,7 +66,7 @@ app.on(['POST', 'GET'], '/api/auth/**', (c) => {
 //   colorize: true,
 // });
 
-app.onError((error, c) => {
+app.onError(async (error, c) => {
   const requestId = c.get('requestId');
   logger.error(error, `[App]: Error with requestId: ${requestId}`);
 
@@ -79,6 +81,14 @@ app.onError((error, c) => {
   if (error instanceof ZodError) {
     const errors = fromZodError(error);
     return c.json(errors, 400);
+  }
+  if (error instanceof HTTPError) {
+    const errors = await error.response.json();
+    return c.json({ message: error.message, error: errors }, 400);
+  }
+  if (error instanceof HTTPException) {
+    // hono built-in http error
+    return error.getResponse();
   }
 
   return c.json({ ...error, message: error.message }, 500);
