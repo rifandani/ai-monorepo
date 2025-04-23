@@ -20,12 +20,14 @@ import {
 import type { Variables } from '@/core/types/hono';
 import { cached } from '@/core/utils/middleware';
 import {
+  calculateTool,
   getCityAttractionTool,
   getWeatherTool,
   logToConsoleTool,
 } from '@/core/utils/tool';
 import {
   type GoogleGenerativeAIProviderMetadata,
+  type GoogleGenerativeAIProviderOptions,
   createGoogleGenerativeAI,
 } from '@ai-sdk/google';
 import { GoogleAICacheManager } from '@google/generative-ai/server';
@@ -232,7 +234,7 @@ geminiApp.post(
                 {
                   type: 'file',
                   data: await pdf.arrayBuffer(),
-                  mimeType: pdf.type,
+                  mimeType: 'application/pdf',
                 } as FilePart,
               ]
             : []),
@@ -1438,6 +1440,63 @@ geminiApp.post(
 );
 
 geminiApp.post(
+  '/agent/mathematician',
+  describeRoute({
+    description: 'Use mathematician',
+    responses: {
+      200: {
+        description: 'Successful use mathematician',
+        content: {
+          'application/json': {
+            schema: resolver(z.object({ answer: z.string() })),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: z
+        .string()
+        .describe('The prompt to solve')
+        .openapi({
+          example:
+            'A taxi driver earns $9461 per 1-hour work. ' +
+            'If he works 12 hours a day and in 1 hour he uses 14-liters petrol with price $134 for 1-liter. ' +
+            'How much money does he earn in one day?',
+        }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    const { text } = await generateText({
+      model: flash15,
+      tools: {
+        calculate: calculateTool,
+        // answer: answerTool,
+      },
+      // toolChoice: 'required',
+      maxSteps: 10,
+      onStepFinish: ({ toolResults }) => {
+        logger.info(toolResults, '[onStepFinish]: Step results');
+      },
+      system:
+        'You are an expert mathematician solving math problems. ' +
+        'Reason step by step. ' +
+        'Use the calculator when necessary. ' +
+        'When you give the final answer, provide an explanation for how you got it.',
+      prompt,
+    });
+
+    return ctx.json({
+      answer: text,
+    });
+  }
+);
+
+geminiApp.post(
   '/web-search-native',
   describeRoute({
     description: 'Use web search native',
@@ -1526,7 +1585,9 @@ geminiApp.post(
       model: flash20exp,
       prompt,
       providerOptions: {
-        google: { responseModalities: ['TEXT', 'IMAGE'] },
+        google: {
+          responseModalities: ['TEXT', 'IMAGE'],
+        } satisfies GoogleGenerativeAIProviderOptions,
       },
     });
 

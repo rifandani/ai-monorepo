@@ -2,6 +2,9 @@ import { auth } from '@/auth/libs';
 import { ENV } from '@/core/constants/env';
 import type { Variables } from '@/core/types/hono';
 import { routes } from '@/routes';
+import { otel } from '@hono/otel';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { InMemorySpanExporter } from '@opentelemetry/sdk-trace-node';
 import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -15,12 +18,21 @@ import { timing } from 'hono/timing';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
+// doesn't support cloudflare workers
+const memorySpanExporter = new InMemorySpanExporter();
+const sdk = new NodeSDK({
+  traceExporter: memorySpanExporter, // new ConsoleSpanExporter(),
+});
+
+sdk.start();
+
 const app = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
 app.use(
   '*',
+  otel(),
   cors({
     origin: [ENV.APP_URL, 'http://localhost:3002'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
