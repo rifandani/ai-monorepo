@@ -1,6 +1,7 @@
 import type { Variables } from '@/core/types/hono';
 import { deepResearchApp } from '@/routes/deep-research';
 import { geminiApp } from '@/routes/gemini';
+import { imagesApp } from '@/routes/images';
 import { llmsTextApp } from '@/routes/llms-text';
 import { ollamaApp } from '@/routes/ollama';
 import { ventureCapitalApp } from '@/routes/venture-capital';
@@ -17,6 +18,7 @@ export function routes(
   app.route('/gemini', geminiApp);
   app.route('/deep-research', deepResearchApp);
   app.route('/venture-capital', ventureCapitalApp);
+  app.route('/images', imagesApp);
   app.route('/llms-text', llmsTextApp);
 
   app.get(
