@@ -37,6 +37,7 @@ import {
   type FilePart,
   type ImagePart,
   cosineSimilarity,
+  createDataStream,
   embed,
   embedMany,
   generateObject,
@@ -401,6 +402,67 @@ geminiApp.post(
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
     return stream(ctx, (stream) => stream.pipe(result.toDataStream()));
+  }
+);
+
+geminiApp.post(
+  '/stream-data',
+  describeRoute({
+    description: 'Generate data stream',
+    responses: {
+      200: {
+        description: 'Successful generate data stream',
+        content: {
+          'text/plain': {
+            schema: textSchema,
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: promptSchema,
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    // immediately start streaming the response
+    const dataStream = createDataStream({
+      execute: (dataStreamWriter) => {
+        // append data part to the stream
+        dataStreamWriter.writeData('initialized call');
+
+        // or, we can append message annotation to the stream
+        dataStreamWriter.writeMessageAnnotation({
+          status: {
+            title: 'Initializing call',
+          },
+        });
+
+        const result = streamText({
+          model: flash15,
+          prompt,
+        });
+
+        result.mergeIntoDataStream(dataStreamWriter);
+      },
+      onError: (error) => {
+        // Error messages are masked by default for security reasons.
+        // If you want to expose the error message to the client, you can do so here:
+        return error instanceof Error ? error.message : String(error);
+      },
+    });
+
+    // Mark the response as a v1 data stream:
+    ctx.header('X-Vercel-AI-Data-Stream', 'v1');
+    ctx.header('Content-Type', 'text/plain; charset=utf-8');
+
+    return stream(ctx, (stream) =>
+      stream.pipe(dataStream.pipeThrough(new TextEncoderStream()))
+    );
   }
 );
 

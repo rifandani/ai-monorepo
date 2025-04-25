@@ -3,6 +3,7 @@ import path from 'node:path';
 import { logger } from '@workspace/core/utils/logger';
 import {
   type LanguageModelV1,
+  type LanguageModelV1CallOptions,
   type LanguageModelV1Middleware,
   type LanguageModelV1Prompt,
   type LanguageModelV1StreamPart,
@@ -179,3 +180,158 @@ export function cached(model: LanguageModelV1) {
     model,
   });
 }
+
+/**
+ * Guardrail Middleware
+ *
+ * This middleware is used to guardrail the model's output.
+ * It is used to filter out PII or other sensitive information.
+ */
+export const guardrailMiddleware: LanguageModelV1Middleware = {
+  wrapGenerate: async ({ doGenerate }) => {
+    const { text, ...rest } = await doGenerate();
+
+    // filtering approach, e.g. for PII or other sensitive information:
+    const cleanedText = text?.replace(/badword/g, '<REDACTED>');
+
+    return { text: cleanedText, ...rest };
+  },
+
+  // here you would implement the guardrail logic for streaming
+  // Note: streaming guardrails are difficult to implement, because
+  // you do not know the full content of the stream until it's finished.
+};
+
+export const logMiddleware: LanguageModelV1Middleware = {
+  wrapGenerate: async ({ doGenerate, params }) => {
+    logger.info('doGenerate called');
+    logger.info(params, 'params:');
+
+    const result = await doGenerate();
+
+    logger.info('doGenerate finished');
+    logger.info(result.text, 'generated text:');
+
+    return result;
+  },
+
+  wrapStream: async ({ doStream, params }) => {
+    logger.info('doStream called');
+    logger.info(params, 'params:');
+
+    const { stream, ...rest } = await doStream();
+
+    let generatedText = '';
+
+    const transformStream = new TransformStream<
+      LanguageModelV1StreamPart,
+      LanguageModelV1StreamPart
+    >({
+      transform(chunk, controller) {
+        if (chunk.type === 'text-delta') {
+          generatedText += chunk.textDelta;
+        }
+
+        controller.enqueue(chunk);
+      },
+
+      flush() {
+        logger.info('doStream finished');
+        logger.info(generatedText, 'generated text:');
+      },
+    });
+
+    return {
+      stream: stream.pipeThrough(transformStream),
+      ...rest,
+    };
+  },
+};
+
+function getLastUserMessageText({
+  prompt,
+}: {
+  prompt: LanguageModelV1Prompt;
+}): string | undefined {
+  const lastMessage = prompt.at(-1);
+
+  if (lastMessage?.role !== 'user') {
+    return undefined;
+  }
+
+  return lastMessage.content.length === 0
+    ? undefined
+    : lastMessage.content.filter((c) => c.type === 'text').join('\n');
+}
+
+function addToLastUserMessage({
+  text,
+  params,
+}: {
+  text: string;
+  params: LanguageModelV1CallOptions;
+}): LanguageModelV1CallOptions {
+  const { prompt, ...rest } = params;
+
+  const lastMessage = prompt.at(-1);
+
+  if (lastMessage?.role !== 'user') {
+    return params;
+  }
+
+  return {
+    ...rest,
+    prompt: [
+      ...prompt.slice(0, -1),
+      {
+        ...lastMessage,
+        content: [{ type: 'text', text }, ...lastMessage.content],
+      },
+    ],
+  };
+}
+
+// example, could implement anything here:
+function findSources(_: { text: string }): Array<{
+  title: string;
+  previewText: string | undefined;
+  url: string | undefined;
+}> {
+  return [
+    {
+      title: 'New York',
+      previewText: 'New York is a city in the United States.',
+      url: 'https://en.wikipedia.org/wiki/New_York',
+    },
+    {
+      title: 'San Francisco',
+      previewText: 'San Francisco is a city in the United States.',
+      url: 'https://en.wikipedia.org/wiki/San_Francisco',
+    },
+  ];
+}
+
+/**
+ * RAG Middleware
+ *
+ * This middleware is used to add RAG to the model's output.
+ */
+export const ragMiddleware: LanguageModelV1Middleware = {
+  transformParams: async ({ params }) => {
+    const lastUserMessageText = getLastUserMessageText({
+      prompt: params.prompt,
+    });
+
+    if (lastUserMessageText == null) {
+      return params; // do not use RAG (send unmodified parameters)
+    }
+
+    const instruction = `Use the following information to answer the question:\n${findSources(
+      { text: lastUserMessageText }
+    )
+      .map((chunk) => JSON.stringify(chunk))
+      .join('\n')}`;
+
+    return addToLastUserMessage({ params, text: instruction });
+  },
+};

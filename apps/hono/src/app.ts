@@ -2,6 +2,7 @@ import { auth } from '@/auth/libs';
 import { ENV } from '@/core/constants/env';
 import type { Variables } from '@/core/types/hono';
 import { routes } from '@/routes';
+import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { InMemorySpanExporter } from '@opentelemetry/sdk-trace-node';
@@ -44,6 +45,7 @@ app.use(
     credentials: true,
   }),
   loggerMiddleware(),
+  reqResLogger(),
   prettyJSON(),
   requestId(),
   timing(),

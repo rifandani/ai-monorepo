@@ -1,129 +1,209 @@
-import { promptSchema, textSchema } from '@/core/api/ai';
 import type { Variables } from '@/core/types/hono';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { logger } from '@workspace/core/utils/logger';
-import { experimental_createMCPClient, streamText } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import type {
+  CallToolResult,
+  GetPromptResult,
+  ReadResourceResult,
+} from '@modelcontextprotocol/sdk/types.js';
+import { toFetchResponse, toReqRes } from 'fetch-to-node';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
-import { resolver, validator as zValidator } from 'hono-openapi/zod';
-import { stream } from 'hono/streaming';
 import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
 
-// by default use GOOGLE_GENERATIVE_AI_API_KEY
-// example fetch wrapper that logs the input to the API call:
-const google = createGoogleGenerativeAI({
-  // @ts-expect-error preconnect is bun specific
-  fetch: async (
-    url: Parameters<typeof fetch>[0],
-    options: Parameters<typeof fetch>[1]
-  ) => {
-    logger.info(
-      { url, headers: options?.headers, body: options?.body },
-      'FETCH_CALL'
-    );
-    return await fetch(url, options);
-  },
-});
-const flash20 = google('gemini-2.0-flash-001');
-const flash20search = google('gemini-2.0-flash-001', {
-  // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
-  useSearchGrounding: true,
-});
-const pro25 = google('gemini-2.5-pro-exp-03-25');
-const embedding004 = google.textEmbeddingModel('text-embedding-004');
-
 export const mcpApp = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
-// can't run the mcp with bun
+/**
+ * @link read more for deployment to CF https://github.dev/mhart/mcp-hono-stateless
+ */
+const getServer = () => {
+  // Create an MCP server with implementation details
+  const server = new McpServer(
+    {
+      name: 'stateless-streamable-http-server',
+      version: '1.0.0',
+    },
+    { capabilities: { logging: {} } }
+  );
+
+  // Register a simple prompt
+  server.prompt(
+    'greeting-template',
+    'A simple greeting prompt template',
+    {
+      name: z.string().describe('Name to include in greeting'),
+    },
+    // biome-ignore lint/suspicious/useAwait: <explanation>
+    async ({ name }): Promise<GetPromptResult> => {
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `Please greet ${name} in a friendly manner.`,
+            },
+          },
+        ],
+      };
+    }
+  );
+
+  // Register a tool specifically for testing resumability
+  server.tool(
+    'start-notification-stream',
+    'Starts sending periodic notifications for testing resumability',
+    {
+      interval: z
+        .number()
+        .describe('Interval in milliseconds between notifications')
+        .default(100),
+      count: z
+        .number()
+        .describe('Number of notifications to send (0 for 100)')
+        .default(10),
+    },
+    async (
+      { interval, count },
+      { sendNotification }
+    ): Promise<CallToolResult> => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+      let counter = 0;
+
+      while (count === 0 || counter < count) {
+        counter++;
+        try {
+          await sendNotification({
+            method: 'notifications/message',
+            params: {
+              level: 'info',
+              data: `Periodic notification #${counter} at ${new Date().toISOString()}`,
+            },
+          });
+        } catch (error) {
+          console.error('Error sending notification:', error);
+        }
+        // Wait for the specified interval
+        await sleep(interval);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Started sending periodic notifications every ${interval}ms`,
+          },
+        ],
+      };
+    }
+  );
+
+  // Create a simple resource at a fixed URI
+  server.resource(
+    'greeting-resource',
+    'https://example.com/greetings/default',
+    { mimeType: 'text/plain' },
+    // biome-ignore lint/suspicious/useAwait: <explanation>
+    async (): Promise<ReadResourceResult> => {
+      return {
+        contents: [
+          {
+            uri: 'https://example.com/greetings/default',
+            text: 'Hello, world!',
+          },
+        ],
+      };
+    }
+  );
+  return server;
+};
+
 mcpApp.post(
-  '/mcp',
+  '/',
   describeRoute({
-    description: 'Model Context Protocol',
+    description:
+      'Streamable HTTP MCP. By default, the server will start an SSE stream, instead of returning JSON responses.',
     responses: {
       200: {
-        description: 'Successful use Model Context Protocol',
-        content: {
-          'text/plain': {
-            schema: resolver(textSchema),
-          },
-        },
+        description: 'Successful streamable HTTP MCP',
       },
     },
   }),
-  zValidator(
-    'json',
-    z.object({
-      prompt: promptSchema,
-    })
-  ),
-  async (ctx) => {
-    const { prompt } = ctx.req.valid('json');
+  async (c) => {
+    const { req, res } = toReqRes(c.req.raw);
+
+    const server = getServer();
 
     try {
-      // Initialize an MCP client to connect to a `stdio` MCP server:
-      const transport = new Experimental_StdioMCPTransport({
-        command: 'dotenvx run -- tsx',
-        args: ['./src/core/mcp/sequentialthinking.ts'],
-      });
-      const stdioClient = await experimental_createMCPClient({
-        transport,
+      const transport: StreamableHTTPServerTransport =
+        new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined,
+        });
+
+      await server.connect(transport);
+
+      // should be after connect and before handleRequest -> Client error: DOMException [AbortError]: This operation was aborted
+      // transport.onmessage = (message) => {
+      //   console.log('Message', message);
+      // };
+      await transport.handleRequest(req, res, await c.req.json());
+
+      res.on('close', () => {
+        console.log('Request closed');
+        transport.close();
+        server.close();
       });
 
-      // Alternatively, you can connect to a Server-Sent Events (SSE) MCP server:
-      const sseClient = await experimental_createMCPClient({
-        transport: {
-          type: 'sse',
-          url: 'https://actions.zapier.com/mcp/[YOUR_KEY]/sse',
+      return toFetchResponse(res);
+    } catch (e) {
+      console.error(e);
+      return c.json(
+        {
+          jsonrpc: '2.0',
+          error: {
+            code: -32603,
+            message: 'Internal server error',
+          },
+          id: null,
         },
-      });
-
-      // Similarly to the stdio example, you can pass in your own custom transport as long as it implements the `MCPTransport` interface:
-      // const transport = new MyCustomTransport({
-      //   // ...
-      // });
-      // const customTransportClient = await experimental_createMCPClient({
-      //   transport,
-      // });
-
-      const toolSetOne = await stdioClient.tools();
-      const toolSetTwo = await sseClient.tools();
-      // const toolSetThree = await customTransportClient.tools();
-
-      const result = streamText({
-        model: flash20,
-        tools: {
-          ...toolSetOne,
-          ...toolSetTwo,
-          // ...toolSetThree, // note: this approach causes subsequent tool sets to override tools with the same name
-        },
-        prompt,
-        // When streaming, the client should be closed after the response is finished:
-        onFinish: async () => {
-          await stdioClient.close();
-          await sseClient.close();
-          // await customTransportClient.close();
-        },
-      });
-
-      for await (const textPart of result.textStream) {
-        // biome-ignore lint/suspicious/noConsoleLog: aaa
-        // biome-ignore lint/suspicious/noConsole: aaa
-        console.log(textPart);
-      }
-
-      // Mark the response as a v1 data stream:
-      ctx.header('X-Vercel-AI-Data-Stream', 'v1');
-      ctx.header('Content-Type', 'text/plain; charset=utf-8');
-
-      return stream(ctx, (stream) => stream.pipe(result.toDataStream()));
-    } catch (error) {
-      return ctx.body(JSON.stringify(error), 500);
+        { status: 500 }
+      );
     }
   }
 );
+
+mcpApp.get('/', (c) => {
+  console.log('Received GET MCP request');
+  return c.json(
+    {
+      jsonrpc: '2.0',
+      error: {
+        code: -32000,
+        message: 'Method not allowed.',
+      },
+      id: null,
+    },
+    { status: 405 }
+  );
+});
+
+mcpApp.delete('/', (c) => {
+  console.log('Received DELETE MCP request');
+  return c.json(
+    {
+      jsonrpc: '2.0',
+      error: {
+        code: -32000,
+        message: 'Method not allowed.',
+      },
+      id: null,
+    },
+    { status: 405 }
+  );
+});
