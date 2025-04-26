@@ -1,7 +1,25 @@
+import { marked } from 'marked';
 import Link from 'next/link';
 import { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+/**
+ * Parses markdown into blocks of text.
+ * @param markdown - The markdown to parse.
+ * @returns An array of blocks of text.
+ * @example
+ * ```ts
+ * const blocks = parseMarkdownIntoBlocks(
+ *   '## Hello\n\nThis is a test\n\n![Alt text](image.png)'
+ * );
+ * // blocks = ['## Hello', 'This is a test', '![Alt text](image.png)']
+ * ```
+ */
+export function parseMarkdownIntoBlocks(markdown: string): string[] {
+  const tokens = marked.lexer(markdown);
+  return tokens.map((token) => token.raw);
+}
 
 const components: Partial<Components> = {
   pre: ({ children }) => <>{children}</>,

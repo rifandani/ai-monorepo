@@ -1,7 +1,18 @@
-import { google } from '@ai-sdk/google';
-import { type DataStreamWriter, generateObject, generateText, tool } from 'ai';
+import { type GoogleGenerativeAIProviderOptions, google } from '@ai-sdk/google';
+import {
+  type DataStreamWriter,
+  type Message,
+  type ToolExecutionOptions,
+  type ToolSet,
+  convertToCoreMessages,
+  formatDataStreamPart,
+  generateObject,
+  generateText,
+  tool,
+} from 'ai';
 import { z } from 'zod';
 
+// type MessagePart = IterableElement<Message['parts']>;
 export type Research = {
   learnings: string[];
   sources: SearchResult[];
@@ -10,15 +21,19 @@ export type Research = {
 };
 
 const flash20 = google('gemini-2.0-flash-001');
+const flash20exp = google('gemini-2.0-flash-exp');
 const flash20search = google('gemini-2.0-flash-001', {
   // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
   useSearchGrounding: true,
 });
+const flash25 = google('gemini-2.5-flash-preview-04-17');
 const pro25 = google('gemini-2.5-pro-exp-03-25');
 
 export const models = {
   flash20,
+  flash20exp,
   flash20search,
+  flash25,
   pro25,
 };
 
@@ -399,4 +414,216 @@ export const tools = {
       },
     });
   },
+  generateImage: tool({
+    description: 'Generate an image based on input prompt',
+    parameters: z.object({
+      prompt: z
+        .string()
+        .describe(
+          'The prompt to generate the image from, should be a short description of the image you want to see'
+        ),
+      style: z
+        .string()
+        .describe(
+          'The style of the image to generate, e.g. "anime", "realistic", "cartoon", "sketch", "vector", "3D", "abstract", "minimalist", "neon", "cyberpunk", "retro", "vintage", "minimalist", "neon", "cyberpunk", "retro", "vintage"'
+        )
+        .default('anime')
+        .optional(),
+    }),
+    execute: async ({ prompt }) => {
+      const result = await generateText({
+        model: models.flash20exp,
+        prompt,
+        providerOptions: {
+          google: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          } satisfies GoogleGenerativeAIProviderOptions,
+        },
+      });
+
+      /**
+       * we can then use the base64 in client side to display the image
+       */
+      const files = result.files.map((file) => ({
+        // remove the uint8Array
+        base64: file.base64,
+        mimeType: file.mimeType,
+      }));
+
+      // in production, save this image to blob storage and return a URL instead
+      return { files, prompt };
+    },
+  }),
+  getWeatherInformation: tool({
+    description: 'show the weather in a given city to the user',
+    parameters: z.object({
+      city: z.string().describe('the city to get the weather for'),
+    }),
+    // execute function removed to stop automatic execution (human in the loop)
+  }),
 };
+
+// biome-ignore lint/correctness/noEmptyPattern: <explanation>
+export function executeGetWeatherInformationTool({}: { city: string }) {
+  const weatherOptions = [
+    'sunny',
+    'cloudy',
+    'rainy',
+    'snowy',
+    'stormy',
+    'foggy',
+  ];
+  return weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
+}
+
+// Approval string to be shared across frontend and backend
+export const APPROVAL = {
+  YES: 'Yes, confirmed.',
+  NO: 'No, denied.',
+} as const;
+
+/**
+ * Check if a tool name is valid
+ * @param key - The key to check
+ * @param obj - The object to check
+ * @returns True if the key is valid, false otherwise
+ */
+function isValidToolName<K extends PropertyKey, T extends object>(
+  key: K,
+  obj: T
+): key is K & keyof T {
+  return key in obj;
+}
+
+/**
+ * Processes tool invocations where human input is required, executing tools when authorized.
+ *
+ * @param options - The function options
+ * @param options.tools - Map of tool names to Tool instances that may expose execute functions
+ * @param options.dataStream - Data stream for sending results back to the client
+ * @param options.messages - Array of messages to process
+ * @param executionFunctions - Map of tool names to execute functions
+ * @returns Promise resolving to the processed messages
+ */
+export async function processToolCalls<
+  Tools extends ToolSet,
+  ExecutableTools extends {
+    // biome-ignore lint/complexity/noBannedTypes: <explanation>
+    [Tool in keyof Tools as Tools[Tool] extends { execute: Function }
+      ? never
+      : Tool]: Tools[Tool];
+  },
+>(
+  {
+    dataStream,
+    messages,
+  }: {
+    tools: Tools; // used for type inference
+    dataStream: DataStreamWriter;
+    messages: Message[];
+  },
+  executeFunctions: {
+    [K in keyof Tools & keyof ExecutableTools]?: (
+      args: z.infer<ExecutableTools[K]['parameters']>,
+      context: ToolExecutionOptions
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    ) => Promise<any>;
+  }
+): Promise<Message[]> {
+  /**
+   * Before sending the new messages to the language model,
+   * we pull out the last message and map through the message parts to see if the tool requiring confirmation was called
+   * and whether it's in a "result" state
+   */
+  const lastMessage = messages.at(-1);
+  if (!lastMessage) {
+    return messages;
+  }
+
+  const parts = lastMessage.parts;
+  if (!parts) {
+    return messages;
+  }
+
+  const processedParts = await Promise.all(
+    parts.map(async (part) => {
+      // Only process tool invocations parts
+      if (part.type !== 'tool-invocation') {
+        return part;
+      }
+
+      const { toolInvocation } = part;
+      const toolName = toolInvocation.toolName;
+
+      // Only continue if we have an execute function for the tool (meaning it requires confirmation) and it's in a 'result' state
+      if (
+        !(toolName in executeFunctions) ||
+        toolInvocation.state !== 'result'
+      ) {
+        return part;
+      }
+
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      let result: any;
+
+      if (toolInvocation.result === APPROVAL.YES) {
+        // Get the tool and check if the tool has an execute function.
+        if (
+          !isValidToolName(toolName, executeFunctions) ||
+          toolInvocation.state !== 'result'
+        ) {
+          return part;
+        }
+
+        const toolInstance = executeFunctions[toolName];
+        if (toolInstance) {
+          result = await toolInstance(toolInvocation.args, {
+            messages: convertToCoreMessages(messages),
+            toolCallId: toolInvocation.toolCallId,
+          });
+        } else {
+          result = 'Error: No execute function found on tool';
+        }
+      } else if (toolInvocation.result === APPROVAL.NO) {
+        result = 'Error: User denied access to tool execution';
+      } else {
+        // For any unhandled responses, return the original part.
+        return part;
+      }
+
+      // Forward updated tool result to the client.
+      dataStream.write(
+        formatDataStreamPart('tool_result', {
+          toolCallId: toolInvocation.toolCallId,
+          result,
+        })
+      );
+
+      // Return updated toolInvocation with the actual result.
+      return {
+        ...part,
+        toolInvocation: {
+          ...toolInvocation,
+          result,
+        },
+      };
+    })
+  );
+
+  // Finally return the processed messages with updated last message
+  return [...messages.slice(0, -1), { ...lastMessage, parts: processedParts }];
+}
+
+/**
+ * Get the tools that require confirmation from the user
+ * @param tools - The tools to check
+ * @returns The tools that require confirmation
+ */
+export function getToolsRequiringConfirmation<T extends ToolSet>(
+  tools: T
+): string[] {
+  return (Object.keys(tools) as (keyof T)[]).filter((key) => {
+    const maybeTool = tools[key];
+    return typeof maybeTool?.execute !== 'function';
+  }) as string[];
+}

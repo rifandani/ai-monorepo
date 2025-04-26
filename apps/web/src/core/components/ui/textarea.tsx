@@ -1,5 +1,6 @@
 'use client';
 
+import type React from 'react';
 import type {
   TextFieldProps as TextFieldPrimitiveProps,
   ValidationResult,
@@ -25,6 +26,7 @@ interface TextareaProps extends TextFieldPrimitiveProps {
   description?: string;
   errorMessage?: string | ((validation: ValidationResult) => string);
   className?: string;
+  textAreaRef?: React.RefObject<HTMLTextAreaElement>;
 }
 
 function Textarea({
@@ -33,6 +35,7 @@ function Textarea({
   label,
   description,
   errorMessage,
+  textAreaRef,
   ...props
 }: TextareaProps) {
   return (
@@ -45,6 +48,7 @@ function Textarea({
     >
       {label && <Label>{label}</Label>}
       <TextAreaPrimitive
+        ref={textAreaRef}
         placeholder={placeholder}
         className={composeRenderProps(className, (className, renderProps) =>
           textareaStyles({

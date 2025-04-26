@@ -1,11 +1,11 @@
 import { models, tools } from '@/core/services/ai';
-import { type CoreMessage, createDataStreamResponse, streamText } from 'ai';
+import { type Message, createDataStreamResponse, streamText } from 'ai';
 
 // Allow streaming responses up to 120 seconds
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
-  const { messages } = (await req.json()) as { messages: CoreMessage[] };
+  const { messages } = (await req.json()) as { messages: Message[] };
 
   return createDataStreamResponse({
     execute: (dataStream) => {
