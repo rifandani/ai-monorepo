@@ -42,6 +42,7 @@ import {
   embedMany,
   generateObject,
   generateText,
+  smoothStream,
   streamObject,
   streamText,
 } from 'ai';
@@ -104,6 +105,7 @@ const flash20safety = google('gemini-2.0-flash-001', {
 });
 const flash20exp = google('gemini-2.0-flash-exp');
 const pro25 = google('gemini-2.5-pro-exp-03-25');
+const flash25 = google('gemini-2.5-flash-preview-04-17');
 const embedding004 = google.textEmbeddingModel('text-embedding-004');
 const cacheManager = new GoogleAICacheManager(
   process.env.GOOGLE_GENERATIVE_AI_API_KEY as string
@@ -173,6 +175,66 @@ geminiApp.post(
       text: result.text,
       usage: result.usage,
       messages: result.response.messages,
+    });
+  }
+);
+
+geminiApp.post(
+  '/generate-image',
+  describeRoute({
+    description: 'Generate image ',
+    responses: {
+      200: {
+        description: 'Successful generate image',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                files: z.array(fileSchema),
+                usage: usageSchema,
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: promptSchema.openapi({
+        example: 'A beautiful sunset over a calm ocean',
+      }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    const result = await generateText({
+      model: flash20exp,
+      prompt,
+      providerOptions: {
+        google: {
+          responseModalities: ['TEXT', 'IMAGE'],
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
+    });
+
+    /**
+     * we can then use the base64 in client side to display the image
+     */
+    const files = result.files.map((file) => ({
+      // remove the uint8Array
+      base64: file.base64,
+      mimeType: file.mimeType,
+    }));
+
+    /**
+     * if we want to send the uint8Array as response, we need to use `ctx.body(imageUint8Array)` and set the header `ctx.header('Content-Type', imageFile.mimeType)`
+     */
+    return ctx.json({
+      files,
+      usage: result.usage,
     });
   }
 );
@@ -1412,15 +1474,15 @@ geminiApp.post(
         example: `I didn't mean to create a frog cult.
           I named the first one Cletus, after a guy my dad used to buy pills from. It felt right. Greasy name. Like something that would survive the apocalypse by crawling into the crawlspace and licking the mold off the copper pipes.
           Cletus stared at me through the glass like he knew I was broken. Like he approved.
-          Dumpy tree frog. Litoria caerulea, if you’re trying to impress a vet tech. People call them “Dumpy” like that’s an insult. Like their weight’s a problem. These frogs don’t give a shit. They sag and spread and cling to your window like a melted scoop of pistachio ice cream with eyes.
+          Dumpy tree frog. Litoria caerulea, if you're trying to impress a vet tech. People call them "Dumpy" like that's an insult. Like their weight's a problem. These frogs don't give a shit. They sag and spread and cling to your window like a melted scoop of pistachio ice cream with eyes.
           You ever see something that ugly and just… feel better?
-          Cuban tree frogs are already here. They came first. They get into your toilets and eat the local ones and probably your happiness too. Nobody invited them, but they’re winning.
-          I thought — if Florida’s going to be swallowed whole, maybe it should be by something with a face like Cletus.
-          I didn’t plan to breed them. One day I had a frog. A week later I had two. Then twenty. Then the bathroom sounded like an alien sex swamp. If the neighbors heard the noises, they never knocked. Florida people know when to look away. I was one croak away from an eviction.
-          The tadpoles lived in takeout containers. The feeders took over the cereal shelf. One morning I woke up with a frog on my eyelid like a warning label that grew legs. That’s when I realized I wasn’t collecting them. They were multiplying through me. Like I was just the host.
-          Florida’s already invasive. Hell even the weather's invasive. The snowbirds are invasive. Half the plants are colonial holdovers. Every lizard looks like it escaped from a reptile expo and developed a nicotine addiction. like evolution just gave up halfway through. People come here to rot in peace. It’s like the whole state is a hospice for ecosystems.
+          Cuban tree frogs are already here. They came first. They get into your toilets and eat the local ones and probably your happiness too. Nobody invited them, but they're winning.
+          I thought — if Florida's going to be swallowed whole, maybe it should be by something with a face like Cletus.
+          I didn't plan to breed them. One day I had a frog. A week later I had two. Then twenty. Then the bathroom sounded like an alien sex swamp. If the neighbors heard the noises, they never knocked. Florida people know when to look away. I was one croak away from an eviction.
+          The tadpoles lived in takeout containers. The feeders took over the cereal shelf. One morning I woke up with a frog on my eyelid like a warning label that grew legs. That's when I realized I wasn't collecting them. They were multiplying through me. Like I was just the host.
+          Florida's already invasive. Hell even the weather's invasive. The snowbirds are invasive. Half the plants are colonial holdovers. Every lizard looks like it escaped from a reptile expo and developed a nicotine addiction. like evolution just gave up halfway through. People come here to rot in peace. It's like the whole state is a hospice for ecosystems.
           So I thought:
-          If the apocalypse is already happening, why not curate it? if it’s already broken, why not break it on purpose? Why not fill the cracks with something soft?
+          If the apocalypse is already happening, why not curate it? if it's already broken, why not break it on purpose? Why not fill the cracks with something soft?
         `,
       }),
     })
@@ -1610,66 +1672,6 @@ geminiApp.post(
       metadata,
       steps: result.steps,
       sources: result.sources,
-    });
-  }
-);
-
-geminiApp.post(
-  '/generate-image',
-  describeRoute({
-    description: 'Generate image ',
-    responses: {
-      200: {
-        description: 'Successful generate image',
-        content: {
-          'application/json': {
-            schema: resolver(
-              z.object({
-                files: z.array(fileSchema),
-                usage: usageSchema,
-              })
-            ),
-          },
-        },
-      },
-    },
-  }),
-  zValidator(
-    'json',
-    z.object({
-      prompt: promptSchema.openapi({
-        example: 'A beautiful sunset over a calm ocean',
-      }),
-    })
-  ),
-  async (ctx) => {
-    const { prompt } = ctx.req.valid('json');
-
-    const result = await generateText({
-      model: flash20exp,
-      prompt,
-      providerOptions: {
-        google: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        } satisfies GoogleGenerativeAIProviderOptions,
-      },
-    });
-
-    /**
-     * we can then use the base64 in client side to display the image
-     */
-    const files = result.files.map((file) => ({
-      // remove the uint8Array
-      base64: file.base64,
-      mimeType: file.mimeType,
-    }));
-
-    /**
-     * if we want to send the uint8Array as response, we need to use `ctx.body(imageUint8Array)` and set the header `ctx.header('Content-Type', imageFile.mimeType)`
-     */
-    return ctx.json({
-      files,
-      usage: result.usage,
     });
   }
 );
@@ -1884,21 +1886,62 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().openapi({
+        example:
+          "Describe the most unusual or striking architectural feature you've ever seen in a building or structure.",
+      }),
     })
   ),
-  async (ctx) => {
+  (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
-    const result = await generateText({
-      model: pro25,
+    const result = streamText({
+      model: flash25,
       prompt,
+      experimental_transform: smoothStream(),
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingBudget: 1024,
+          },
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
     });
 
-    return ctx.json({
-      text: result.text,
-      reasoning: result.reasoning, // could be undefined
-      reasoningDetails: result.reasoningDetails,
-    });
+    // Mark the response as a v1 data stream:
+    ctx.header('X-Vercel-AI-Data-Stream', 'v1');
+    ctx.header('Content-Type', 'text/plain; charset=utf-8');
+
+    return stream(ctx, async (stream) =>
+      stream.pipe(result.toDataStream({ sendReasoning: true }))
+    );
   }
 );
+
+// return stream(ctx, async (stream) => {
+//   // Read the stream and log chunks
+//   const reader = result.toDataStream().getReader();
+//   const decoder = new TextDecoder();
+//   async function processStream() {
+//     try {
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) {
+//           break;
+//         }
+//         const chunkText = decoder.decode(value, { stream: true });
+//         // biome-ignore lint/suspicious/noConsoleLog: Logging stream output
+//         // biome-ignore lint/suspicious/noConsole: Logging stream output
+//         console.log('Stream chunk:', chunkText);
+//         await stream.write(value);
+//       }
+//     } catch (error) {
+//       logger.error(error, 'Error reading stream');
+//       stream.close();
+//     } finally {
+//       reader.releaseLock();
+//       stream.close();
+//     }
+//   }
+//   await processStream();
+// });
