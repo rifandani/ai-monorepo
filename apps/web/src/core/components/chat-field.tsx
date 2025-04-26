@@ -36,11 +36,13 @@ export function ChatField({
   setInput,
   onSubmit,
   stop,
+  disableSubmit = false,
 }: Pick<UseChatHelpers, 'status' | 'input' | 'setInput' | 'stop'> & {
   onSubmit: (
     evt: { preventDefault: () => void },
     files: FileList | null
   ) => void;
+  disableSubmit?: boolean;
 }) {
   const [files, setFiles] = useState<FileList | null>(null);
   const [showSearch, setShowSearch] = useState(false);
@@ -193,7 +195,9 @@ export function ChatField({
               size="square-petite"
               type={showStopButton ? 'button' : 'submit'}
               isDisabled={
-                (!showStopButton && status !== 'ready') || input.trim() === ''
+                (!showStopButton && status !== 'ready') ||
+                input.trim() === '' ||
+                disableSubmit
               }
               onClick={() => {
                 if (!showStopButton) {

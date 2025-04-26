@@ -35,10 +35,12 @@ export default function Chat() {
     // id: 'gen-image',
     api: '/api/gen-image',
     // experimental_prepareRequestBody(options) {
+    // // useful for example, only send the last message, send additional data along with the message, change the structure of the request body
     //   console.log(`🦛 ~ "page.tsx" at line 12: Whats inside request body? -> `, options);
     // },
     // experimental_throttle: 50, // throttle messages and data updates to 50ms
     onToolCall({ toolCall }) {
+      // useful for running client-side tools that are automatically executed
       console.log(`🐦 ~ "page.tsx" at line 10: toolCall -> `, toolCall);
     },
     onFinish(message, options) {
@@ -238,6 +240,7 @@ export default function Chat() {
         input={input}
         setInput={setInput}
         stop={stop}
+        disableSubmit={pendingToolCallConfirmation}
         onSubmit={(evt, files) => {
           handleSubmit(evt, {
             experimental_attachments: files ?? undefined,
