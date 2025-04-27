@@ -34,11 +34,11 @@ function FileTrigger({
       >
         {withIcon &&
           (props.defaultCamera ? (
-            <Icon icon="mdi:camera" />
+            <Icon icon="lucide:camera" />
           ) : props.acceptDirectory ? (
-            <Icon icon="mdi:folder" />
+            <Icon icon="lucide:folder" />
           ) : (
-            <Icon icon="mdi:paperclip" />
+            <Icon icon="lucide:paperclip" />
           ))}
         {props.children ? (
           props.children

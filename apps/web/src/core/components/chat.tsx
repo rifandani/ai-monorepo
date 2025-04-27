@@ -7,17 +7,22 @@ import {
   Disclosure,
   DisclosurePanel,
   DisclosureTrigger,
+  Note,
 } from '@/core/components/ui';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
-import { twJoin, twMerge } from 'tailwind-merge';
+import { createIdGenerator } from 'ai';
+import { twMerge } from 'tailwind-merge';
 import { P, match } from 'ts-pattern';
 
 const toolsWithConfirmation = {
   getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
 };
 
-export default function Chat() {
+export function Chat({
+  id,
+  initialMessages,
+}: { id?: string; initialMessages?: Message[] } = {}) {
   const {
     messages,
     input,
@@ -26,21 +31,30 @@ export default function Chat() {
     status,
     stop,
     addToolResult,
+    error,
+    reload,
   } = useChat({
     /**
      * The chat state is shared between both components by using the same `id` value.
      * This allows you to split the form and chat messages into separate components while maintaining synchronized state.
-     * e.g. we also use useChat here as well as inside ChatField component with the same `id` value.
      */
-    // id: 'gen-image',
-    api: '/api/gen-image',
-    // experimental_prepareRequestBody(options) {
-    // // useful for example, only send the last message, send additional data along with the message, change the structure of the request body
-    //   console.log(`🦛 ~ "page.tsx" at line 12: Whats inside request body? -> `, options);
-    // },
+    id,
+    // id format for client-side messages
+    generateId: createIdGenerator({
+      prefix: 'msgc',
+      size: 16,
+    }),
+    initialMessages, // initial messages if provided
+    sendExtraMessageFields: true, // send id and createdAt for each message, meaning that we store messages in the useChat message format.
+    api: '/api/chat',
+    experimental_prepareRequestBody({ messages, id }) {
+      // useful for example, only send the last message, send additional data along with the message, change the structure of the request body
+      // biome-ignore lint/nursery/useAtIndex: <explanation>
+      return { message: messages[messages.length - 1], id };
+    },
     // experimental_throttle: 50, // throttle messages and data updates to 50ms
     onToolCall({ toolCall }) {
-      // useful for running client-side tools that are automatically executed
+      // useful for running client-side tools that are automatically executed (e.g. render chart/diagram)
       console.log(`🐦 ~ "page.tsx" at line 10: toolCall -> `, toolCall);
     },
     onFinish(message, options) {
@@ -65,16 +79,21 @@ export default function Chat() {
   );
 
   return (
-    <main className="stretch mx-auto flex w-full max-w-lg flex-col pt-12">
-      <div className="space-y-4">
+    <main
+      data-total-messages={messages.length}
+      className="stretch mx-auto flex w-full max-w-lg flex-col pt-10 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
+    >
+      <div className="flex flex-col gap-y-5">
         {messages.map((message) => (
           <div
             key={message.id}
             data-testid={`message-${message.id}`}
             data-role={message.role}
-            className="whitespace-pre-wrap"
+            className="group/message whitespace-pre-wrap"
           >
-            <p className="font-bold">{message.role}</p>
+            <p className="font-bold group-data-[role=user]/message:text-right">
+              {message.role}
+            </p>
 
             {message.experimental_attachments?.map((attachment, index) =>
               match(attachment)
@@ -108,9 +127,9 @@ export default function Chat() {
                   <div
                     key={`message-${message.id}-text-${part.text}`}
                     className={twMerge(
-                      'flex flex-col gap-4',
+                      'flex w-fit flex-col gap-4',
                       message.role === 'user' &&
-                        'rounded-xl bg-primary px-3 py-2 text-primary-foreground'
+                        'ml-auto rounded-lg bg-primary px-3 py-2 text-primary-foreground'
                     )}
                   >
                     <Markdown>{part.text}</Markdown>
@@ -124,7 +143,7 @@ export default function Chat() {
                     data-toolstate={part.toolInvocation.state}
                     data-toolstep={part.toolInvocation.step}
                     data-toolargs={JSON.stringify(part.toolInvocation.args)}
-                    className={twJoin(
+                    className={twMerge(
                       ['generateImage'].includes(
                         part.toolInvocation.toolName
                       ) && 'skeleton'
@@ -234,6 +253,21 @@ export default function Chat() {
           </div>
         ))}
       </div>
+
+      {/* reflects the error object thrown during the fetch request, show generic error message to avoid leaking information from the server */}
+      {error && (
+        <span className="mt-2 flex items-center gap-2">
+          <Note intent="danger">An error occurred.</Note>
+          <Button
+            type="button"
+            intent="outline"
+            size="small"
+            onClick={() => reload()}
+          >
+            Retry
+          </Button>
+        </span>
+      )}
 
       <ChatField
         status={status}

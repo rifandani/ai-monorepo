@@ -52,6 +52,10 @@ export function ChatField({
   });
 
   const showStopButton = status === 'submitted' || status === 'streaming';
+  const isDisabled =
+    (!showStopButton && status !== 'ready') ||
+    (input.trim() === '' && status === 'ready') ||
+    disableSubmit;
 
   const handleSubmit = (evt: { preventDefault: () => void }) => {
     adjustHeight(true);
@@ -84,25 +88,23 @@ export function ChatField({
       </div>
 
       <div className="relative flex flex-col">
-        <div className="max-h-[200px] overflow-y-auto">
-          <Textarea
-            id="ai-input-04"
-            value={input}
-            placeholder="Ask anything..."
-            className="w-full resize-none rounded-xl rounded-b-none border-none bg-black/5 px-4 py-3 leading-[1.2] placeholder:text-black/70 focus-visible:ring-0 dark:bg-white/5 dark:text-white dark:placeholder:text-white/70"
-            textAreaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-            onChange={(value) => {
-              setInput(value);
-              adjustHeight();
-            }}
-          />
-        </div>
+        <Textarea
+          id="ai-input-04"
+          value={input}
+          placeholder="Ask anything..."
+          className="w-full resize-none rounded-lg rounded-b-none border-none bg-black/5 p-3 leading-[1.2] placeholder:text-black/70 focus-visible:ring-0 dark:bg-white/5 dark:text-white dark:placeholder:text-white/70"
+          textAreaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit(e);
+            }
+          }}
+          onChange={(value) => {
+            setInput(value);
+            adjustHeight();
+          }}
+        />
 
         <div className="h-12 rounded-b-xl bg-black/5 dark:bg-white/5">
           <div className="absolute bottom-3 left-3 flex items-center gap-2">
@@ -127,7 +129,9 @@ export function ChatField({
 
                   setFiles(filelist);
                 }}
-              />
+              >
+                Attachments
+              </FileTrigger>
             </label>
             <button
               type="button"
@@ -194,11 +198,7 @@ export function ChatField({
             <Button
               size="square-petite"
               type={showStopButton ? 'button' : 'submit'}
-              isDisabled={
-                (!showStopButton && status !== 'ready') ||
-                input.trim() === '' ||
-                disableSubmit
-              }
+              isDisabled={isDisabled}
               onClick={() => {
                 if (!showStopButton) {
                   return;

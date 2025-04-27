@@ -1,7 +1,11 @@
 import { models, processToolCalls, tools } from '@/core/services/ai';
+import { loadChat, saveChat } from '@/core/utils/filesystem';
 import {
   type Message,
+  appendClientMessage,
+  appendResponseMessages,
   createDataStreamResponse,
+  createIdGenerator,
   experimental_createMCPClient,
   smoothStream,
   streamText,
@@ -34,9 +38,22 @@ async function getStdioMcpClient() {
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
-  const { messages } = (await req.json()) as { messages: Message[] };
+  // get the last message from the request:
+  const { message, id } = (await req.json()) as {
+    message: Message;
+    id: string;
+  };
 
-  // filter through messages and remove base64 image data to avoid sending too much tokens to the model
+  // load the previous messages from the server:
+  const previousMessages = await loadChat(id);
+
+  // append the new message to the previous messages:
+  const messages = appendClientMessage({
+    messages: previousMessages,
+    message,
+  });
+
+  // filter through messages and remove base64 image data to avoid sending too much tokens to the model (not needed if we are using object storage and the data is an url)
   const formattedMessages = messages.map((msg) => {
     if (msg.role === 'assistant') {
       for (const ti of msg.toolInvocations ?? []) {
@@ -97,17 +114,49 @@ export async function POST(req: Request) {
         model,
         messages: processedMessages,
         system:
-          'You are a helpful assistant. We have a list of tools that you can use to help the user. If there is no tool to use, you should respond normally with a text. Give the answer in markdown format.',
+          'You are a helpful assistant. We have a list of tools that you can use to help the user. If there is no tool to use, you should respond normally with a text.',
         tools: combinedTools,
-        experimental_transform: smoothStream(),
         maxSteps: 10,
-        async onFinish() {
+        experimental_transform: smoothStream(),
+        // id format for server-side messages:
+        experimental_generateMessageId: createIdGenerator({
+          prefix: 'msgs',
+          size: 16,
+        }),
+        async onFinish({ response }) {
+          // save the chat to storage
+          await saveChat({
+            id,
+            messages: appendResponseMessages({
+              messages,
+              responseMessages: response.messages,
+            }),
+          });
+
           // we can save the message and the response to storage here
           await mcpClient.close();
         },
       });
 
+      // to ensure it runs to completion & triggers onFinish even when the client aborted (e.g. by closing the browser tab or because of a network issue):
+      result.consumeStream(); // no await
+
       result.mergeIntoDataStream(dataStream);
     },
+    // onError: (error) => {
+    //   if (error == null) {
+    //     return 'unknown error';
+    //   }
+
+    //   if (typeof error === 'string') {
+    //     return error;
+    //   }
+
+    //   if (error instanceof Error) {
+    //     return error.message;
+    //   }
+
+    //   return JSON.stringify(error);
+    // },
   });
 }

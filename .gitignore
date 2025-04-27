@@ -127,3 +127,6 @@ buck-out/
 *.db
 *.db-journal
 prisma/_sqlite/migrations
+
+# web
+.chats
