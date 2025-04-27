@@ -24,6 +24,7 @@ export function Chat({
   initialMessages,
 }: { id?: string; initialMessages?: Message[] } = {}) {
   const {
+    // data, // custom data from `dataStream.writeData()`
     messages,
     input,
     setInput,
@@ -47,6 +48,7 @@ export function Chat({
     initialMessages, // initial messages if provided
     sendExtraMessageFields: true, // send id and createdAt for each message, meaning that we store messages in the useChat message format.
     api: '/api/chat',
+    maxSteps: 10,
     experimental_prepareRequestBody({ messages, id }) {
       // useful for example, only send the last message, send additional data along with the message, change the structure of the request body
       // biome-ignore lint/nursery/useAtIndex: <explanation>

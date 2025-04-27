@@ -459,7 +459,7 @@ geminiApp.post(
       console.log(textPart);
     }
 
-    // Mark the response as a v1 data stream:
+    // Mark the response as a v1 data stream (for AI SDK UI client)
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
@@ -518,7 +518,7 @@ geminiApp.post(
       },
     });
 
-    // Mark the response as a v1 data stream:
+    // Mark the response as a v1 data stream (for AI SDK client)
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
@@ -571,7 +571,7 @@ geminiApp.post(
       },
     });
 
-    // Mark the response as a v1 data stream:
+    // Mark the response as a v1 data stream (for AI SDK client)
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
@@ -1908,7 +1908,7 @@ geminiApp.post(
       },
     });
 
-    // Mark the response as a v1 data stream:
+    // Mark the response as a v1 data stream (for AI SDK client)
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 

@@ -8,6 +8,7 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { InMemorySpanExporter } from '@opentelemetry/sdk-trace-node';
 import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
+import { rateLimiter } from 'hono-rate-limiter';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { HTTPException } from 'hono/http-exception';
@@ -37,6 +38,15 @@ const app = new Hono<{
 app.use(
   '*',
   otel(),
+  loggerMiddleware(),
+  // reqResLogger(),
+  rateLimiter({
+    windowMs: 60 * 1_000, // 1 minute
+    limit: 600, // Limit each IP to 600 requests per `window` (here, per 1 minute).
+    standardHeaders: 'draft-6', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+    keyGenerator: () => crypto.randomUUID(), // Method to generate custom identifiers for clients (should be based on user id, session id, etc). For now, we use random UUID.
+    // store: ... , // To support multi-instance apps that runs behind load balancer, use centralized store like Redis (default is MemoryStore)
+  }),
   cors({
     origin: [ENV.APP_URL, 'http://localhost:3002'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
@@ -44,8 +54,6 @@ app.use(
     exposeHeaders: ['Content-Length'],
     credentials: true,
   }),
-  loggerMiddleware(),
-  // reqResLogger(),
   prettyJSON(),
   requestId(),
   timing(),

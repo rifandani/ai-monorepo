@@ -116,6 +116,7 @@ export async function POST(req: Request) {
         system:
           'You are a helpful assistant. We have a list of tools that you can use to help the user. If there is no tool to use, you should respond normally with a text.',
         tools: combinedTools,
+        // toolCallStreaming: true, // partial tool calls will be streamed as part of the data stream enabling client "partial-tool" state
         maxSteps: 10,
         experimental_transform: smoothStream(),
         // id format for server-side messages:
@@ -143,20 +144,20 @@ export async function POST(req: Request) {
 
       result.mergeIntoDataStream(dataStream);
     },
-    // onError: (error) => {
-    //   if (error == null) {
-    //     return 'unknown error';
-    //   }
+    onError: (error) => {
+      if (error == null) {
+        return 'unknown error';
+      }
 
-    //   if (typeof error === 'string') {
-    //     return error;
-    //   }
+      if (typeof error === 'string') {
+        return error;
+      }
 
-    //   if (error instanceof Error) {
-    //     return error.message;
-    //   }
+      if (error instanceof Error) {
+        return error.message;
+      }
 
-    //   return JSON.stringify(error);
-    // },
+      return JSON.stringify(error);
+    },
   });
 }

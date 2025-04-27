@@ -46,6 +46,7 @@
     "fetch-to-node": "2.0.0",
     "hono": "4.7.6",
     "hono-openapi": "0.4.6",
+    "hono-rate-limiter": "0.4.2",
     "mathjs": "14.4.0",
     "ollama": "0.5.14",
     "ollama-ai-provider": "1.2.0",
