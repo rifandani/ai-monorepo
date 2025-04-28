@@ -7,21 +7,19 @@ import { Icon } from '@iconify/react';
 import { PreviewMessage } from './message';
 
 export default function Chat() {
-  const { messages, input, setInput, handleSubmit, error, isLoading } = useChat(
-    {
-      api: '/api/deep-research',
-      maxSteps: 10,
-      onToolCall({ toolCall }) {
-        console.log(`🦁 ~ "page.tsx" at line 14: toolCall -> `, toolCall);
-      },
-      onFinish(message, options) {
-        console.log(`🐦 ~ "page.tsx" at line 20: message, options -> `, {
-          message,
-          options,
-        });
-      },
-    }
-  );
+  const { messages, input, setInput, handleSubmit, error, status } = useChat({
+    api: '/api/deep-research',
+    maxSteps: 10,
+    onToolCall({ toolCall }) {
+      console.log(`🦁 ~ "page.tsx" at line 14: toolCall -> `, toolCall);
+    },
+    onFinish(message, options) {
+      console.log(`🐦 ~ "page.tsx" at line 20: message, options -> `, {
+        message,
+        options,
+      });
+    },
+  });
   // const [containerRef, endRef] = useScrollToBottom<HTMLDivElement>();
 
   if (error) {
@@ -39,7 +37,7 @@ export default function Chat() {
           <PreviewMessage
             message={message}
             key={message.id}
-            isLoading={isLoading}
+            isLoading={status === 'submitted' || status === 'streaming'}
           />
         ))}
         <div

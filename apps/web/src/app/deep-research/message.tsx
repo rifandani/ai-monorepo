@@ -1,5 +1,6 @@
 'use client';
 
+import { Markdown } from '@/core/components/markdown';
 import { Icon } from '@iconify/react';
 import type { Message } from 'ai';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -7,7 +8,6 @@ import { isEqual } from 'radashi';
 import { memo } from 'react';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { DeepResearch } from './deep-research';
-import { Markdown } from './markdown';
 
 const PurePreviewMessage = ({
   message,

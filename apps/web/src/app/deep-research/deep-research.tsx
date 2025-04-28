@@ -1,5 +1,6 @@
 'use client';
 
+import { Markdown } from '@/core/components/markdown';
 import { Modal } from '@/core/components/ui/modal';
 import { ScrollArea } from '@/core/components/ui/scroll-area';
 import type { Research } from '@/core/services/ai';
@@ -7,7 +8,6 @@ import { Icon } from '@iconify/react';
 import type { JSONValue, ToolInvocation } from 'ai';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { Markdown } from './markdown';
 
 interface StatusUpdate {
   title: string;

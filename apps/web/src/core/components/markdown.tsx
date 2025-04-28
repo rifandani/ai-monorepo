@@ -22,6 +22,7 @@ export function parseMarkdownIntoBlocks(markdown: string): string[] {
 }
 
 const components: Partial<Components> = {
+  // code: CodeBlock,
   pre: ({ children }) => <>{children}</>,
   ol: ({ node, children, ...props }) => {
     return (
