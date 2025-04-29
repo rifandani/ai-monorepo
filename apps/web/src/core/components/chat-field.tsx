@@ -70,7 +70,7 @@ export function ChatField({
       onSubmit={handleSubmit}
       className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) py-2"
     >
-      {/* Scroll-down button: show when user is not at bottom */}
+      {/* scroll-down button: show when user is not at bottom */}
       {!isAutoScroll && (
         <Button
           type="button"

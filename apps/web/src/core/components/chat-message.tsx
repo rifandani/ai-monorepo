@@ -1,3 +1,6 @@
+'use client';
+
+import { ChatMessageActions } from '@/core/components/chat-message-actions';
 import { Markdown } from '@/core/components/markdown';
 import { Button } from '@/core/components/ui/button';
 import {
@@ -53,21 +56,33 @@ export function ChatMessage({
           .otherwise(() => null)
       )}
 
-      {message.parts?.map((part) =>
+      {message.parts?.map((part, idx) =>
         match(part)
-          .with({ type: 'text' }, (part) => (
-            <div
-              key={`text-${part.text}`}
-              data-testid={`text-${part.text}`}
-              className={twMerge(
-                'flex w-fit flex-col gap-4',
-                message.role === 'user' &&
-                  'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
-              )}
-            >
-              <Markdown>{part.text}</Markdown>
-            </div>
-          ))
+          .with({ type: 'text' }, (part) => {
+            // Check if this is the last part in the array
+            const isLastPart = idx === (message.parts?.length ?? 0) - 1;
+
+            return (
+              <>
+                <div
+                  key={`text-${part.text}`}
+                  data-testid={`text-${part.text}`}
+                  className={twMerge(
+                    'flex w-fit flex-col gap-4',
+                    message.role === 'user' &&
+                      'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
+                  )}
+                >
+                  <Markdown>{part.text}</Markdown>
+                </div>
+
+                {/* only show copy button if this is the last part */}
+                {message.role === 'assistant' && isLastPart && (
+                  <ChatMessageActions text={part.text} />
+                )}
+              </>
+            );
+          })
           .with({ type: 'tool-invocation' }, (part) => (
             <div
               key={`tool-invocation-${part.toolInvocation.toolCallId}`}
