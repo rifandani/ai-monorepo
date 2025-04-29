@@ -21,6 +21,9 @@ export type Research = {
 };
 
 const flash20 = google('gemini-2.0-flash-001');
+/**
+ * only one that supports generating images
+ */
 const flash20exp = google('gemini-2.0-flash-exp');
 const flash20search = google('gemini-2.0-flash-001', {
   // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
@@ -28,13 +31,17 @@ const flash20search = google('gemini-2.0-flash-001', {
 });
 const flash25 = google('gemini-2.5-flash-preview-04-17');
 const pro25 = google('gemini-2.5-pro-exp-03-25');
+const embedding004 = google.textEmbeddingModel('text-embedding-004');
 
 export const models = {
   flash20,
   flash20exp,
   flash20search,
   flash25,
+  // flash25safety, // not supported
+  // flash25search, // not supported
   pro25,
+  embedding004,
 };
 
 const searchResultSchema = z.object({
@@ -101,7 +108,7 @@ async function generateSearchQueries(
     object: { queries },
   } = await generateObject({
     system: SYSTEM_PROMPT,
-    model: flash20,
+    model: models.flash25,
     prompt: `Given the following prompt from the user, generate a list of SERP queries to research the topic. Ensure at least one is almost identical to the initial prompt. Return a maximum of ${breadth} queries, but feel free to return less if the original prompt is clear. Make sure each query is unique and not similar to each other: <prompt>${query}</prompt>\n\n${
       learnings
         ? `Here are some learnings from previous research, use them to generate more specific queries: ${learnings.join(
@@ -121,6 +128,8 @@ async function generateSearchQueries(
               ),
           })
         )
+        .min(1)
+        .max(breadth)
         .describe(`List of SERP queries, max of ${breadth}`),
     }),
   });
@@ -137,7 +146,7 @@ async function generateLearnings(
   const {
     object: { followUpQuestions, learnings },
   } = await generateObject({
-    model: flash20,
+    model: models.flash25,
     system: SYSTEM_PROMPT,
     prompt: `Given the following contents from a SERP search for the query <query>${query}</query>, generate a list of learnings from the contents. Return a maximum of ${numberOfLearnings} learnings, but feel free to return less if the contents are clear. Make sure each learning is unique and not similar to each other. The learnings should be concise and to the point, as detailed and information dense as possible. Make sure to include any entities like people, places, companies, products, things, etc in the learnings, as well as any exact metrics, numbers, or dates. The learnings will be used to research the topic further.\n\n<contents>${results
       .map((content) => `<content>\n${content.content}\n</content>`)
@@ -187,9 +196,6 @@ async function deepResearch(
     breadth,
     accumulatedResearch.learnings
   );
-  dataStream.writeMessageAnnotation({
-    status: { title: `Generated search queries for "${prompt}"` },
-  });
 
   // Process each query and merge the results rather than overwrite
   const subResults = await Promise.all(
@@ -202,22 +208,21 @@ async function deepResearch(
         dataStream.writeMessageAnnotation({
           source: { title: source.title, url: source.url },
         });
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       dataStream.writeMessageAnnotation({
         status: { title: `Analyzing search results for "${query}"` },
       });
-
       const { learnings, followUpQuestions } = await generateLearnings(
         query,
         results,
         3,
         breadth
       );
-      const nextQuery = `Previous research goal: ${researchGoal}${` Follow-up directions: ${followUpQuestions.map((q) => `\n${q}`).join('')}`.trim()}`;
 
       // Make the recursive call
+      const nextQuery = `Previous research goal: ${researchGoal}${` Follow-up directions: ${followUpQuestions.map((q) => `\n${q}`).join('')}`.trim()}`;
       dataStream.writeMessageAnnotation({
         status: {
           title: `Diving deeper to understand "${followUpQuestions.slice(0, 3).join(', ')}"`,
@@ -289,10 +294,10 @@ async function generateReport(prompt: string, research: Research) {
   });
 
   const { object } = await generateObject({
-    model: flash20,
+    model: models.flash25,
     prompt: `Generate a punchy title (5 words) for the following report:\n\n${content}`,
     schema: z.object({
-      title: z.string(),
+      title: z.string().describe('The impactful title of the report'),
     }),
   });
 
@@ -323,7 +328,7 @@ export const tools = {
         // experimental_output: { results },
         object: { results },
       } = await generateObject({
-        model: flash20search,
+        model: models.flash20search,
         prompt: query,
         // experimental_output: Output.object({
         //   schema: z.object({
@@ -341,7 +346,7 @@ export const tools = {
       // Process and clean the results
       return results.map((result) => ({
         title: result.title,
-        url: result.url,
+        url: result.url, // hallucination
         snippet: result.content, // Limit snippet length
         domain: new URL(result.url).hostname, // Extract domain for source context
         date: result.publishedDate || 'Date not available', // Include publish date when available
@@ -397,18 +402,20 @@ export const tools = {
           status: { title: 'Successfully generated report' },
         });
 
+        const sources = Array.from(
+          new Map(
+            research.sources.map((s) => [
+              s.url,
+              { ...s, content: `${s.content.slice(0, 50)}...` },
+            ])
+          ).values()
+        );
+
         return {
           report,
           research: {
             ...research,
-            sources: Array.from(
-              new Map(
-                research.sources.map((s) => [
-                  s.url,
-                  { ...s, content: `${s.content.slice(0, 50)}...` },
-                ])
-              ).values()
-            ),
+            sources,
           },
         };
       },

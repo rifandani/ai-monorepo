@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   return createDataStreamResponse({
     execute: (dataStream) => {
       const result = streamText({
-        model: models.flash20,
+        model: models.flash25,
         messages,
         system:
           'You are a helpful assistant. Do not repeat the results of deepResearch tool calls. You can report (max 2 sentences) that the tool has been used successfully. Do not call multiple tools at once.',

@@ -22,7 +22,7 @@ export function ChatMessage({
       key={message.id}
       data-testid={`message-${message.id}`}
       data-role={message.role}
-      className="group/message flex flex-col gap-y-2 whitespace-pre-wrap"
+      className="group/message flex flex-col gap-y-2 whitespace-pre-wrap data-[role=user]:items-end"
     >
       {message.experimental_attachments?.map((attachment, index) =>
         match(attachment)
@@ -34,7 +34,7 @@ export function ChatMessage({
                 data-testid={`attachment-${attachment.name ?? attachment.url}`}
                 src={attachment.url}
                 alt={attachment.name ?? `attachment-${index}`}
-                className="ml-auto aspect-square w-60"
+                className="aspect-square w-60 rounded-lg"
               />
             )
           )
@@ -46,6 +46,7 @@ export function ChatMessage({
               title={attachment.name ?? `attachment-${index}`}
               width="400"
               height="400"
+              className="rounded-lg"
             />
           ))
           .otherwise(() => null)
@@ -60,7 +61,7 @@ export function ChatMessage({
               className={twMerge(
                 'flex w-fit flex-col gap-4',
                 message.role === 'user' &&
-                  'ml-auto rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
+                  'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
               )}
             >
               <Markdown>{part.text}</Markdown>
@@ -89,6 +90,7 @@ export function ChatMessage({
                         alt={tool.args.prompt}
                         height={400}
                         width={400}
+                        className="rounded-lg"
                       />
                     )
                   )
@@ -139,7 +141,6 @@ export function ChatMessage({
 
                       <div className="flex gap-2">
                         <Button
-                          size="square-petite"
                           onClick={() =>
                             // will trigger a call to route handler.
                             addToolResult({
@@ -148,10 +149,9 @@ export function ChatMessage({
                             })
                           }
                         >
-                          Yes
+                          Approve
                         </Button>
                         <Button
-                          size="square-petite"
                           appearance="outline"
                           intent="outline"
                           onClick={() =>
@@ -162,7 +162,7 @@ export function ChatMessage({
                             })
                           }
                         >
-                          No
+                          Reject
                         </Button>
                       </div>
                     </div>

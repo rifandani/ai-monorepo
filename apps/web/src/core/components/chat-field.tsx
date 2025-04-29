@@ -66,7 +66,7 @@ export function ChatField({
   return (
     <form
       onSubmit={handleSubmit}
-      className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) pb-4"
+      className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) py-2"
     >
       <div className="flex gap-x-2">
         {files &&

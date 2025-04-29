@@ -13,6 +13,15 @@ import {
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { z } from 'zod';
 
+const systemPrompt = `
+You are a helpful assistant.
+We have a list of tools that you can use to help the user. 
+If there is no tool to use, you should respond normally with a markdown formatted text.
+`;
+// Do not repeat the results of deepResearch tool calls.
+// You can report (max 2 sentences) that the tool has been used successfully.
+// Do not call multiple tools at once.
+
 async function getStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
     command: 'node',
@@ -84,6 +93,8 @@ export async function POST(req: Request) {
     ...mcpTools,
     generateImage: tools.generateImage,
     getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
+    // webSearch: tools.webSearch,
+    // deepResearch: tools.deepResearch(dataStream),
   };
 
   return createDataStreamResponse({
@@ -113,8 +124,7 @@ export async function POST(req: Request) {
       const result = streamText({
         model,
         messages: processedMessages,
-        system:
-          'You are a helpful assistant. We have a list of tools that you can use to help the user. If there is no tool to use, you should respond normally with a text.',
+        system: systemPrompt,
         tools: combinedTools,
         // toolCallStreaming: true, // partial tool calls will be streamed as part of the data stream enabling client "partial-tool" state
         maxSteps: 10,
@@ -138,6 +148,12 @@ export async function POST(req: Request) {
           await mcpClient.close();
         },
       });
+
+      // forward the initial result to the client without the finish event:
+      // result.mergeIntoDataStream(dataStream, {
+      //   sendReasoning: true,
+      //   experimental_sendFinish: false, // omit the finish event
+      // });
 
       // to ensure it runs to completion & triggers onFinish even when the client aborted (e.g. by closing the browser tab or because of a network issue):
       result.consumeStream(); // no await
