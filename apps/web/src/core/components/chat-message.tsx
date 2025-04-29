@@ -5,6 +5,7 @@ import {
   DisclosurePanel,
   DisclosureTrigger,
 } from '@/core/components/ui/disclosure';
+import { APPROVAL } from '@/core/services/ai';
 import type { useChat } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
 import { twMerge } from 'tailwind-merge';
@@ -145,7 +146,7 @@ export function ChatMessage({
                             // will trigger a call to route handler.
                             addToolResult({
                               toolCallId: tool.toolCallId,
-                              result: 'YES',
+                              result: APPROVAL.YES,
                             })
                           }
                         >
@@ -158,7 +159,7 @@ export function ChatMessage({
                             // will trigger a call to route handler.
                             addToolResult({
                               toolCallId: tool.toolCallId,
-                              result: 'NO',
+                              result: APPROVAL.NO,
                             })
                           }
                         >

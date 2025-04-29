@@ -542,12 +542,10 @@ export async function processToolCalls<
    * we pull out the last message and map through the message parts to see if the tool requiring confirmation was called
    * and whether it's in a "result" state
    */
-  const lastMessage = messages.at(-1);
-  if (!lastMessage) {
-    return messages;
-  }
+  // biome-ignore lint/nursery/useAtIndex: <explanation>
+  const lastMessage = messages[messages.length - 1];
 
-  const parts = lastMessage.parts;
+  const parts = lastMessage?.parts;
   if (!parts) {
     return messages;
   }
