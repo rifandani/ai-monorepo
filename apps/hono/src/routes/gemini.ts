@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   cacheListSchema,
+  cacheManager,
+  cacheModelId,
   embeddingSchema,
   embeddingUsageSchema,
   fileSchema,
@@ -13,10 +15,8 @@ import {
   textSchema,
   usageSchema,
 } from '@/core/api/ai';
-import {
-  CACHE_CONTENT_EXPLICIT_CONTENT,
-  CACHE_CONTENT_RECIPES,
-} from '@/core/constants/cache';
+import { models } from '@/core/api/ai';
+import { CACHE_CONTENT_EXPLICIT_CONTENT } from '@/core/constants/cache';
 import type { Variables } from '@/core/types/hono';
 import { cached } from '@/core/utils/middleware';
 import {
@@ -28,9 +28,8 @@ import {
 import {
   type GoogleGenerativeAIProviderMetadata,
   type GoogleGenerativeAIProviderOptions,
-  createGoogleGenerativeAI,
+  google,
 } from '@ai-sdk/google';
-import { GoogleAICacheManager } from '@google/generative-ai/server';
 import { logger } from '@workspace/core/utils/logger';
 import {
   type CoreMessage,
@@ -56,65 +55,6 @@ import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
-
-// by default use GOOGLE_GENERATIVE_AI_API_KEY
-// example fetch wrapper that logs the input to the API call:
-const google = createGoogleGenerativeAI({
-  // @ts-expect-error preconnect is bun specific
-  fetch: async (
-    url: Parameters<typeof fetch>[0],
-    options: Parameters<typeof fetch>[1]
-  ) => {
-    logger.info(
-      { url, headers: options?.headers, body: options?.body },
-      'FETCH_CALL'
-    );
-    return await fetch(url, options);
-  },
-});
-const flash15 = google('gemini-1.5-flash');
-const flash20 = google('gemini-2.0-flash-001');
-const flash20search = google('gemini-2.0-flash-001', {
-  // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
-  useSearchGrounding: true,
-});
-const flash20safety = google('gemini-2.0-flash-001', {
-  // https://ai.google.dev/gemini-api/docs/safety-settings?hl=en
-  safetySettings: [
-    {
-      category: 'HARM_CATEGORY_HARASSMENT',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-    {
-      category: 'HARM_CATEGORY_HATE_SPEECH',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-    {
-      category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-    {
-      category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-    {
-      category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-  ],
-});
-const flash20exp = google('gemini-2.0-flash-exp');
-const pro25 = google('gemini-2.5-pro-exp-03-25');
-const flash25 = google('gemini-2.5-flash-preview-04-17');
-const embedding004 = google.textEmbeddingModel('text-embedding-004');
-const cacheManager = new GoogleAICacheManager(
-  process.env.GOOGLE_GENERATIVE_AI_API_KEY as string
-);
-// As of August 23rd, 2024, these are the only models that support caching
-type GoogleModelCacheableId =
-  | 'models/gemini-1.5-flash-001'
-  | 'models/gemini-1.5-pro-001';
-const cacheModelId: GoogleModelCacheableId = 'models/gemini-1.5-flash-001';
 
 export const geminiApp = new Hono<{
   Variables: Variables;
@@ -162,7 +102,7 @@ geminiApp.post(
     ];
 
     const result = await generateText({
-      model: flash15,
+      model: models.flash25,
       system: 'Answer in pirate language',
       messages,
       experimental_telemetry: {
@@ -182,7 +122,7 @@ geminiApp.post(
 geminiApp.post(
   '/generate-image',
   describeRoute({
-    description: 'Generate image ',
+    description: 'Generate image using gemini flash 2.0 exp',
     responses: {
       200: {
         description: 'Successful generate image',
@@ -211,7 +151,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
-      model: flash20exp,
+      model: models.flash20exp,
       prompt,
       providerOptions: {
         google: {
@@ -262,7 +202,100 @@ geminiApp.post(
   zValidator(
     'form',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().openapi({
+        example: 'Describe the image in detail',
+      }),
+      image: z.instanceof(File).optional().openapi({
+        description: 'Image to be used as context for the prompt',
+      }),
+      pdf: z.instanceof(File).optional().openapi({
+        description: 'PDF to be used as context for the prompt',
+      }),
+      audio: z.instanceof(File).optional().openapi({
+        description: 'Audio to be used as context for the prompt',
+      }),
+    })
+  ),
+  async (c) => {
+    const { prompt, image, pdf, audio } = c.req.valid('form');
+
+    const messages: CoreMessage[] = [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: prompt,
+          },
+          ...(image
+            ? [
+                {
+                  type: 'image',
+                  image: await image.arrayBuffer(),
+                  mimeType: image.type,
+                } as ImagePart,
+              ]
+            : []),
+          ...(pdf
+            ? [
+                {
+                  type: 'file',
+                  data: await pdf.arrayBuffer(),
+                  mimeType: 'application/pdf',
+                } as FilePart,
+              ]
+            : []),
+          ...(audio
+            ? [
+                {
+                  type: 'file',
+                  data: await audio.arrayBuffer(),
+                  mimeType: audio.type,
+                } as FilePart,
+              ]
+            : []),
+        ],
+      },
+    ];
+
+    const result = await generateText({
+      model: models.flash25,
+      messages,
+    });
+
+    return c.json({
+      text: result.text,
+      usage: result.usage,
+    });
+  }
+);
+
+geminiApp.post(
+  '/multimodal-object',
+  describeRoute({
+    description: 'Generate response from multimodal input',
+    responses: {
+      200: {
+        description: 'Successful generate response from multimodal input',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                object: gofoodSchema,
+                usage: usageSchema,
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'form',
+    z.object({
+      prompt: z.string().openapi({
+        example: 'Get as much information from the provided image',
+      }),
       image: z.instanceof(File).optional().openapi({
         description: 'Image to be used for the prompt',
       }),
@@ -316,99 +349,8 @@ geminiApp.post(
       },
     ];
 
-    const result = await generateText({
-      model: flash20,
-      system: 'Answer in pirate language',
-      messages,
-    });
-
-    return c.json({
-      text: result.text,
-      usage: result.usage,
-      messages: result.response.messages,
-    });
-  }
-);
-
-geminiApp.post(
-  '/multimodal-object',
-  describeRoute({
-    description: 'Generate response from multimodal input',
-    responses: {
-      200: {
-        description: 'Successful generate response from multimodal input',
-        content: {
-          'application/json': {
-            schema: resolver(
-              z.object({
-                object: gofoodSchema,
-                usage: usageSchema,
-              })
-            ),
-          },
-        },
-      },
-    },
-  }),
-  zValidator(
-    'form',
-    z.object({
-      prompt: promptSchema,
-      image: z.instanceof(File).optional().openapi({
-        description: 'Image to be used for the prompt',
-      }),
-      pdf: z.instanceof(File).optional().openapi({
-        description: 'PDF to be used for the prompt',
-      }),
-      audio: z.instanceof(File).optional().openapi({
-        description: 'Audio to be used for the prompt',
-      }),
-    })
-  ),
-  async (c) => {
-    const { prompt, image, pdf, audio } = c.req.valid('form');
-
-    const messages: CoreMessage[] = [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: prompt,
-          },
-          ...(image
-            ? [
-                {
-                  type: 'image',
-                  image: await image.arrayBuffer(),
-                  mimeType: image.type,
-                } as ImagePart,
-              ]
-            : []),
-          ...(pdf
-            ? [
-                {
-                  type: 'file',
-                  data: await pdf.arrayBuffer(),
-                  mimeType: pdf.type,
-                } as FilePart,
-              ]
-            : []),
-          ...(audio
-            ? [
-                {
-                  type: 'file',
-                  data: await audio.arrayBuffer(),
-                  mimeType: audio.type,
-                } as FilePart,
-              ]
-            : []),
-        ],
-      },
-    ];
-
     const result = await generateObject({
-      model: flash15,
+      model: models.flash25,
       messages,
       schema: gofoodSchema,
     });
@@ -423,10 +365,10 @@ geminiApp.post(
 geminiApp.post(
   '/stream',
   describeRoute({
-    description: 'Generate text stream',
+    description: 'Stream text',
     responses: {
       200: {
-        description: 'Successful generate text stream',
+        description: 'Successful stream text',
         content: {
           'text/plain': {
             schema: textSchema,
@@ -445,12 +387,12 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = streamText({
-      model: flash15,
+      model: models.flash25,
       prompt,
-      // experimental_transform: smoothStream({
-      //   delayInMs: 20, // optional: defaults to 10ms
-      //   chunking: 'line', // optional: defaults to 'word'
-      // }),
+      experimental_transform: smoothStream({
+        delayInMs: 20, // optional: defaults to 10ms
+        chunking: 'line', // optional: defaults to 'word'
+      }),
     });
 
     for await (const textPart of result.textStream) {
@@ -463,17 +405,17 @@ geminiApp.post(
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
-    return stream(ctx, (stream) => stream.pipe(result.toDataStream()));
+    return stream(ctx, (stream) => stream.pipe(result.toDataStream({})));
   }
 );
 
 geminiApp.post(
   '/stream-data',
   describeRoute({
-    description: 'Generate data stream',
+    description: 'Stream data',
     responses: {
       200: {
-        description: 'Successful generate data stream',
+        description: 'Successful stream data',
         content: {
           'text/plain': {
             schema: textSchema,
@@ -505,8 +447,9 @@ geminiApp.post(
         });
 
         const result = streamText({
-          model: flash15,
+          model: models.flash25,
           prompt,
+          experimental_transform: smoothStream(),
         });
 
         result.mergeIntoDataStream(dataStreamWriter);
@@ -531,10 +474,10 @@ geminiApp.post(
 geminiApp.post(
   '/stream-object',
   describeRoute({
-    description: 'Generate object stream',
+    description: 'Stream object',
     responses: {
       200: {
-        description: 'Successful generate object stream',
+        description: 'Successful stream object',
         content: {
           'text/plain': {
             schema: textSchema,
@@ -546,28 +489,24 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().openapi({
+        example: 'Generate a detailed user profile',
+      }),
     })
   ),
   (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     const result = streamObject({
-      model: flash15,
+      model: models.flash25,
       prompt,
-      schemaName: 'User',
-      schemaDescription: 'Mock user schema',
       schema: mockUserSchema,
-      onFinish({ usage, object, error }) {
+      onFinish({ object, error }) {
         // handle type validation failure (when the object does not match the schema):
-        if (object === undefined) {
+        if (!object) {
           logger.error(error, 'Stream object error');
           return;
         }
-
-        // biome-ignore lint/suspicious/noConsole: aaa
-        // biome-ignore lint/suspicious/noConsoleLog: aaa
-        console.log('Context', { usage, object });
       },
     });
 
@@ -576,6 +515,7 @@ geminiApp.post(
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
     return stream(ctx, async (stream) => {
+      // or use fullStream to get different types of events, including partial objects, errors, and finish events
       for await (const objectPart of result.partialObjectStream) {
         await stream.write(JSON.stringify(objectPart));
         // await stream.writeln('');
@@ -607,17 +547,17 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().openapi({
+        example: 'Generate a detailed user profile',
+      }),
     })
   ),
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateObject({
-      model: flash15,
+      model: models.flash25,
       prompt,
-      schemaName: 'User',
-      schemaDescription: 'Mock user schema',
       schema: mockUserSchema,
     });
 
@@ -629,7 +569,7 @@ geminiApp.post(
 );
 
 geminiApp.post(
-  '/classify',
+  '/object/classify',
   describeRoute({
     description:
       'Classify the sentiment of the text as positive, negative, or neutral',
@@ -654,19 +594,20 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().openapi({
+        example:
+          'Well now, the winds be neither fair nor foul today, just fillin the sails enough to keep us movin. The stores be holdin out, mind ye, not overflowin with grog and plunder, but enough to keep a body from starvin.',
+      }),
     })
   ),
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateObject({
-      model: flash15,
+      model: models.flash25,
       system:
         'Classify the sentiment of the text as positive, negative, or neutral',
       prompt,
-      schemaName: 'Text sentiment',
-      schemaDescription: 'Text sentiment schema',
       schema: z.object({
         sentiment: z
           .enum(['positive', 'negative', 'neutral'])
@@ -711,7 +652,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await embed({
-      model: embedding004,
+      model: models.embedding004,
       value: prompt,
     });
 
@@ -725,10 +666,10 @@ geminiApp.post(
 geminiApp.post(
   '/embed-many',
   describeRoute({
-    description: 'Embed text',
+    description: 'Embed many texts',
     responses: {
       200: {
-        description: 'Successful embed text',
+        description: 'Successful embed many texts',
         content: {
           'application/json': {
             schema: resolver(
@@ -758,18 +699,25 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z
+        .string()
+        .describe(
+          'The text query to match the predefined values. The query will be embedded and compared to the predefined values.'
+        )
+        .openapi({
+          example: 'Nasi Goreng',
+        }),
     })
   ),
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     const searchTermResult = await embed({
-      model: embedding004,
+      model: models.embedding004,
       value: prompt,
     });
 
-    const prompts = [
+    const predefinedValues = [
       'Foods',
       'Drinks',
       'Animals',
@@ -777,14 +725,14 @@ geminiApp.post(
       'Cities',
       'Countries',
     ];
-    // result index is same as prompts index
+    // result index is same as predefinedValues index
     const result = await embedMany({
-      model: embedding004,
-      values: prompts,
+      model: models.embedding004,
+      values: predefinedValues,
     });
 
     const vector = result.embeddings.map((embedding, index) => ({
-      prompt: prompts[index],
+      prompt: predefinedValues[index],
       embedding,
       /**
        * A high value (close to 1) indicates that the vectors are very similar, while a low value (close to -1) indicates that they are different.
@@ -839,9 +787,9 @@ geminiApp.post(
         {
           role: 'user',
           parts: [
-            {
-              text: CACHE_CONTENT_RECIPES,
-            },
+            // {
+            //   text: CACHE_CONTENT_RECIPES,
+            // },
             {
               inlineData: {
                 data: (
@@ -920,7 +868,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
-      model: cached(flash15),
+      model: cached(models.flash25),
       prompt,
     });
 
@@ -958,7 +906,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
-      model: flash20,
+      model: models.flash20,
       prompt,
       tools: {
         logToConsoleTool,
@@ -1015,19 +963,11 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
-      model: flash15,
+      model: models.flash25,
       messages: [
         {
           role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            // {
-            //   type: 'image',
-            //   image: new URL(
-            //     'https://xxx.jpg'
-            //   ),
-            // },
-          ],
+          content: [{ type: 'text', text: prompt }],
         },
       ],
       tools: {
@@ -1085,13 +1025,13 @@ geminiApp.post(
 
     // First step: Generate marketing copy with lower cost model
     const { text: copy } = await generateText({
-      model: flash15,
+      model: models.flash25,
       prompt: `Write persuasive marketing copy for: ${prompt}. Focus on benefits and emotional appeal.`,
     });
 
     // Second step: Perform quality check on copy with same model
     const { object: qualityMetrics } = await generateObject({
-      model: flash15,
+      model: models.flash25,
       schema: qualityMetricsSchema,
       prompt: `Evaluate this marketing copy for:
     1. Presence of call to action (true/false)
@@ -1108,7 +1048,7 @@ geminiApp.post(
     ) {
       // Third step: If quality check fails, regenerate with more specific instructions with higher cost model
       const result = await generateText({
-        model: flash20,
+        model: models.flash25,
         prompt: `Rewrite this marketing copy with:
       ${qualityMetrics.hasCallToAction ? '' : '- A clear call to action'}
       ${qualityMetrics.emotionalAppeal < 7 ? '- Stronger emotional appeal' : ''}
@@ -1173,7 +1113,7 @@ geminiApp.post(
 
     // First step: Classify the query type
     const { object: classification } = await generateObject({
-      model: flash15,
+      model: models.flash25,
       schema: z.object({
         reasoning: z.string(),
         type: z.enum(['general', 'refund', 'technical']),
@@ -1193,7 +1133,10 @@ geminiApp.post(
      * Set model and system prompt based on query type and complexity
      */
     const result = await generateText({
-      model: classification.complexity === 'simple' ? flash15 : flash20,
+      model:
+        classification.complexity === 'simple'
+          ? models.flash25
+          : models.flash25,
       system: {
         general:
           'You are an expert customer service agent handling general inquiries.',
@@ -1261,7 +1204,7 @@ geminiApp.post(
     const [securityReview, performanceReview, maintainabilityReview] =
       await Promise.all([
         generateObject({
-          model: flash15,
+          model: models.flash25,
           system:
             'You are an expert in code security. Focus on identifying security vulnerabilities, injection risks, and authentication issues.',
           schema: z.object({
@@ -1274,7 +1217,7 @@ geminiApp.post(
         }),
 
         generateObject({
-          model: flash15,
+          model: models.flash25,
           system:
             'You are an expert in code performance. Focus on identifying performance bottlenecks, memory leaks, and optimization opportunities.',
           schema: z.object({
@@ -1287,7 +1230,7 @@ geminiApp.post(
         }),
 
         generateObject({
-          model: flash15,
+          model: models.flash25,
           system:
             'You are an expert in code quality. Focus on code structure, readability, and adherence to best practices.',
           schema: z.object({
@@ -1308,7 +1251,7 @@ geminiApp.post(
 
     // Aggregate results using another model instance
     const result = await generateText({
-      model: flash20,
+      model: models.flash25,
       system: 'You are a technical lead summarizing multiple code reviews.',
       prompt: `Synthesize these code review results into a concise summary with key actions:
     ${JSON.stringify(reviews, null, 2)}`,
@@ -1381,7 +1324,7 @@ geminiApp.post(
 
     // Orchestrator: Plan the implementation
     const { object: implementationPlan } = await generateObject({
-      model: flash20,
+      model: models.flash25,
       schema: z.object({
         files: z.array(
           z.object({
@@ -1412,7 +1355,7 @@ geminiApp.post(
         }[file.changeType];
 
         const { object: change } = await generateObject({
-          model: flash20,
+          model: models.flash25,
           schema: z.object({
             explanation: z.string(),
             code: z.string(),
@@ -1496,7 +1439,7 @@ geminiApp.post(
 
     // Initial translation
     const { text: translation } = await generateText({
-      model: flash15, // use small model for first attempt
+      model: models.flash25, // use small model for first attempt
       system: 'You are an expert literary translator.',
       prompt: `Translate this text to ${targetLanguage}, preserving tone and cultural nuances:
     ${text}`,
@@ -1508,7 +1451,7 @@ geminiApp.post(
     while (iterations < MAX_ITERATIONS) {
       // Evaluate current translation
       const { object: evaluation } = await generateObject({
-        model: flash20, // use a larger model to evaluate
+        model: models.flash25, // use a larger model to evaluate
         schema: z.object({
           qualityScore: z.number().min(0).max(10),
           preservesTone: z.boolean(),
@@ -1542,7 +1485,7 @@ geminiApp.post(
 
       // Generate improved translation based on feedback
       const { text: improvedTranslation } = await generateText({
-        model: flash20, // use a larger model which excel at translation
+        model: models.pro25, // use a larger model which excel at translation
         system: 'You are an expert literary translator.',
         prompt: `Improve this translation based on the following feedback:
       ${evaluation.specificIssues.join('\n')}
@@ -1598,7 +1541,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const { text } = await generateText({
-      model: flash15,
+      model: models.flash25,
       tools: {
         calculate: calculateTool,
         // answer: answerTool,
@@ -1654,7 +1597,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
-      model: flash20search,
+      model: models.flash20search,
       messages: [
         {
           role: 'user',
@@ -1699,16 +1642,19 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema.openapi({
-        example: `Summarize the song lyrics:\n ${CACHE_CONTENT_EXPLICIT_CONTENT}`,
-      }),
+      prompt: z
+        .string()
+        .describe('The prompt with explicit content')
+        .openapi({
+          example: `Summarize the song lyrics:\n ${CACHE_CONTENT_EXPLICIT_CONTENT}`,
+        }),
     })
   ),
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
-      model: flash20safety,
+      model: models.flash20safety,
       prompt,
     });
     const metadata = result.providerMetadata?.google as
@@ -1779,7 +1725,7 @@ geminiApp.post(
       { length: Math.ceil(chunks.length / batchSize) },
       (_, i) =>
         embedMany({
-          model: embedding004,
+          model: models.embedding004,
           values: chunks.slice(i * batchSize, (i + 1) * batchSize),
         })
     );
@@ -1822,7 +1768,7 @@ geminiApp.post(
 
     // embed the prompt
     const { embedding } = await embed({
-      model: embedding004,
+      model: models.embedding004,
       value: prompt,
     });
 
@@ -1838,7 +1784,7 @@ geminiApp.post(
       .join('\n');
 
     const result = await generateText({
-      model: flash20,
+      model: models.flash25,
       prompt: `
         Answer the following question based only on the provided context:
 
@@ -1896,7 +1842,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = streamText({
-      model: flash25,
+      model: models.flash25,
       prompt,
       experimental_transform: smoothStream(),
       providerOptions: {

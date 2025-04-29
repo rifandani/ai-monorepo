@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { models } from '@/core/api/ai';
 import { logger } from '@workspace/core/utils/logger';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
@@ -9,13 +9,6 @@ import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
-
-const flash20 = google('gemini-2.0-flash-001');
-const flash20search = google('gemini-2.0-flash-001', {
-  // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
-  useSearchGrounding: true,
-});
-const pro25 = google('gemini-2.5-pro-exp-03-25');
 
 const searchResultSchema = z.object({
   title: z.string().describe('The title of the search result'),
@@ -84,7 +77,7 @@ const accumulatedResearch: Research = {
 async function generateReport(research: Research) {
   // we can use reasoning model here to generate a comprehensive report
   const { text } = await generateText({
-    model: pro25,
+    model: models.pro25,
     system: `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:
   - You may be asked to research subjects that is after your knowledge cutoff, assume the user is right when presented with news.
   - The user is a highly experienced analyst, no need to simplify it, be as detailed as possible and make sure your response is correct.
@@ -159,7 +152,7 @@ async function generateLearningAndFollowUpQuestions(
   searchResult: SearchResult
 ) {
   const { object } = await generateObject({
-    model: flash20,
+    model: models.flash25,
     prompt: `The user is researching "${query}". The following search result were deemed relevant.
     Generate a learning and a follow-up question from the following search result:
  
@@ -181,7 +174,7 @@ async function searchAndEvaluate(
   const finalSearchResults: SearchResult[] = [];
 
   await generateText({
-    model: flash20,
+    model: models.flash25,
     system:
       'You are a researcher. For each query, search the web and then evaluate if the results are relevant and will help answer the following query',
     prompt: `Search the web for information about ${query}`,
@@ -206,7 +199,7 @@ async function searchAndEvaluate(
             // experimental_output: { results },
             object: { results },
           } = await generateObject({
-            model: flash20search,
+            model: models.flash20search,
             prompt: query,
             // experimental_output: Output.object({
             //   schema: z.object({
@@ -231,7 +224,7 @@ async function searchAndEvaluate(
           // biome-ignore lint/style/noNonNullAssertion: <explanation>
           const pendingResult = pendingSearchResults.pop()!;
           const { object: evaluation } = await generateObject({
-            model: flash20,
+            model: models.flash25,
             prompt: `Evaluate whether the search results are relevant and will help answer the following query: "${query}". If the page already exists in the existing results, mark it as irrelevant.
 
             <search_results>
@@ -266,7 +259,7 @@ async function searchAndEvaluate(
 
 async function generateSearchQueries(query: string, depth = 1) {
   const { object } = await generateObject({
-    model: flash20,
+    model: models.flash25,
     // search query should not be too long/detailed to avoid not being able to find results
     prompt: `Generate ${depth} relevant search queries for the following query: ${query}`,
     schema: z.object({

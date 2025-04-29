@@ -1,5 +1,4 @@
-import { textSchema, usageSchema } from '@/core/api/ai';
-import { google } from '@ai-sdk/google';
+import { models, textSchema, usageSchema } from '@/core/api/ai';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
@@ -10,15 +9,9 @@ import { z } from 'zod';
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
 
-const flash20search = google('gemini-2.0-flash-001', {
-  // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
-  useSearchGrounding: true,
-});
-const pro25 = google('gemini-2.5-pro-exp-03-25');
-
 async function getCompanyInfo(company: string) {
   const { object } = await generateObject({
-    model: flash20search,
+    model: models.flash20search,
     system: 'You are an expert researcher and analyst',
     prompt: `For the following company provide:
 - a brief company description
@@ -38,7 +31,7 @@ async function getCompanyInfo(company: string) {
 
 async function getCompetitors(company: string, num = 2) {
   const { object } = await generateObject({
-    model: flash20search,
+    model: models.flash20search,
     system: 'You are an expert researcher and analyst',
     prompt: `For the following company provide:
         - find similar competitors (minimum 1, maximum ${num}) to the following company: ${company}.
@@ -71,7 +64,7 @@ async function getCompetitors(company: string, num = 2) {
 
 async function getFounderLatest3Tweets(founder: string) {
   const { object } = await generateObject({
-    model: flash20search,
+    model: models.flash20search,
     system:
       'You are an expert researcher and analyst who is looking for latest 3 tweets from twitter (X) profile',
     prompt: `Please provide a brief summary of the following person's latest 3 tweets. <person_name>${founder}</person_name>.`,
@@ -90,7 +83,7 @@ async function getFounderLatest3Tweets(founder: string) {
 
 async function getFounderLinkedinProfile(founder: string) {
   const { object } = await generateObject({
-    model: flash20search,
+    model: models.flash20search,
     system:
       "You are an expert researcher and analyst who is looking for founder's background from their linkedin profile",
     prompt: `Please provide a brief summary of the following person's background from their linkedin profile. <person_name>${founder}</person_name>.`,
@@ -109,7 +102,7 @@ async function getFounderLinkedinProfile(founder: string) {
 
 async function getFounderPersonalWebsite(founder: string) {
   const { object } = await generateObject({
-    model: flash20search,
+    model: models.flash20search,
     system:
       "You are an expert researcher and analyst who is looking for founder's background from their personal website",
     prompt: `Please provide a brief summary of the following person's background from their personal website. <person_name>${founder}</person_name>.`,
@@ -144,7 +137,7 @@ async function assessFounderMarketFit({
   companyInfo: string;
 }) {
   const { text } = await generateText({
-    model: pro25,
+    model: models.flash25,
     system:
       'You are a partner at a Venture Capital fund looking to invest in a startup. Assess the market fit of the founder based on the company info.',
     prompt: `<founder_name>${founderName}</founder_name>\n\n<search_results>${JSON.stringify({ companyInfo })}</search_results>`,
@@ -155,7 +148,7 @@ async function assessFounderMarketFit({
 
 async function getCompanyFinancialInformation(company: string) {
   const { object } = await generateObject({
-    model: flash20search,
+    model: models.flash20search,
     system: 'You are an expert researcher and analyst',
     prompt: `Tell me about the funding, valuation, investors, and financials information of this company in detail and nothing else. <company>${company}</company>`,
     schema: z.object({
@@ -191,7 +184,7 @@ async function getCompanyFinancialInformation(company: string) {
 
 async function generateInvestmentPitch(company: string, research: string) {
   const { text } = await generateText({
-    model: pro25,
+    model: models.pro25,
     system: 'You are an expert researcher and analyst',
     prompt: `Generate an investment pitch for ${company} from the perspective of a venture capitalist.\n\n${research}`,
   });
@@ -236,7 +229,7 @@ ventureCapitalApp.post(
     const { prompt } = c.req.valid('json');
 
     const { text, usage } = await generateText({
-      model: pro25,
+      model: models.flash25,
       prompt,
       maxSteps: 10,
       tools: {

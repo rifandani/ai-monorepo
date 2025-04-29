@@ -1,4 +1,6 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { GoogleAICacheManager } from '@google/generative-ai/server';
+import { logger } from '@workspace/core/utils/logger';
 import { createProviderRegistry } from 'ai';
 import { z } from 'zod';
 // For extending the Zod schema with OpenAPI properties
@@ -178,7 +180,7 @@ export const cacheListSchema = z.object({
 
 /**
  * ================================
- * Providers
+ * Registry Providers
  * ================================
  */
 
@@ -187,3 +189,80 @@ export const registry = createProviderRegistry({
   // by default use process.env.GOOGLE_GENERATIVE_AI_API_KEY
   google: createGoogleGenerativeAI(),
 });
+
+// by default use GOOGLE_GENERATIVE_AI_API_KEY
+// example fetch wrapper that logs the input to the API call:
+const google = createGoogleGenerativeAI({
+  // @ts-expect-error preconnect is bun specific
+  fetch: async (
+    url: Parameters<typeof fetch>[0],
+    options: Parameters<typeof fetch>[1]
+  ) => {
+    logger.info(
+      { url, headers: options?.headers, body: options?.body },
+      'FETCH_CALL'
+    );
+    return await fetch(url, options);
+  },
+});
+
+const flash20 = google('gemini-2.0-flash-001');
+/**
+ * only one that supports generating images
+ */
+const flash20exp = google('gemini-2.0-flash-exp');
+const flash20search = google('gemini-2.0-flash-001', {
+  // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
+  useSearchGrounding: true,
+});
+const flash20safety = google('gemini-2.0-flash-001', {
+  // https://ai.google.dev/gemini-api/docs/safety-settings?hl=en
+  safetySettings: [
+    {
+      category: 'HARM_CATEGORY_HARASSMENT',
+      threshold: 'BLOCK_LOW_AND_ABOVE',
+    },
+    {
+      category: 'HARM_CATEGORY_HATE_SPEECH',
+      threshold: 'BLOCK_LOW_AND_ABOVE',
+    },
+    {
+      category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+      threshold: 'BLOCK_LOW_AND_ABOVE',
+    },
+    {
+      category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+      threshold: 'BLOCK_LOW_AND_ABOVE',
+    },
+    {
+      category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
+      threshold: 'BLOCK_LOW_AND_ABOVE',
+    },
+  ],
+});
+const flash25 = google('gemini-2.5-flash-preview-04-17');
+const pro25 = google('gemini-2.5-pro-exp-03-25');
+const embedding004 = google.textEmbeddingModel('text-embedding-004');
+
+export const cacheManager = new GoogleAICacheManager(
+  process.env.GOOGLE_GENERATIVE_AI_API_KEY as string
+);
+// As of Apr 28rd, 2025, only models that support caching in free tier
+type GoogleModelCacheableId =
+  | 'models/gemini-1.5-flash-001'
+  | 'models/gemini-1.5-pro-001'
+  | 'models/gemini-2.0-flash-001';
+export const cacheModelId: GoogleModelCacheableId =
+  'models/gemini-1.5-flash-001';
+
+export const models = {
+  flash20,
+  flash20exp,
+  flash20search,
+  flash20safety,
+  flash25,
+  // flash25safety, // not supported
+  // flash25search, // not supported
+  pro25,
+  embedding004,
+};
