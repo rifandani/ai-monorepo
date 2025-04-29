@@ -11,6 +11,7 @@ import {
 import { APPROVAL } from '@/core/services/ai';
 import type { useChat } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
+import React from 'react';
 import { twMerge } from 'tailwind-merge';
 import { P, match } from 'ts-pattern';
 
@@ -63,9 +64,8 @@ export function ChatMessage({
             const isLastPart = idx === (message.parts?.length ?? 0) - 1;
 
             return (
-              <>
+              <React.Fragment key={`text-${part.text}`}>
                 <div
-                  key={`text-${part.text}`}
                   data-testid={`text-${part.text}`}
                   className={twMerge(
                     'flex w-fit flex-col gap-4',
@@ -80,7 +80,7 @@ export function ChatMessage({
                 {message.role === 'assistant' && isLastPart && (
                   <ChatMessageActions text={part.text} />
                 )}
-              </>
+              </React.Fragment>
             );
           })
           .with({ type: 'tool-invocation' }, (part) => (

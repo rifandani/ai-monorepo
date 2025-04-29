@@ -77,15 +77,33 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
                           <Icon icon="lucide:more-horizontal" />
                         </Menu.Trigger>
                         <Menu.Content offset={0} placement="right top">
-                          <Menu.Item isDisabled={isDeleting} className="gap-2">
+                          <Menu.Item
+                            isDisabled={isDeleting}
+                            className="gap-2"
+                            onAction={() => {
+                              // TODO: implement share after we setup auth
+                            }}
+                          >
                             <Icon icon="lucide:upload" />
                             Share
                           </Menu.Item>
-                          <Menu.Item isDisabled={isDeleting} className="gap-2">
+                          <Menu.Item
+                            isDisabled={isDeleting}
+                            className="gap-2"
+                            onAction={() => {
+                              // TODO: implement rename
+                            }}
+                          >
                             <Icon icon="lucide:pencil" />
                             Rename
                           </Menu.Item>
-                          <Menu.Item isDisabled={isDeleting} className="gap-2">
+                          <Menu.Item
+                            isDisabled={isDeleting}
+                            className="gap-2"
+                            onAction={() => {
+                              // TODO: implement archive
+                            }}
+                          >
                             <Icon icon="lucide:archive" />
                             Archive
                           </Menu.Item>
