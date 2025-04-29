@@ -5,6 +5,7 @@ import { ChatMessage } from '@/core/components/chat-message';
 import { Button, Note } from '@/core/components/ui';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
+import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
 import { createIdGenerator } from 'ai';
 
 const toolsWithConfirmation = {
@@ -59,6 +60,13 @@ export function Chat({
     },
   });
 
+  // Manage auto-scroll and user scroll cancel
+  const { anchorRef, isAutoScroll } = useAutoScroll({
+    isLoading: status === 'submitted' || status === 'streaming',
+    dependency: messages.length,
+    isStreaming: () => status === 'streaming',
+  });
+
   const toolsRequiringConfirmation = getToolsRequiringConfirmation(
     toolsWithConfirmation
   );
@@ -104,6 +112,7 @@ export function Chat({
       )}
 
       <ChatField
+        isAutoScroll={isAutoScroll}
         status={status}
         input={input}
         setInput={setInput}
@@ -115,6 +124,8 @@ export function Chat({
           });
         }}
       />
+
+      <div ref={anchorRef} />
     </section>
   );
 }

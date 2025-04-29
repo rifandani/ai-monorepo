@@ -37,12 +37,14 @@ export function ChatField({
   onSubmit,
   stop,
   disableSubmit = false,
+  isAutoScroll,
 }: Pick<UseChatHelpers, 'status' | 'input' | 'setInput' | 'stop'> & {
   onSubmit: (
     evt: { preventDefault: () => void },
     files: FileList | null
   ) => void;
   disableSubmit?: boolean;
+  isAutoScroll: boolean;
 }) {
   const [files, setFiles] = useState<FileList | null>(null);
   const [showSearch, setShowSearch] = useState(false);
@@ -68,6 +70,26 @@ export function ChatField({
       onSubmit={handleSubmit}
       className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) py-2"
     >
+      {/* Scroll-down button: show when user is not at bottom */}
+      {!isAutoScroll && (
+        <Button
+          type="button"
+          intent="outline"
+          appearance="outline"
+          size="square-petite"
+          shape="circle"
+          className="-top-10 -translate-x-1/2 absolute left-1/2 z-20"
+          onClick={() =>
+            window.scrollTo({
+              top: document.documentElement.scrollHeight,
+              behavior: 'smooth',
+            })
+          }
+        >
+          <Icon icon="lucide:chevron-down" className="h-4 w-4" />
+        </Button>
+      )}
+
       <div className="flex gap-x-2">
         {files &&
           Array.from(files).map((file) => (
