@@ -66,9 +66,9 @@ export function ChatMessage({
             return (
               <React.Fragment key={`text-${part.text}`}>
                 <div
-                  data-testid={`text-${part.text}`}
+                  data-testid="chat-message-text"
                   className={twMerge(
-                    'flex w-fit flex-col gap-4',
+                    'flex flex-col gap-4',
                     message.role === 'user' &&
                       'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
                   )}

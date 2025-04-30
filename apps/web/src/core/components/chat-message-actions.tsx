@@ -3,7 +3,7 @@
 import { buttonStyles } from '@/core/components/ui/button';
 import { Tooltip } from '@/core/components/ui/tooltip';
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
+import { useCopyToClipboard } from '@workspace/core/hooks/use-copy-to-clipboard';
 import { toast } from 'sonner';
 
 export function ChatMessageActions({
@@ -11,10 +11,13 @@ export function ChatMessageActions({
 }: {
   text: string;
 }) {
-  const [isCopied, setIsCopied] = useState(false);
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   return (
-    <div className="flex items-center gap-0.5">
+    <div
+      className="flex items-center gap-0.5"
+      data-testid="chat-message-actions"
+    >
       <Tooltip>
         <Tooltip.Trigger
           aria-label="Copy message"
@@ -23,14 +26,9 @@ export function ChatMessageActions({
             size: 'square-petite',
             shape: 'circle',
           })}
-          onClick={async () => {
-            setIsCopied(true);
-            await navigator.clipboard.writeText(text);
+          onClick={() => {
+            copyToClipboard(text);
             toast.success('Message copied to clipboard');
-
-            setTimeout(() => {
-              setIsCopied(false);
-            }, 1000); // Reset after 1 second
           }}
         >
           <Icon

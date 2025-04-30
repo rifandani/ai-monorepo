@@ -1,5 +1,9 @@
+'use client';
+
+import { CodeBlock } from '@/core/components/code-block';
 import { marked } from 'marked';
 import Link from 'next/link';
+import type React from 'react';
 import { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -22,7 +26,37 @@ export function parseMarkdownIntoBlocks(markdown: string): string[] {
 }
 
 const components: Partial<Components> = {
-  // code: CodeBlock,
+  code({ node, className, children, ...props }) {
+    if ((children as React.ReactNode[])?.length) {
+      // biome-ignore lint/nursery/useCollapsedIf: <explanation>
+      if ((children as React.ReactNode[])?.[0] === '▍') {
+        return <span className="mt-1 animate-pulse cursor-default">▍</span>;
+      }
+      // (children as string[])[0] = (children as string[])?.[0]?.replace(
+      //   '`▍`',
+      //   '▍'
+      // ) as string;
+    }
+
+    const match = /language-(\w+)/.exec(className || '');
+
+    if (!match) {
+      return (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
+    }
+
+    return (
+      <CodeBlock
+        key={Math.random()}
+        language={match[1] || ''}
+        value={String(children).replace(/\n$/, '')}
+        {...props}
+      />
+    );
+  },
   pre: ({ children }) => <>{children}</>,
   ol: ({ node, children, ...props }) => {
     return (
@@ -111,9 +145,16 @@ const components: Partial<Components> = {
 
 const remarkPlugins = [remarkGfm];
 
-const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+const NonMemoizedMarkdown = ({
+  children,
+  ...props
+}: React.ComponentProps<typeof ReactMarkdown>) => {
   return (
-    <ReactMarkdown remarkPlugins={remarkPlugins} components={components}>
+    <ReactMarkdown
+      remarkPlugins={remarkPlugins}
+      components={components}
+      {...props}
+    >
       {children}
     </ReactMarkdown>
   );
