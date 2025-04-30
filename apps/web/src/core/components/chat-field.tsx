@@ -1,15 +1,18 @@
 'use client';
 
-import { Button, FileTrigger } from '@/core/components/ui';
+import {
+  Button,
+  FileTrigger,
+  Tooltip,
+  buttonStyles,
+} from '@/core/components/ui';
 import { Textarea } from '@/core/components/ui/textarea';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { Icon } from '@iconify/react';
 import { useAutoResizeTextarea } from '@workspace/core/hooks/use-auto-resize-textarea';
-import { AnimatePresence, motion } from 'motion/react';
 import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { twMerge } from 'tailwind-merge';
 
 function FileDisplay({
   fileName,
@@ -155,68 +158,26 @@ export function ChatField({
                   setFiles(filelist);
                 }}
               >
-                Attachments
+                Upload
               </FileTrigger>
             </label>
-            <button
-              type="button"
-              onClick={() => {
-                setShowSearch(!showSearch);
-              }}
-              className={twMerge(
-                'flex h-8 cursor-pointer items-center gap-2 rounded-full border px-1.5 py-1 transition-all',
-                showSearch
-                  ? 'border-sky-400 bg-sky-500/15 text-sky-500'
-                  : 'border-transparent bg-black/5 text-black/40 hover:text-black dark:bg-white/5 dark:text-white/40 dark:hover:text-white '
-              )}
-            >
-              <div className="flex h-4 w-4 shrink-0 items-center justify-center">
-                <motion.div
-                  animate={{
-                    rotate: showSearch ? 180 : 0,
-                    scale: showSearch ? 1.1 : 1,
-                  }}
-                  whileHover={{
-                    rotate: showSearch ? 180 : 15,
-                    scale: 1.1,
-                    transition: {
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 10,
-                    },
-                  }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 260,
-                    damping: 25,
-                  }}
-                >
-                  <Icon
-                    icon="lucide:globe"
-                    className={twMerge(
-                      'h-4 w-4',
-                      showSearch ? 'text-sky-500' : 'text-inherit'
-                    )}
-                  />
-                </motion.div>
-              </div>
-              <AnimatePresence>
-                {showSearch && (
-                  <motion.span
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{
-                      width: 'auto',
-                      opacity: 1,
-                    }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="shrink-0 overflow-hidden whitespace-nowrap text-sky-500 text-sm"
-                  >
-                    Search
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
+
+            <Tooltip>
+              <Tooltip.Trigger
+                aria-label="Web search"
+                className={buttonStyles({
+                  intent: showSearch ? 'primary' : 'outline',
+                  shape: 'circle',
+                  size: 'square-petite',
+                })}
+                onClick={() => {
+                  setShowSearch(!showSearch);
+                }}
+              >
+                <Icon icon="lucide:globe" />
+              </Tooltip.Trigger>
+              <Tooltip.Content intent="inverse">Web search</Tooltip.Content>
+            </Tooltip>
           </div>
 
           <div className="absolute right-3 bottom-3">

@@ -56,8 +56,8 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
         <div className="flex items-center space-x-1">
           <Button
             type="button"
-            intent="outline"
-            appearance="outline"
+            intent="plain"
+            appearance="plain"
             size="square-petite"
             className="focus-visible:ring-1"
             onClick={() => {
@@ -77,8 +77,8 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
           </Button>
           <Button
             type="button"
-            intent="outline"
-            appearance="outline"
+            intent="plain"
+            appearance="plain"
             size="square-petite"
             className="text-xs focus-visible:ring-1 focus-visible:ring-offset-0"
             onClick={() => {

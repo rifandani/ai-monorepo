@@ -6,7 +6,7 @@ import { Button, Note } from '@/core/components/ui';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
 import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
-import { createIdGenerator } from 'ai';
+import { type ChatRequestOptions, createIdGenerator } from 'ai';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -22,6 +22,7 @@ export function Chat({
   const {
     // data, // custom data from `dataStream.writeData()`
     messages,
+    setMessages,
     input,
     setInput,
     handleSubmit,
@@ -90,6 +91,38 @@ export function Chat({
     )
   );
 
+  // to trim messages and reload from a specific message
+  async function handleRetry(messageId: string, options?: ChatRequestOptions) {
+    // Find the index of the message with the specified ID
+    const messageIndex = messages.findIndex((m) => m.id === messageId);
+
+    if (messageIndex === -1) {
+      // If message or preceding user message not found, perform a normal reload
+      return await reload(options);
+    }
+
+    // Keep messages up to the specified one (usually the assistant message) and the user message just before it.
+    const relevantMessages = messages.slice(0, messageIndex);
+    const reversedRelevantMessages = [...relevantMessages].reverse();
+    const reversedIndex = reversedRelevantMessages.findIndex(
+      (m) => m.role === 'user'
+    );
+    const userMessageIndex =
+      reversedIndex !== -1 ? relevantMessages.length - 1 - reversedIndex : -1;
+
+    if (userMessageIndex === -1) {
+      // If message or preceding user message not found, perform a normal reload
+      return await reload(options);
+    }
+
+    // trim messages up to the user message
+    const trimmedMessages = messages.slice(0, userMessageIndex + 1);
+    setMessages(trimmedMessages);
+
+    // Reload the conversation
+    return await reload(options);
+  }
+
   return (
     <section
       data-testid="chat-root"
@@ -102,6 +135,7 @@ export function Chat({
             key={message.id}
             message={message}
             addToolResult={addToolResult}
+            onRetry={handleRetry}
           />
         ))}
       </div>

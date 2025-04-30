@@ -18,9 +18,11 @@ import { P, match } from 'ts-pattern';
 export function ChatMessage({
   message,
   addToolResult,
+  onRetry,
 }: {
   message: UIMessage;
   addToolResult: ReturnType<typeof useChat>['addToolResult'];
+  onRetry: (messageId: string) => void;
 }) {
   return (
     <div
@@ -78,7 +80,12 @@ export function ChatMessage({
 
                 {/* only show copy button if this is the last part */}
                 {message.role === 'assistant' && isLastPart && (
-                  <ChatMessageActions text={part.text} />
+                  <ChatMessageActions
+                    text={part.text}
+                    onRetry={() => {
+                      onRetry(message.id);
+                    }}
+                  />
                 )}
               </React.Fragment>
             );
