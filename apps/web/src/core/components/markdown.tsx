@@ -6,7 +6,10 @@ import Link from 'next/link';
 import type React from 'react';
 import { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import 'katex/dist/katex.min.css';
 
 /**
  * Parses markdown into blocks of text.
@@ -23,6 +26,15 @@ import remarkGfm from 'remark-gfm';
 export function parseMarkdownIntoBlocks(markdown: string): string[] {
   const tokens = marked.lexer(markdown);
   return tokens.map((token) => token.raw);
+}
+
+/**
+ * Checks if the markdown contains LaTeX.
+ * @param markdown - The markdown to check.
+ * @returns True if the markdown contains LaTeX, false otherwise.
+ */
+export function checkLatex(markdown: string): boolean {
+  return /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/.test(markdown);
 }
 
 const components: Partial<Components> = {
@@ -143,7 +155,13 @@ const components: Partial<Components> = {
   },
 };
 
-const remarkPlugins = [remarkGfm];
+const remarkPlugins = [
+  remarkGfm, // github flavored markdown
+  remarkMath, // math
+];
+const rehypePlugins = [
+  rehypeKatex, // KaTeX
+];
 
 const NonMemoizedMarkdown = ({
   children,
@@ -152,6 +170,7 @@ const NonMemoizedMarkdown = ({
   return (
     <ReactMarkdown
       remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
       components={components}
       {...props}
     >
