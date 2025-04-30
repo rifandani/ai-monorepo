@@ -38,6 +38,8 @@ export function ChatField({
   stop,
   disableSubmit = false,
   isAutoScroll,
+  showSearch,
+  setShowSearch,
 }: Pick<UseChatHelpers, 'status' | 'input' | 'setInput' | 'stop'> & {
   onSubmit: (
     evt: { preventDefault: () => void },
@@ -45,9 +47,10 @@ export function ChatField({
   ) => void;
   disableSubmit?: boolean;
   isAutoScroll: boolean;
+  showSearch: boolean;
+  setShowSearch: (showSearch: boolean) => void;
 }) {
   const [files, setFiles] = useState<FileList | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 52,
     maxHeight: 200,

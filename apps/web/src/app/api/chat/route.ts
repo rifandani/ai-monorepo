@@ -48,9 +48,10 @@ export const maxDuration = 120;
 
 export async function POST(req: Request) {
   // get the last message from the request:
-  const { message, id } = (await req.json()) as {
+  const { message, id, searchMode } = (await req.json()) as {
     message: Message;
     id: string;
+    searchMode: boolean;
   };
 
   // load the previous messages from the server:
@@ -93,6 +94,7 @@ export async function POST(req: Request) {
     ...mcpTools,
     generateImage: tools.generateImage,
     getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
+    ...(searchMode && { webSearchNative: tools.webSearchNative }),
     // webSearch: tools.webSearch,
     // deepResearch: tools.deepResearch(dataStream),
   };
@@ -126,6 +128,7 @@ export async function POST(req: Request) {
         messages: processedMessages,
         system: systemPrompt,
         tools: combinedTools,
+        experimental_activeTools: searchMode ? ['webSearchNative'] : [],
         // toolCallStreaming: true, // partial tool calls will be streamed as part of the data stream enabling client "partial-tool" state
         maxSteps: 10,
         experimental_transform: smoothStream(),

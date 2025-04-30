@@ -7,6 +7,8 @@ import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
 import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
 import { createIdGenerator } from 'ai';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const toolsWithConfirmation = {
   getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
@@ -16,6 +18,7 @@ export function Chat({
   id,
   initialMessages,
 }: { id?: string; initialMessages?: Message[] } = {}) {
+  const [showSearch, setShowSearch] = useState(false);
   const {
     // data, // custom data from `dataStream.writeData()`
     messages,
@@ -42,12 +45,16 @@ export function Chat({
     sendExtraMessageFields: true, // send id and createdAt for each message, meaning that we store messages in the useChat message format.
     api: '/api/chat',
     maxSteps: 10,
+    experimental_throttle: 100, // throttle messages and data updates to 100ms
     experimental_prepareRequestBody({ messages, id }) {
       // useful for example, only send the last message, send additional data along with the message, change the structure of the request body
-      // biome-ignore lint/nursery/useAtIndex: <explanation>
-      return { message: messages[messages.length - 1], id };
+      return {
+        // biome-ignore lint/nursery/useAtIndex: <explanation>
+        message: messages[messages.length - 1],
+        id,
+        searchMode: showSearch,
+      };
     },
-    // experimental_throttle: 50, // throttle messages and data updates to 50ms
     onToolCall({ toolCall }) {
       // useful for running client-side tools that are automatically executed (e.g. render chart/diagram)
       console.log(`🐦 ~ "page.tsx" at line 10: toolCall -> `, toolCall);
@@ -57,6 +64,9 @@ export function Chat({
         message,
         options,
       });
+    },
+    onError(error) {
+      toast.error(error.message);
     },
   });
 
@@ -112,6 +122,8 @@ export function Chat({
       )}
 
       <ChatField
+        showSearch={showSearch}
+        setShowSearch={setShowSearch}
         isAutoScroll={isAutoScroll}
         status={status}
         input={input}
