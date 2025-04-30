@@ -15,12 +15,15 @@ import { z } from 'zod';
 
 const systemPrompt = `
 You are a helpful assistant.
-We have a list of tools that you can use to help the user. 
+You have a list of tools that you can use to help the user. 
 If there is no tool to use, you should respond normally with a markdown formatted text.
 `;
-// Do not repeat the results of deepResearch tool calls.
-// You can report (max 2 sentences) that the tool has been used successfully.
-// Do not call multiple tools at once.
+
+const deepResearchSystemPrompt = `
+Do not call multiple tools at once.
+Do not repeat the results of deepResearch tool calls.
+You can report (max 2 sentences) that the tool has been used successfully.
+`;
 
 async function getStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
@@ -48,10 +51,11 @@ export const maxDuration = 120;
 
 export async function POST(req: Request) {
   // get the last message from the request:
-  const { message, id, searchMode } = (await req.json()) as {
+  const { message, id, searchMode, deepResearchMode } = (await req.json()) as {
     message: Message;
     id: string;
     searchMode: boolean;
+    deepResearchMode: boolean;
   };
 
   // load the previous messages from the server:
@@ -100,8 +104,10 @@ export async function POST(req: Request) {
         ...(searchMode && {
           webSearchNative: tools.webSearchNative(dataStream),
         }),
-        // webSearch: tools.webSearch,
-        // deepResearch: tools.deepResearch(dataStream),
+        ...(deepResearchMode && {
+          webSearch: tools.webSearch,
+          deepResearch: tools.deepResearch(dataStream),
+        }),
       };
 
       /**
@@ -129,9 +135,13 @@ export async function POST(req: Request) {
       const result = streamText({
         model,
         messages: processedMessages,
-        system: systemPrompt,
+        system: deepResearchMode ? deepResearchSystemPrompt : systemPrompt,
         tools: combinedTools,
-        experimental_activeTools: searchMode ? ['webSearchNative'] : [],
+        experimental_activeTools: searchMode
+          ? ['webSearchNative']
+          : deepResearchMode
+            ? ['webSearch', 'deepResearch']
+            : [],
         // toolCallStreaming: true, // partial tool calls will be streamed as part of the data stream enabling client "partial-tool" state
         maxSteps: 10,
         experimental_transform: smoothStream(),

@@ -19,6 +19,7 @@ export function Chat({
   initialMessages,
 }: { id?: string; initialMessages?: Message[] } = {}) {
   const [showSearch, setShowSearch] = useState(false);
+  const [showDeepResearch, setShowDeepResearch] = useState(false);
   const {
     // data, // custom data from `dataStream.writeData()`
     messages,
@@ -54,6 +55,7 @@ export function Chat({
         message: messages[messages.length - 1],
         id,
         searchMode: showSearch,
+        deepResearchMode: showDeepResearch,
       };
     },
     onToolCall({ toolCall }) {
@@ -158,6 +160,8 @@ export function Chat({
       <ChatField
         showSearch={showSearch}
         setShowSearch={setShowSearch}
+        showDeepResearch={showDeepResearch}
+        setShowDeepResearch={setShowDeepResearch}
         isAutoScroll={isAutoScroll}
         status={status}
         input={input}

@@ -43,6 +43,8 @@ export function ChatField({
   isAutoScroll,
   showSearch,
   setShowSearch,
+  showDeepResearch,
+  setShowDeepResearch,
 }: Pick<UseChatHelpers, 'status' | 'input' | 'setInput' | 'stop'> & {
   onSubmit: (
     evt: { preventDefault: () => void },
@@ -52,6 +54,8 @@ export function ChatField({
   isAutoScroll: boolean;
   showSearch: boolean;
   setShowSearch: (showSearch: boolean) => void;
+  showDeepResearch: boolean;
+  setShowDeepResearch: (showDeepResearch: boolean) => void;
 }) {
   const [files, setFiles] = useState<FileList | null>(null);
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -171,12 +175,37 @@ export function ChatField({
                   size: 'square-petite',
                 })}
                 onClick={() => {
+                  if (!showSearch) {
+                    setShowDeepResearch(false);
+                  }
+
                   setShowSearch(!showSearch);
                 }}
               >
                 <Icon icon="lucide:globe" />
               </Tooltip.Trigger>
               <Tooltip.Content intent="inverse">Web search</Tooltip.Content>
+            </Tooltip>
+
+            <Tooltip>
+              <Tooltip.Trigger
+                aria-label="Deep research"
+                className={buttonStyles({
+                  intent: showDeepResearch ? 'primary' : 'outline',
+                  shape: 'circle',
+                  size: 'square-petite',
+                })}
+                onClick={() => {
+                  if (!showDeepResearch) {
+                    setShowSearch(false);
+                  }
+
+                  setShowDeepResearch(!showDeepResearch);
+                }}
+              >
+                <Icon icon="lucide:telescope" />
+              </Tooltip.Trigger>
+              <Tooltip.Content intent="inverse">Deep research</Tooltip.Content>
             </Tooltip>
           </div>
 

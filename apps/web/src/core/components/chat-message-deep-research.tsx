@@ -14,6 +14,29 @@ interface StatusUpdate {
   description?: string;
 }
 
+function formatElapsedTime(ms: number) {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  return minutes > 0 ? `${minutes}m ${seconds % 60}s` : `${seconds}s`;
+}
+
+function useElapsedTime(state: ToolInvocation['state']) {
+  const [startTime] = useState(Date.now());
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    if (state !== 'result') {
+      const interval = setInterval(() => {
+        setElapsedTime(Date.now() - startTime);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [startTime, state]);
+
+  return elapsedTime;
+}
+
 function DeepResearchStatus({
   updates,
 }: {
@@ -53,36 +76,13 @@ function DeepResearchStatus({
   );
 }
 
-function formatElapsedTime(ms: number) {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  return minutes > 0 ? `${minutes}m ${seconds % 60}s` : `${seconds}s`;
-}
-
-function useElapsedTime(state: ToolInvocation['state']) {
-  const [startTime] = useState(Date.now());
-  const [elapsedTime, setElapsedTime] = useState(0);
-
-  useEffect(() => {
-    if (state !== 'result') {
-      const interval = setInterval(() => {
-        setElapsedTime(Date.now() - startTime);
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [startTime, state]);
-
-  return elapsedTime;
-}
-
-export const DeepResearch = ({
+export function ChatMessageDeepResearch({
   toolInvocation,
   annotations,
 }: {
   toolInvocation: ToolInvocation;
   annotations?: JSONValue[];
-}) => {
+}) {
   const { state } = toolInvocation;
   const elapsedTime = useElapsedTime(state);
 
@@ -278,4 +278,4 @@ export const DeepResearch = ({
       </div>
     </motion.div>
   );
-};
+}
