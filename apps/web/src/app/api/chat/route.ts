@@ -90,17 +90,20 @@ export async function POST(req: Request) {
 
   // combined tools
   const { mcpClient, tools: mcpTools } = await getStdioMcpClient();
-  const combinedTools = {
-    ...mcpTools,
-    generateImage: tools.generateImage,
-    getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
-    ...(searchMode && { webSearchNative: tools.webSearchNative }),
-    // webSearch: tools.webSearch,
-    // deepResearch: tools.deepResearch(dataStream),
-  };
 
   return createDataStreamResponse({
     execute: async (dataStream) => {
+      const combinedTools = {
+        ...mcpTools,
+        generateImage: tools.generateImage,
+        getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
+        ...(searchMode && {
+          webSearchNative: tools.webSearchNative(dataStream),
+        }),
+        // webSearch: tools.webSearch,
+        // deepResearch: tools.deepResearch(dataStream),
+      };
+
       /**
        * Utility function to handle tools that require human confirmation
        * Checks for confirmation in last message and then runs associated tool

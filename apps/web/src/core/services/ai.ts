@@ -305,23 +305,31 @@ async function generateReport(prompt: string, research: Research) {
 }
 
 export const tools = {
-  webSearchNative: tool({
-    description: 'Use this tool to search the web for information.',
-    parameters: z.object({
-      query: z.string().min(1).max(200).describe('The search query'),
-    }),
-    execute: async ({ query }) => {
-      const { sources, text } = await generateText({
-        model: models.flash20search,
-        prompt: query,
-      });
+  webSearchNative: (dataStream: DataStreamWriter) => {
+    return tool({
+      description: 'Use this tool to search the web for information.',
+      parameters: z.object({
+        query: z.string().min(1).max(200).describe('The search query'),
+      }),
+      execute: async ({ query }) => {
+        const { sources, text } = await generateText({
+          model: models.flash20search,
+          prompt: query,
+        });
 
-      return {
-        sources,
-        text,
-      };
-    },
-  }),
+        for (const source of sources) {
+          dataStream.writeMessageAnnotation({
+            source,
+          });
+        }
+
+        return {
+          sources,
+          text,
+        };
+      },
+    });
+  },
   /**
    * This tool returns specific result schema using generateObject.
    */

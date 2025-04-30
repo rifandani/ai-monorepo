@@ -2,6 +2,7 @@
 
 import { ChatMessageActions } from '@/core/components/chat-message-actions';
 import { Markdown } from '@/core/components/markdown';
+import { Badge, Link } from '@/core/components/ui';
 import { Button } from '@/core/components/ui/button';
 import {
   Disclosure,
@@ -9,13 +10,16 @@ import {
   DisclosureTrigger,
 } from '@/core/components/ui/disclosure';
 import { APPROVAL } from '@/core/services/ai';
+import type { LanguageModelV1Source } from '@ai-sdk/provider';
 import type { useChat } from '@ai-sdk/react';
+import { Icon } from '@iconify/react';
 import type { UIMessage } from 'ai';
-import React from 'react';
+import { isEqual } from 'radashi';
+import React, { memo } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { P, match } from 'ts-pattern';
 
-export function ChatMessage({
+function PureChatMessage({
   message,
   addToolResult,
   onRetry,
@@ -104,11 +108,45 @@ export function ChatMessage({
               )}
             >
               {match(part.toolInvocation)
+                .with(
+                  { toolName: 'webSearchNative', state: 'result' },
+                  (tool) => (
+                    <Disclosure key={`webSearchNative-${tool.toolCallId}`}>
+                      <DisclosureTrigger className="justify-normal">
+                        <Badge
+                          shape="circle"
+                          className="flex items-center gap-2"
+                        >
+                          <Icon icon="lucide:link" />
+                          {tool.result.sources.length} sources found
+                        </Badge>
+                      </DisclosureTrigger>
+
+                      <DisclosurePanel>
+                        <div className="flex flex-col gap-2">
+                          {tool.result.sources.map(
+                            (source: LanguageModelV1Source) => (
+                              <Link
+                                key={source.url}
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full hover:underline"
+                              >
+                                {source.title}
+                              </Link>
+                            )
+                          )}
+                        </div>
+                      </DisclosurePanel>
+                    </Disclosure>
+                  )
+                )
                 .with({ toolName: 'generateImage', state: 'result' }, (tool) =>
                   tool.result.files.map(
                     (file: { base64: string; mimeType: string }) => (
                       <img
-                        key={`file-${file.base64}`}
+                        key={`generateImage-file-${file.base64}`}
                         src={`data:${file.mimeType};base64,${file.base64}`}
                         alt={tool.args.prompt}
                         height={400}
@@ -199,3 +237,19 @@ export function ChatMessage({
     </div>
   );
 }
+
+export const ChatMessage = memo(PureChatMessage, (prevProps, nextProps) => {
+  if (
+    prevProps.message.reasoning !== nextProps.message.reasoning ||
+    prevProps.message.annotations !== nextProps.message.annotations ||
+    prevProps.message.content !== nextProps.message.content ||
+    !isEqual(
+      prevProps.message.toolInvocations,
+      nextProps.message.toolInvocations
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+});
