@@ -2,15 +2,22 @@
 
 import { CodeBlock } from '@/core/components/code-block';
 import { marked } from 'marked';
+// import mermaid from 'mermaid';
 import Link from 'next/link';
 import type React from 'react';
 import { memo } from 'react';
-import ReactMarkdown, { type Components } from 'react-markdown';
+import type ReactMarkdown from 'react-markdown';
+import { type Components, MarkdownHooks } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
+import rehypeMermaid from 'rehype-mermaid';
+import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import 'katex/dist/katex.min.css';
 import { twMerge } from 'tailwind-merge';
+import 'katex/dist/katex.min.css';
+
+// to make it work synchronously with `strategy: 'pre-mermaid'`
+// mermaid.initialize({ startOnLoad: true });
 
 /**
  * Parses markdown into blocks of text.
@@ -150,19 +157,11 @@ const components: Partial<Components> = {
       />
     );
   },
-  pre: ({ children }) => <>{children}</>,
   ol: ({ node, children, ...props }) => {
     return (
       <ol className="ml-4 list-outside list-decimal" {...props}>
         {children}
       </ol>
-    );
-  },
-  li: ({ node, children, ...props }) => {
-    return (
-      <li className="py-1" {...props}>
-        {children}
-      </li>
     );
   },
   ul: ({ node, children, ...props }) => {
@@ -172,11 +171,11 @@ const components: Partial<Components> = {
       </ul>
     );
   },
-  strong: ({ node, children, ...props }) => {
+  li: ({ node, children, ...props }) => {
     return (
-      <span className="font-semibold" {...props}>
+      <li className="py-1" {...props}>
         {children}
-      </span>
+      </li>
     );
   },
   a: ({ node, children, ...props }) => {
@@ -241,7 +240,10 @@ const remarkPlugins = [
   remarkMath, // math
 ];
 const rehypePlugins = [
-  rehypeKatex, // KaTeX
+  rehypeKatex, // kaTeX
+  // [rehypeMermaid, { strategy: 'pre-mermaid' }], // mermaid
+  rehypeMermaid, // mermaid
+  rehypeStringify, // stringify
 ];
 
 const NonMemoizedMarkdown = ({
@@ -249,14 +251,14 @@ const NonMemoizedMarkdown = ({
   ...props
 }: React.ComponentProps<typeof ReactMarkdown>) => {
   return (
-    <ReactMarkdown
+    <MarkdownHooks
+      components={components}
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
-      components={components}
       {...props}
     >
       {children}
-    </ReactMarkdown>
+    </MarkdownHooks>
   );
 };
 
