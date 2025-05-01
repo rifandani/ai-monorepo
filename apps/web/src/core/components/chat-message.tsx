@@ -89,7 +89,7 @@ function PureChatMessage({
                   <div
                     data-testid="chat-message-text"
                     className={twMerge(
-                      'relative flex flex-col gap-4',
+                      'relative flex flex-col',
                       message.role === 'user' &&
                         'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
                     )}

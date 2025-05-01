@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Parses markdown into blocks of text.
@@ -38,41 +39,86 @@ export function checkLatex(markdown: string): boolean {
 }
 
 const components: Partial<Components> = {
-  // table({ node, className, children, ...props }) {
-  //   return (
-  //     <Table className={className} {...props}>
-  //       {children}
-  //     </Table>
-  //   );
-  // },
-  // thead({ node, className, children, ...props }) {
-  //   return (
-  //     <Table.Header className={className} {...props}>
-  //       {children}
-  //     </Table.Header>
-  //   );
-  // },
-  // tbody({ node, className, children, ...props }) {
-  //   return (
-  //     <Table.Body className={className} {...props}>
-  //       {children}
-  //     </Table.Body>
-  //   );
-  // },
-  // td({ node, className, children, ...props }) {
-  //   return (
-  //     <Table.Cell className={className} {...props}>
-  //       {children}
-  //     </Table.Cell>
-  //   );
-  // },
-  // tr({ node, className, children, ...props }) {
-  //   return (
-  //     <Table.Row className={className} {...props}>
-  //       {children}
-  //     </Table.Row>
-  //   );
-  // },
+  table({ node, className, children, ...props }) {
+    return (
+      <table
+        className={twMerge(
+          'table w-full min-w-full caption-bottom border-spacing-0 text-sm outline-hidden [--table-selected-bg:color-mix(in_oklab,var(--color-primary)_5%,white_90%)] **:data-drop-target:border **:data-drop-target:border-primary dark:[--table-selected-bg:color-mix(in_oklab,var(--color-primary)_25%,black_70%)]',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </table>
+    );
+  },
+  thead({ node, className, children, ...props }) {
+    return (
+      <thead
+        data-slot="table-header"
+        className={twMerge('border-b', className)}
+        {...props}
+      >
+        {children}
+      </thead>
+    );
+  },
+  tbody({ node, className, children, ...props }) {
+    return (
+      <tbody
+        data-slot="table-body"
+        className={twMerge('[&_.tr:last-child]:border-0', className)}
+        {...props}
+      >
+        {children}
+      </tbody>
+    );
+  },
+  th({ node, className, children, ...props }) {
+    return (
+      <th
+        data-slot="table-column"
+        className={twMerge(
+          'relative allows-sorting:cursor-pointer whitespace-nowrap px-3 py-3 text-left font-medium outline-hidden data-dragging:cursor-grabbing [&:has([slot=selection])]:pr-0',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </th>
+    );
+  },
+  tr({ node, className, children, ...props }) {
+    return (
+      <tr
+        data-slot="table-row"
+        className={twMerge(
+          'tr group relative cursor-default border-b bg-bg selected:bg-(--table-selected-bg) text-muted-fg outline-hidden ring-primary selected:hover:bg-(--table-selected-bg)/70 focus:ring-0 data-focus-visible:ring-1 dark:selected:hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,black_70%)]',
+          'href' in props
+            ? 'cursor-pointer hover:bg-secondary/50 hover:text-secondary-fg'
+            : '',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </tr>
+    );
+  },
+  td({ node, className, children, ...props }) {
+    return (
+      <td
+        data-slot="table-cell"
+        className={twMerge(
+          'group whitespace-nowrap px-3 py-3 outline-hidden',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </td>
+    );
+  },
   code({ node, className, children, ...props }) {
     if ((children as React.ReactNode[])?.length) {
       // biome-ignore lint/nursery/useCollapsedIf: <explanation>
