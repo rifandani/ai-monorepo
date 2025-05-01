@@ -16,7 +16,10 @@ export function ChatMessageActions({
   const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   return (
-    <div className="flex items-center gap-1" data-testid="chat-message-actions">
+    <section
+      className="flex items-center gap-1"
+      data-testid="chat-message-actions"
+    >
       <Tooltip>
         <Tooltip.Trigger
           aria-label="Copy message"
@@ -51,6 +54,6 @@ export function ChatMessageActions({
         <Tooltip.Content intent="inverse">Retry</Tooltip.Content>
       </Tooltip>
       {/* {enableShare && chatId && <ChatShare chatId={chatId} />} */}
-    </div>
+    </section>
   );
 }

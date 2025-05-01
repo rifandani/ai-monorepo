@@ -129,7 +129,7 @@ export function Chat({
     <section
       data-testid="chat-root"
       data-total-messages={messages.length}
-      className="stretch mx-auto flex w-full max-w-lg flex-col pt-10 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
+      className="stretch flex w-full flex-col p-5 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
     >
       <div className="flex flex-col gap-y-5">
         {messages.map((message) => (

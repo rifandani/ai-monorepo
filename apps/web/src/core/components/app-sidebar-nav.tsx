@@ -10,7 +10,7 @@ import { useTheme } from 'next-themes';
 
 export function AppSidebarNav() {
   return (
-    <SidebarNav className="sticky top-0 border-b">
+    <SidebarNav className="sticky top-0 z-10 border-b">
       <span className="flex items-center gap-x-4">
         <SidebarTrigger className="-mx-2" />
         <Separator className="h-6" orientation="vertical" />

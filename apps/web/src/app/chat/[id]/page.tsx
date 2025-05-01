@@ -1,6 +1,18 @@
 import { Chat } from '@/core/components/chat';
 import { loadChat } from '@/core/utils/filesystem';
 
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await props.params;
+  const messages = await loadChat(id); // load the chat messages
+  const message = messages.find((chat) => id === chat.id);
+
+  return {
+    title: message?.content.slice(0, 50) || 'Chat',
+  };
+}
+
 export default async function ChatDetail({
   params,
 }: { params: Promise<{ id: string }> }) {

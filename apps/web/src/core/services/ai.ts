@@ -1,3 +1,5 @@
+import type { Annotation, Research, SearchResult } from '@/core/schemas/ai';
+import { searchResultSchema } from '@/core/schemas/ai';
 import { type GoogleGenerativeAIProviderOptions, google } from '@ai-sdk/google';
 import {
   type DataStreamWriter,
@@ -11,14 +13,6 @@ import {
   tool,
 } from 'ai';
 import { z } from 'zod';
-
-// type MessagePart = IterableElement<Message['parts']>;
-export type Research = {
-  learnings: string[];
-  sources: SearchResult[];
-  questionsExplored: string[];
-  searchQueries: string[];
-};
 
 const flash20 = google('gemini-2.0-flash-001');
 /**
@@ -43,17 +37,6 @@ export const models = {
   pro25,
   embedding004,
 };
-
-const searchResultSchema = z.object({
-  title: z.string().describe('The title of the search result'),
-  content: z.string().describe('The content of the search result'),
-  url: z.string().describe('The url of the search result source'),
-  publishedDate: z
-    .string()
-    .datetime()
-    .describe('The date the search result was published'),
-});
-type SearchResult = z.infer<typeof searchResultSchema>;
 
 const SYSTEM_PROMPT = `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:
   - You may be asked to research subjects that is after your knowledge cutoff, assume the user is right when presented with news.
@@ -189,8 +172,9 @@ async function deepResearch(
   }
 
   dataStream.writeMessageAnnotation({
-    status: { title: `Generating search queries for "${prompt}"` },
-  });
+    type: 'deep-research',
+    data: { status: `Generating search queries for "${prompt}"` },
+  } satisfies Annotation);
   const searchQueries = await generateSearchQueries(
     prompt,
     breadth,
@@ -201,19 +185,28 @@ async function deepResearch(
   const subResults = await Promise.all(
     searchQueries.map(async ({ query, researchGoal }) => {
       dataStream.writeMessageAnnotation({
-        status: { title: `Searching the web for "${query}"` },
-      });
+        type: 'deep-research',
+        data: { status: `Searching the web for "${query}"` },
+      } satisfies Annotation);
       const results = await searchWeb(query);
+
       for (const source of results) {
         dataStream.writeMessageAnnotation({
-          source: { title: source.title, url: source.url },
-        });
+          type: 'deep-research',
+          data: {
+            source: {
+              title: source.title,
+              url: source.url,
+            },
+          },
+        } satisfies Annotation);
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       dataStream.writeMessageAnnotation({
-        status: { title: `Analyzing search results for "${query}"` },
-      });
+        type: 'deep-research',
+        data: { status: `Analyzing search results for "${query}"` },
+      } satisfies Annotation);
       const { learnings, followUpQuestions } = await generateLearnings(
         query,
         results,
@@ -224,10 +217,11 @@ async function deepResearch(
       // Make the recursive call
       const nextQuery = `Previous research goal: ${researchGoal}${` Follow-up directions: ${followUpQuestions.map((q) => `\n${q}`).join('')}`.trim()}`;
       dataStream.writeMessageAnnotation({
-        status: {
-          title: `Diving deeper to understand "${followUpQuestions.slice(0, 3).join(', ')}"`,
+        type: 'deep-research',
+        data: {
+          status: `Diving deeper to understand "${followUpQuestions.slice(0, 3).join(', ')}"`,
         },
-      });
+      } satisfies Annotation);
       const subResearch = await deepResearch(
         dataStream,
         nextQuery,
@@ -238,8 +232,9 @@ async function deepResearch(
 
       for (const source of subResearch.sources) {
         dataStream.writeMessageAnnotation({
-          source: { title: source.title, url: source.url },
-        });
+          type: 'deep-research',
+          data: { source: { title: source.title, url: source.url } },
+        } satisfies Annotation);
       }
 
       // Merge the research found at this level with the research in the child call.
@@ -319,8 +314,9 @@ export const tools = {
 
         for (const source of sources) {
           dataStream.writeMessageAnnotation({
-            source,
-          });
+            type: 'web-search',
+            data: { source },
+          } satisfies Annotation);
         }
 
         return {
@@ -411,8 +407,9 @@ export const tools = {
       }),
       execute: async ({ prompt, depth, breadth }) => {
         dataStream.writeMessageAnnotation({
-          status: { title: 'Beginning deep research' },
-        });
+          type: 'deep-research',
+          data: { status: 'Beginning deep research' },
+        } satisfies Annotation);
 
         const research = await deepResearch(
           dataStream,
@@ -422,13 +419,15 @@ export const tools = {
           undefined
         );
         dataStream.writeMessageAnnotation({
-          status: { title: 'Generating report...' },
-        });
+          type: 'deep-research',
+          data: { status: 'Generating report...' },
+        } satisfies Annotation);
 
         const report = await generateReport(prompt, research);
         dataStream.writeMessageAnnotation({
-          status: { title: 'Successfully generated report' },
-        });
+          type: 'deep-research',
+          data: { status: 'Successfully generated report' },
+        } satisfies Annotation);
 
         const sources = Array.from(
           new Map(
@@ -495,6 +494,33 @@ export const tools = {
       city: z.string().describe('the city to get the weather for'),
     }),
     // execute function removed to stop automatic execution (human in the loop)
+  }),
+  askQuestionTool: tool({
+    description:
+      'Ask a clarifying question with multiple options when more information is needed',
+    parameters: z.object({
+      question: z.string().describe('The main question to ask the user'),
+      options: z
+        .array(
+          z.object({
+            value: z.string().describe('Option identifier (always in English)'),
+            label: z.string().describe('Display text for the option'),
+          })
+        )
+        .describe('List of predefined options'),
+      allowsInput: z
+        .boolean()
+        .describe('Whether to allow free-form text input'),
+      inputLabel: z
+        .string()
+        .optional()
+        .describe('Label for free-form input field'),
+      inputPlaceholder: z
+        .string()
+        .optional()
+        .describe('Placeholder text for input field'),
+    }),
+    // execute function removed to enable frontend confirmation
   }),
 };
 

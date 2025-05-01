@@ -52,7 +52,6 @@ server.tool(
   async ({ name }) => {
     const path = `/pokemon/${name.toLowerCase()}`;
     const pokemon = await makePokeApiRequest<Pokemon>(path);
-    console.log(`🐦 ~ "server.ts" at line 53: path -> `, path);
 
     if (!pokemon) {
       return {

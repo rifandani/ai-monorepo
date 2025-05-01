@@ -132,6 +132,8 @@ export async function POST(req: Request) {
         }
       );
 
+      let startTime: number | null = null;
+
       const result = streamText({
         model,
         messages: processedMessages,
@@ -150,7 +152,23 @@ export async function POST(req: Request) {
           prefix: 'msgs',
           size: 16,
         }),
+        onChunk() {
+          if (startTime === null) {
+            startTime = Date.now();
+          }
+          // else {
+          //   const duration = Date.now() - startTime;
+
+          //   dataStream.writeMessageAnnotation({
+          //     type: 'metadata',
+          //     data: { duration },
+          //   } satisfies Annotation);
+          // }
+        },
         async onFinish({ response }) {
+          // reset the start time
+          startTime = null;
+
           // save the chat to storage
           await saveChat({
             id,

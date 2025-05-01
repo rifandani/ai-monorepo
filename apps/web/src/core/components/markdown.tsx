@@ -38,6 +38,41 @@ export function checkLatex(markdown: string): boolean {
 }
 
 const components: Partial<Components> = {
+  // table({ node, className, children, ...props }) {
+  //   return (
+  //     <Table className={className} {...props}>
+  //       {children}
+  //     </Table>
+  //   );
+  // },
+  // thead({ node, className, children, ...props }) {
+  //   return (
+  //     <Table.Header className={className} {...props}>
+  //       {children}
+  //     </Table.Header>
+  //   );
+  // },
+  // tbody({ node, className, children, ...props }) {
+  //   return (
+  //     <Table.Body className={className} {...props}>
+  //       {children}
+  //     </Table.Body>
+  //   );
+  // },
+  // td({ node, className, children, ...props }) {
+  //   return (
+  //     <Table.Cell className={className} {...props}>
+  //       {children}
+  //     </Table.Cell>
+  //   );
+  // },
+  // tr({ node, className, children, ...props }) {
+  //   return (
+  //     <Table.Row className={className} {...props}>
+  //       {children}
+  //     </Table.Row>
+  //   );
+  // },
   code({ node, className, children, ...props }) {
     if ((children as React.ReactNode[])?.length) {
       // biome-ignore lint/nursery/useCollapsedIf: <explanation>

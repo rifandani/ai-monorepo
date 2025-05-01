@@ -10,7 +10,9 @@ import {
   DisclosurePanel,
   DisclosureTrigger,
 } from '@/core/components/ui/disclosure';
+import type { MetadataAnnotation } from '@/core/schemas/ai';
 import { APPROVAL } from '@/core/services/ai';
+import { formatElapsedTime } from '@/core/utils/time';
 import type { LanguageModelV1Source } from '@ai-sdk/provider';
 import type { useChat } from '@ai-sdk/react';
 import { Icon } from '@iconify/react';
@@ -38,7 +40,6 @@ function PureChatMessage({
         key={message.id}
         data-testid={`message-${message.id}`}
         data-role={message.role}
-        data-createdat={message.createdAt?.toISOString()}
         className="group/message flex flex-col gap-y-2 whitespace-pre-wrap data-[role=user]:items-end"
       >
         {message.experimental_attachments?.map((attachment, index) =>
@@ -75,17 +76,31 @@ function PureChatMessage({
               // Check if this is the last part in the array
               const isLastPart = idx === (message.parts?.length ?? 0) - 1;
 
+              const metadata = message.annotations?.find(
+                (annotation): annotation is MetadataAnnotation =>
+                  annotation !== null &&
+                  typeof annotation === 'object' &&
+                  'type' in annotation &&
+                  annotation.type === 'metadata'
+              );
+
               return (
                 <React.Fragment key={`text-${part.text}`}>
                   <div
                     data-testid="chat-message-text"
                     className={twMerge(
-                      'flex flex-col gap-4',
+                      'relative flex flex-col gap-4',
                       message.role === 'user' &&
                         'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
                     )}
                   >
                     <Markdown>{part.text}</Markdown>
+                    {metadata && (
+                      <p className="absolute right-0 bottom-0 text-xs text-zinc-500">
+                        Completed in{' '}
+                        {formatElapsedTime(metadata.data?.duration)}
+                      </p>
+                    )}
                   </div>
 
                   {/* only show copy button if this is the last part */}

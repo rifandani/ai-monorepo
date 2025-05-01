@@ -1,24 +1,15 @@
 'use client';
 
 import { Markdown } from '@/core/components/markdown';
+import { Badge } from '@/core/components/ui/badge';
 import { Modal } from '@/core/components/ui/modal';
 import { ScrollArea } from '@/core/components/ui/scroll-area';
-import type { Research } from '@/core/services/ai';
+import type { DeepResearchAnnotation, Research } from '@/core/schemas/ai';
+import { formatElapsedTime } from '@/core/utils/time';
 import { Icon } from '@iconify/react';
 import type { JSONValue, ToolInvocation } from 'ai';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-
-interface StatusUpdate {
-  title: string;
-  description?: string;
-}
-
-function formatElapsedTime(ms: number) {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  return minutes > 0 ? `${minutes}m ${seconds % 60}s` : `${seconds}s`;
-}
 
 function useElapsedTime(state: ToolInvocation['state']) {
   const [startTime] = useState(Date.now());
@@ -40,7 +31,7 @@ function useElapsedTime(state: ToolInvocation['state']) {
 function DeepResearchStatus({
   updates,
 }: {
-  updates: StatusUpdate[];
+  updates: string[];
 }) {
   if (updates.length === 0) {
     return null;
@@ -52,7 +43,7 @@ function DeepResearchStatus({
     <div className="relative mt-6 rounded-md bg-zinc-100 px-4 py-2">
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentUpdate?.title}
+          key={currentUpdate}
           initial={{ opacity: 0, y: 20, rotateX: -90 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           exit={{ opacity: 0, y: -20, rotateX: 90 }}
@@ -63,13 +54,8 @@ function DeepResearchStatus({
           className="flex h-full w-full flex-col"
         >
           <p className="line-clamp-2 font-mono text-sm text-zinc-950 tracking-tight">
-            {currentUpdate?.title}
+            {currentUpdate}
           </p>
-          {currentUpdate?.description && (
-            <p className="px-4 py-2 font-mono text-xs text-zinc-950 tracking-tight">
-              {currentUpdate.description}
-            </p>
-          )}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -86,30 +72,18 @@ export function ChatMessageDeepResearch({
   const { state } = toolInvocation;
   const elapsedTime = useElapsedTime(state);
 
-  const statusUpdates: StatusUpdate[] = (annotations ?? [])
-    .filter(
-      (
-        annotation
-      ): annotation is { status: { title: string; description?: string } } =>
-        annotation !== null &&
-        typeof annotation === 'object' &&
-        'status' in annotation
-    )
-    .map((update) => update.status);
-
-  const sourceUpdates = Array.from<{
-    source: { title: string; url: string };
-  }>(
-    new Set(
-      annotations?.filter(
-        (
-          annotation
-        ): annotation is { source: { title: string; url: string } } =>
-          annotation !== null &&
-          typeof annotation === 'object' &&
-          'source' in annotation
-      )
-    )
+  const deepSearchAnnotations = (annotations ?? []).filter(
+    (annotation): annotation is DeepResearchAnnotation =>
+      annotation !== null &&
+      typeof annotation === 'object' &&
+      'type' in annotation &&
+      annotation.type === 'deep-research'
+  );
+  const statusUpdates = deepSearchAnnotations.map(
+    (annotation) => annotation.data?.status ?? ''
+  );
+  const sourceUpdates = Array.from(
+    new Set(deepSearchAnnotations.map((annotation) => annotation.data?.source))
   );
 
   if (state === 'result') {
@@ -125,7 +99,7 @@ export function ChatMessageDeepResearch({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto mb-4 w-full max-w-xl rounded-2xl border border-zinc-200"
+        className="mb-4 w-full rounded-2xl border border-zinc-200"
       >
         <div className="p-6">
           <div className="mb-6 flex items-center justify-between">
@@ -172,11 +146,16 @@ export function ChatMessageDeepResearch({
 
           {research.sources && research.sources.length > 0 && (
             <Modal>
-              <Modal.Trigger className="mx-2 cursor-pointer text-sm text-zinc-500 transition-colors hover:text-zinc-600">
-                Deep Research used{' '}
-                {Array.from(new Set(research.sources)).length} sources.
+              <Modal.Trigger className="cursor-pointer text-sm text-zinc-500 transition-colors hover:text-zinc-600">
+                <Badge shape="circle" className="flex items-center gap-2">
+                  <Icon icon="lucide:link" />
+                  {Array.from(new Set(research.sources)).length} sources found
+                </Badge>
               </Modal.Trigger>
-              <Modal.Content classNames={{ content: 'max-h-[75vh] max-w-3xl' }}>
+              <Modal.Content
+                size="2xl"
+                classNames={{ content: 'max-h-[75vh] max-w-3xl' }}
+              >
                 <Modal.Header>
                   <Modal.Title className="flex items-center gap-2 font-medium text-xl tracking-tight">
                     <Icon
@@ -208,7 +187,6 @@ export function ChatMessageDeepResearch({
                               className="font-medium transition-opacity hover:opacity-75"
                             >
                               <div className="mb-2 flex items-center gap-2">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 {/* <img
                                   src={source.favicon}
                                   alt="Favicon"
@@ -239,7 +217,7 @@ export function ChatMessageDeepResearch({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="mx-auto w-full max-w-2xl rounded-2xl border border-zinc-200"
+      className="w-full rounded-2xl border border-zinc-200"
     >
       <div className="p-6">
         <div className="mb-6 flex items-center justify-between">
@@ -266,11 +244,7 @@ export function ChatMessageDeepResearch({
               className="space-y-2"
             >
               <div className="text-sm text-zinc-500">
-                Sources found so far:{' '}
-                {
-                  Array.from(new Set(sourceUpdates.map((s) => s.source.url)))
-                    .length
-                }
+                Sources found so far: {sourceUpdates.length}
               </div>
             </motion.div>
           )}
