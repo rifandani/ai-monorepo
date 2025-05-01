@@ -1,3 +1,4 @@
+import type { Annotation } from '@/core/schemas/ai';
 import { models, processToolCalls, tools } from '@/core/services/ai';
 import { loadChat, saveChat } from '@/core/utils/filesystem';
 import {
@@ -156,18 +157,15 @@ export async function POST(req: Request) {
           if (startTime === null) {
             startTime = Date.now();
           }
-          // else {
-          //   const duration = Date.now() - startTime;
-
-          //   dataStream.writeMessageAnnotation({
-          //     type: 'metadata',
-          //     data: { duration },
-          //   } satisfies Annotation);
-          // }
         },
         async onFinish({ response }) {
-          // reset the start time
+          const duration = Date.now() - (startTime ?? 0);
           startTime = null;
+
+          dataStream.writeMessageAnnotation({
+            type: 'metadata',
+            data: { duration },
+          } satisfies Annotation);
 
           // save the chat to storage
           await saveChat({

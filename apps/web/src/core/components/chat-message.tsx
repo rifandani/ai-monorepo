@@ -96,7 +96,7 @@ function PureChatMessage({
                   >
                     <Markdown>{part.text}</Markdown>
                     {metadata && (
-                      <p className="absolute right-0 bottom-0 text-xs text-zinc-500">
+                      <p className="-bottom-4 absolute right-0 text-xs text-zinc-500">
                         Completed in{' '}
                         {formatElapsedTime(metadata.data?.duration)}
                       </p>
