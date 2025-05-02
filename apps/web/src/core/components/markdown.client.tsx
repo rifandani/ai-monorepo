@@ -1,6 +1,6 @@
 'use client';
 
-import { CodeBlock } from '@/core/components/code-block';
+import { CodeBlock } from '@/core/components/code-block.client';
 import { marked } from 'marked';
 // import mermaid from 'mermaid';
 import Link from 'next/link';

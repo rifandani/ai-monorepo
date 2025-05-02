@@ -1,4 +1,4 @@
-import { Chat } from '@/core/components/chat';
+import { Chat } from '@/core/components/chat.client';
 import { loadChat } from '@/core/utils/filesystem';
 
 export async function generateMetadata(props: {

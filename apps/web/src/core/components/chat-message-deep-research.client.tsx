@@ -1,6 +1,6 @@
 'use client';
 
-import { Markdown } from '@/core/components/markdown';
+import { Markdown } from '@/core/components/markdown.client';
 import { Badge } from '@/core/components/ui/badge';
 import { Modal } from '@/core/components/ui/modal';
 import { ScrollArea } from '@/core/components/ui/scroll-area';

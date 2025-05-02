@@ -1,7 +1,7 @@
 'use client';
 
-import { ChatField } from '@/core/components/chat-field';
-import { ChatMessage } from '@/core/components/chat-message';
+import { ChatField } from '@/core/components/chat-field.client';
+import { ChatMessage } from '@/core/components/chat-message.client';
 import { Button, Note } from '@/core/components/ui';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Markdown } from '@/core/components/markdown';
+import { Markdown } from '@/core/components/markdown.client';
 import { Icon } from '@iconify/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';

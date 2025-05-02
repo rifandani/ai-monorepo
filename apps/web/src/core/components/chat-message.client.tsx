@@ -1,8 +1,8 @@
 'use client';
 
-import { ChatMessageActions } from '@/core/components/chat-message-actions';
-import { ChatMessageDeepResearch } from '@/core/components/chat-message-deep-research';
-import { Markdown } from '@/core/components/markdown';
+import { ChatMessageActions } from '@/core/components/chat-message-actions.client';
+import { ChatMessageDeepResearch } from '@/core/components/chat-message-deep-research.client';
+import { Markdown } from '@/core/components/markdown.client';
 import { Badge, Link } from '@/core/components/ui';
 import { Button } from '@/core/components/ui/button';
 import {
