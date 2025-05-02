@@ -16,6 +16,7 @@ import { z } from 'zod';
 
 const systemPrompt = `
 You are a helpful assistant.
+Keep your responses concise and helpful.
 You have a list of tools that you can use to help the user. 
 If there is no tool to use, you should respond normally with a markdown formatted text.
 `;
@@ -90,9 +91,6 @@ export async function POST(req: Request) {
     return msg;
   });
 
-  // route model based on the user's prompt
-  const model = models.flash25;
-
   // combined tools
   const { mcpClient, tools: mcpTools } = await getStdioMcpClient();
 
@@ -102,6 +100,7 @@ export async function POST(req: Request) {
         ...mcpTools,
         generateImage: tools.generateImage,
         getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
+        createSpreadsheet: tools.createSpreadsheet(dataStream),
         ...(searchMode && {
           webSearchNative: tools.webSearchNative(dataStream),
         }),
@@ -136,7 +135,7 @@ export async function POST(req: Request) {
       let startTime: number | null = null;
 
       const result = streamText({
-        model,
+        model: models.flash25,
         messages: processedMessages,
         system: deepResearchMode ? deepResearchSystemPrompt : systemPrompt,
         tools: combinedTools,
@@ -144,7 +143,7 @@ export async function POST(req: Request) {
           ? ['webSearchNative']
           : deepResearchMode
             ? ['webSearch', 'deepResearch']
-            : [],
+            : undefined,
         // toolCallStreaming: true, // partial tool calls will be streamed as part of the data stream enabling client "partial-tool" state
         maxSteps: 10,
         experimental_transform: smoothStream(),

@@ -3,7 +3,7 @@
 import { ChatMessageActions } from '@/core/components/chat-message-actions.client';
 import { ChatMessageDeepResearch } from '@/core/components/chat-message-deep-research.client';
 import { Markdown } from '@/core/components/markdown.client';
-import { Badge, Link } from '@/core/components/ui';
+import { Badge, Card, Link, Loader } from '@/core/components/ui';
 import { Button } from '@/core/components/ui/button';
 import {
   Disclosure,
@@ -19,9 +19,16 @@ import { Icon } from '@iconify/react';
 import type { UIMessage } from 'ai';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEqual } from 'radashi';
-import React, { memo } from 'react';
+import React, { lazy, memo, Suspense } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { P, match } from 'ts-pattern';
+
+// required to avoid theme hydration mismatch
+const LazySpreadsheetEditor = lazy(() =>
+  import('@/core/components/sheet-editor.client').then((mod) => ({
+    default: mod.SpreadsheetEditor,
+  }))
+);
 
 function PureChatMessage({
   message,
@@ -182,12 +189,12 @@ function PureChatMessage({
                   .with(
                     { toolName: 'generateImage', state: 'call' },
                     (tool) => (
-                      <div
+                      <span
                         key={`generateImage-${tool.toolCallId}-generating`}
                         className="animate-pulse"
                       >
                         Generating image...
-                      </div>
+                      </span>
                     )
                   )
                   .with({ toolName: 'getPokemon', state: 'result' }, (tool) =>
@@ -203,12 +210,12 @@ function PureChatMessage({
                     )
                   )
                   .with({ toolName: 'getPokemon', state: 'call' }, (tool) => (
-                    <div
+                    <span
                       key={`getPokemon-${tool.toolCallId}-generating`}
                       className="animate-pulse"
                     >
                       Calling <code>{tool.toolName}</code> MCP server...
-                    </div>
+                    </span>
                   ))
                   .with(
                     { toolName: 'getWeatherInformation', state: 'call' },
@@ -239,7 +246,6 @@ function PureChatMessage({
                             Approve
                           </Button>
                           <Button
-                            appearance="outline"
                             intent="outline"
                             onClick={() =>
                               // will trigger a call to route handler.
@@ -261,6 +267,36 @@ function PureChatMessage({
                       annotations={message.annotations}
                     />
                   ))
+                  .with(
+                    { toolName: 'createSpreadsheet', state: 'call' },
+                    (tool) => (
+                      <span
+                        key={`createSpreadsheet-${tool.toolCallId}-generating`}
+                        className="animate-pulse"
+                      >
+                        Generating spreadsheet...
+                      </span>
+                    )
+                  )
+                  .with(
+                    { toolName: 'createSpreadsheet', state: 'result' },
+                    (tool) => (
+                      <Card>
+                        <Card.Header>
+                          <Card.Title>{tool.result.title}</Card.Title>
+                        </Card.Header>
+
+                        <Card.Content>
+                          <Suspense fallback={<Loader />}>
+                            <LazySpreadsheetEditor
+                              content={tool.result.csv}
+                              saveContent={() => {}}
+                            />
+                          </Suspense>
+                        </Card.Content>
+                      </Card>
+                    )
+                  )
                   .with(
                     { toolName: 'webSearch', state: P.not('result') },
                     () => (

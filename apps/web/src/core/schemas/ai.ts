@@ -27,10 +27,17 @@ export type WebSearchAnnotation = {
     source: LanguageModelV1Source;
   };
 };
+export type SpreadsheetAnnotation = {
+  type: 'spreadsheet';
+  data: {
+    status: string;
+  };
+};
 export type Annotation =
   | MetadataAnnotation
   | WebSearchAnnotation
-  | DeepResearchAnnotation;
+  | DeepResearchAnnotation
+  | SpreadsheetAnnotation;
 
 export const searchResultSchema = z.object({
   title: z.string().describe('The title of the search result'),

@@ -85,7 +85,6 @@ export function ChatField({
         <Button
           type="button"
           intent="outline"
-          appearance="outline"
           size="square-petite"
           shape="circle"
           className="-top-10 -translate-x-1/2 absolute left-1/2 z-20"

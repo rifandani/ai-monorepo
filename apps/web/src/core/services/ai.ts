@@ -1,4 +1,9 @@
-import type { Annotation, Research, SearchResult } from '@/core/schemas/ai';
+import type {
+  Annotation,
+  Research,
+  SearchResult,
+  SpreadsheetAnnotation,
+} from '@/core/schemas/ai';
 import { searchResultSchema } from '@/core/schemas/ai';
 import { type GoogleGenerativeAIProviderOptions, google } from '@ai-sdk/google';
 import {
@@ -38,7 +43,7 @@ export const models = {
   embedding004,
 };
 
-const SYSTEM_PROMPT = `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:
+const DEEP_RESEARCH_SYSTEM_PROMPT = `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:
   - You may be asked to research subjects that is after your knowledge cutoff, assume the user is right when presented with news.
   - The user is a highly experienced analyst, no need to simplify it, be as detailed as possible and make sure your response is correct.
   - Be highly organized.
@@ -52,6 +57,10 @@ const SYSTEM_PROMPT = `You are an expert researcher. Today is ${new Date().toISO
   - You may use high levels of speculation or prediction, just flag it for me.
   - You must provide links to sources used. Ideally these are inline e.g. [this documentation](https://documentation.com/this)
   `;
+
+export const SHEET_PROMPT = `
+You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
+`;
 
 async function searchWeb(query: string) {
   const {
@@ -90,7 +99,7 @@ async function generateSearchQueries(
   const {
     object: { queries },
   } = await generateObject({
-    system: SYSTEM_PROMPT,
+    system: DEEP_RESEARCH_SYSTEM_PROMPT,
     model: models.flash25,
     prompt: `Given the following prompt from the user, generate a list of SERP queries to research the topic. Ensure at least one is almost identical to the initial prompt. Return a maximum of ${breadth} queries, but feel free to return less if the original prompt is clear. Make sure each query is unique and not similar to each other: <prompt>${query}</prompt>\n\n${
       learnings
@@ -130,7 +139,7 @@ async function generateLearnings(
     object: { followUpQuestions, learnings },
   } = await generateObject({
     model: models.flash25,
-    system: SYSTEM_PROMPT,
+    system: DEEP_RESEARCH_SYSTEM_PROMPT,
     prompt: `Given the following contents from a SERP search for the query <query>${query}</query>, generate a list of learnings from the contents. Return a maximum of ${numberOfLearnings} learnings, but feel free to return less if the contents are clear. Make sure each learning is unique and not similar to each other. The learnings should be concise and to the point, as detailed and information dense as possible. Make sure to include any entities like people, places, companies, products, things, etc in the learnings, as well as any exact metrics, numbers, or dates. The learnings will be used to research the topic further.\n\n<contents>${results
       .map((content) => `<content>\n${content.content}\n</content>`)
       .join('\n')}</contents>`,
@@ -267,7 +276,7 @@ async function generateReport(prompt: string, research: Research) {
   const { learnings, sources, questionsExplored, searchQueries } = research;
   const { text: content } = await generateText({
     model: pro25,
-    system: `${SYSTEM_PROMPT}\n- Write in markdown sytax.`,
+    system: `${DEEP_RESEARCH_SYSTEM_PROMPT}\n- Write in markdown sytax.`,
     prompt: `Generate a comprehensive report focused on "${prompt}". The main research findings should be drawn from the learnings below, with the search queries and related questions explored serving as supplementary context. Focus on synthesizing the key insights into a coherent narrative around the main topic.
 
     <learnings>
@@ -495,7 +504,7 @@ export const tools = {
     }),
     // execute function removed to stop automatic execution (human in the loop)
   }),
-  askQuestionTool: tool({
+  askQuestion: tool({
     description:
       'Ask a clarifying question with multiple options when more information is needed',
     parameters: z.object({
@@ -522,6 +531,38 @@ export const tools = {
     }),
     // execute function removed to enable frontend confirmation
   }),
+  createSpreadsheet: (dataStream: DataStreamWriter) =>
+    tool({
+      description:
+        'Create a spreadsheet or excel for a writing or content creation activities in CSV format. This tool will generate the title and the content of the spreadsheet based on the input query.',
+      parameters: z.object({
+        query: z
+          .string()
+          .describe(
+            'The query what the user wants to generate the spreadsheet from'
+          ),
+      }),
+      execute: async ({ query }) => {
+        dataStream.writeMessageAnnotation({
+          type: 'spreadsheet',
+          data: {
+            status: 'Generating spreadsheet...',
+          },
+        } satisfies SpreadsheetAnnotation);
+
+        const { object } = await generateObject({
+          model: models.flash25,
+          system: SHEET_PROMPT,
+          prompt: query,
+          schema: z.object({
+            title: z.string().describe('The title of the spreadsheet'),
+            csv: z.string().describe('CSV data'),
+          }),
+        });
+
+        return object;
+      },
+    }),
 };
 
 // biome-ignore lint/correctness/noEmptyPattern: <explanation>
