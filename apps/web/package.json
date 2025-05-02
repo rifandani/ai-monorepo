@@ -19,7 +19,7 @@
   "dependencies": {
     "@ai-sdk/google": "1.2.13",
     "@formkit/auto-animate": "0.8.2",
-    "@google/generative-ai": "0.24.0",
+    "@google/generative-ai": "0.24.1",
     "@hookform/resolvers": "5.0.1",
     "@internationalized/date": "3.8.0",
     "@next/bundle-analyzer": "15.3.0",
