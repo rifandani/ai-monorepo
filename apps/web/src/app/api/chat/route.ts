@@ -27,7 +27,7 @@ Do not repeat the results of deepResearch tool calls.
 You can report (max 2 sentences) that the tool has been used successfully.
 `;
 
-async function getStdioMcpClient() {
+async function getPokemonStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
     command: 'node',
     args: ['../hono/src/mcp/stdio/dist/server.js'],
@@ -41,6 +41,31 @@ async function getStdioMcpClient() {
     schemas: {
       'get-pokemon': {
         parameters: z.object({ name: z.string() }),
+      },
+    },
+  });
+
+  return { mcpClient, tools };
+}
+
+async function markitdownStdioMcpClient() {
+  const stdioTransport = new Experimental_StdioMCPTransport({
+    command: 'docker',
+    args: ['run', '--rm', '-i', 'markitdown-mcp:latest'],
+  });
+
+  const mcpClient = await experimental_createMCPClient({
+    transport: stdioTransport,
+  });
+
+  const tools = await mcpClient.tools({
+    schemas: {
+      convert_to_markdown: {
+        parameters: z
+          .string()
+          .describe(
+            'The URI in which to convert the resource described by an http:, https:, file: or data: into markdown'
+          ),
       },
     },
   });
@@ -92,7 +117,7 @@ export async function POST(req: Request) {
   });
 
   // combined tools
-  const { mcpClient, tools: mcpTools } = await getStdioMcpClient();
+  const { mcpClient, tools: mcpTools } = await getPokemonStdioMcpClient();
 
   return createDataStreamResponse({
     execute: async (dataStream) => {

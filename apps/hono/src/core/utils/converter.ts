@@ -24,3 +24,31 @@ export function base64ToUint8Array(base64String: string): Uint8Array {
   }
   return outputArray;
 }
+
+/**
+ * Converts a File object to a data URI.
+ *
+ * @param file The File object to convert.
+ * @returns A data URI representing the file.
+ * @example
+ * ```typescript
+ * const file = new File([], 'example.txt', { type: 'text/plain' });
+ * const dataUri = await fileToDataUri(file);
+ * console.log(dataUri);
+ * ```
+ */
+export async function fileToDataUri(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  // Convert ArrayBuffer to Uint8Array
+  const uint8Array = new Uint8Array(arrayBuffer);
+  // Convert Uint8Array to binary string
+  let binaryString = '';
+  // Avoid potential stack overflow issues with String.fromCharCode.apply for large arrays
+  for (let i = 0; i < uint8Array.length; i++) {
+    binaryString += String.fromCharCode(uint8Array[i]);
+  }
+  // Encode binary string to base64
+  const base64String = btoa(binaryString);
+  const mimeType = file.type || 'application/octet-stream'; // Default MIME type
+  return `data:${mimeType};base64,${base64String}`;
+}

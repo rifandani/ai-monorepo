@@ -121,6 +121,7 @@ const getServer = () => {
       };
     }
   );
+
   return server;
 };
 

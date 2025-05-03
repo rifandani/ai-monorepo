@@ -23,7 +23,8 @@
     "mcp:stream:client": "node ../../node_modules/@modelcontextprotocol/sdk/dist/esm/examples/client/simpleStreamableHttp.js",
     "mcp:stdio:server:build": "dotenvx run -- tsc src/mcp/stdio/server.ts --outDir src/mcp/stdio/dist --target es2023 --module nodenext",
     "mcp:stdio:server": "dotenvx run -- node src/mcp/stdio/dist/server.js",
-    "mcp:stdio:client": "dotenvx run -- tsx src/mcp/stdio/client.ts"
+    "mcp:stdio:client": "dotenvx run -- tsx src/mcp/stdio/client.ts",
+    "mcp:markitdown:client": "dotenvx run -- tsx src/mcp/markitdown/client.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.13",

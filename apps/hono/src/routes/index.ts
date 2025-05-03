@@ -4,6 +4,7 @@ import { geminiApp } from '@/routes/gemini';
 import { imagesApp } from '@/routes/images';
 import { llmsTextApp } from '@/routes/llms-text';
 import { mcpApp } from '@/routes/mcp';
+import { mcpMarkitdownApp } from '@/routes/mcp-markitdown';
 import { ollamaApp } from '@/routes/ollama';
 import { ventureCapitalApp } from '@/routes/venture-capital';
 import { Scalar } from '@scalar/hono-api-reference';
@@ -18,6 +19,7 @@ export function routes(
   app.route('/ollama', ollamaApp);
   app.route('/gemini', geminiApp);
   app.route('/mcp', mcpApp);
+  app.route('/mcp-markitdown', mcpMarkitdownApp);
   app.route('/venture-capital', ventureCapitalApp);
   app.route('/deep-research', deepResearchApp);
   app.route('/images', imagesApp);
