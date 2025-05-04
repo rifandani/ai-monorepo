@@ -137,15 +137,15 @@ mcpApp.post(
     },
   }),
   async (c) => {
+    // Node.js-compatible request and response objects for WinterTC (fetch-like) runtimes, such as Cloudflare Workers, Bun, Deno and Fastly Compute.
     const { req, res } = toReqRes(c.req.raw);
 
     const server = getServer();
 
     try {
-      const transport: StreamableHTTPServerTransport =
-        new StreamableHTTPServerTransport({
-          sessionIdGenerator: undefined,
-        });
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+      });
 
       await server.connect(transport);
 

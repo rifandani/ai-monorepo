@@ -29,8 +29,11 @@ You can report (max 2 sentences) that the tool has been used successfully.
 
 async function getPokemonStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
-    command: 'node',
-    args: ['../hono/src/mcp/stdio/dist/server.js'],
+    // use this if we want to build it first and run the server as javascript
+    // command: 'node',
+    // args: ['../hono/src/mcp/stdio/dist/server.js'],
+    command: 'npx',
+    args: ['tsx', '../hono/src/mcp/stdio/server.ts'],
   });
 
   const mcpClient = await experimental_createMCPClient({
@@ -48,6 +51,7 @@ async function getPokemonStdioMcpClient() {
   return { mcpClient, tools };
 }
 
+// FIXME: this is not working
 async function markitdownStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
     command: 'docker',

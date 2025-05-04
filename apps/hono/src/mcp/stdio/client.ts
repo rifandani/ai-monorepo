@@ -11,8 +11,13 @@ async function main() {
   try {
     // using StdioClientTransport from @modelcontextprotocol/sdk -> Error: spawn node ENOENT
     const stdioTransport = new Experimental_StdioMCPTransport({
-      command: 'node',
-      args: ['./src/mcp/stdio/dist/server.js'],
+      // use this if we want to build it first and run the server as javascript
+      // command: 'node',
+      // args: ['./src/mcp/stdio/dist/server.js'],
+      // by using tsx we can run the server as typescript without building it into javascript
+      command: 'npx',
+      args: ['tsx', './src/mcp/stdio/server.ts'],
+      // just for example, this how we pass env variables
       env: {
         POKE_API_BASE: 'https://pokeapi.co/api/v2',
       },
