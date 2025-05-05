@@ -50,7 +50,8 @@ import { describeRoute } from 'hono-openapi';
 import { resolver, validator as zValidator } from 'hono-openapi/zod';
 import { stream } from 'hono/streaming';
 import { endTime, startTime } from 'hono/timing';
-import pdf from 'pdf-parse/lib/pdf-parse.js';
+// import pdf from 'pdf-parse/lib/pdf-parse.js';
+import { extractText, getDocumentProxy } from 'unpdf';
 import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
@@ -1698,7 +1699,9 @@ geminiApp.post(
     'json',
     z.object({
       prompt: z.string().openapi({
-        example: 'Where is the delivery address?',
+        // example: 'Where is the delivery address?',
+        example:
+          "When we hunting memory leaks with React Native DevTools, React Native DevTools offers three ways to profile your app's memory, what is it?",
       }),
     })
   ),
@@ -1707,17 +1710,23 @@ geminiApp.post(
 
     // read the PDF file as a buffer
     const pdfBuffer = await readFile(
-      path.join(__dirname, '../core/assets/pdf/gofood.pdf')
+      // path.join(__dirname, '../core/assets/pdf/gofood.pdf') // simple pdf
+      path.join(__dirname, '../core/assets/pdf/react-native-optimization.pdf') // large pdf
     );
+
     // parse the PDF buffer to extract text
-    const pdfData = await pdf(pdfBuffer);
-    const pdfText = pdfData.text;
+    // const pdfData = await pdf(pdfBuffer);
+    // const pdfText = pdfData.text;
+
+    // load the PDF file into a PDF.js document
+    const pdf = await getDocumentProxy(new Uint8Array(pdfBuffer));
+    const { text } = await extractText(pdf, { mergePages: true });
 
     // split file contents into chunks by paragraphs or double newlines
-    const chunks = pdfText
+    const chunks = text
       .split('\n\n') // Split by double newline, common paragraph separator
       .map((chunk) => chunk.trim().replace(/\n/g, ' ')) // Replace single newlines within chunks with spaces and trim
-      .filter((chunk) => chunk.length > 50); // Filter out very short chunks
+      .filter((chunk) => chunk.length > 30); // Filter out very short chunks
 
     // embed the file chunks in batches concurrently
     const batchSize = 100; // gemini can only embed 100 chunks per request
@@ -1751,15 +1760,12 @@ geminiApp.post(
       // We need to map the index `idx` back to the original chunk index carefully.
       // The current `chunks[idx]` mapping might be incorrect if some batches failed.
 
-      // Let's recalculate the correct chunk index mapping based on successful batches
-      // This is complex. A simpler approach might be needed if batches fail often.
-      // For now, assuming all succeed or failure doesn't disrupt order significantly for demo.
-      // A robust solution would track original indices through batching and results.
       if (_embed) {
         // Ensure embed exists (might be undefined if a batch failed)
         db.push({
           embedding: _embed,
-          // WARNING: This index mapping assumes all batches succeeded and order is preserved.
+          // NOTE: This index mapping assumes all batches succeeded and order is preserved.
+          // A robust solution would track original indices through batching and results.
           // If batches can fail, this mapping `chunks[idx]` is potentially wrong.
           value: chunks[idx],
         });
@@ -1779,7 +1785,7 @@ geminiApp.post(
         similarity: cosineSimilarity(embedding, item.embedding),
       }))
       .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 3)
+      .slice(0, 3) // top 3
       .map((r) => r.document.value)
       .join('\n');
 
