@@ -36,6 +36,7 @@
     "@hono/otel": "0.1.1",
     "@hono/zod-validator": "0.4.3",
     "@modelcontextprotocol/sdk": "1.10.2",
+    "@opentelemetry/auto-instrumentations-node": "0.58.1",
     "@opentelemetry/sdk-node": "0.200.0",
     "@opentelemetry/sdk-trace-node": "2.0.0",
     "@scalar/hono-api-reference": "0.8.1",

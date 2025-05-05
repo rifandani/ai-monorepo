@@ -106,10 +106,6 @@ geminiApp.post(
       model: models.flash25,
       system: 'Answer in pirate language',
       messages,
-      experimental_telemetry: {
-        isEnabled: true,
-        functionId: 'generate',
-      },
     });
 
     return c.json({
@@ -1549,9 +1545,6 @@ geminiApp.post(
       },
       // toolChoice: 'required',
       maxSteps: 10,
-      onStepFinish: ({ toolResults }) => {
-        logger.info(toolResults, '[onStepFinish]: Step results');
-      },
       system:
         'You are an expert mathematician solving math problems. ' +
         'Reason step by step. ' +

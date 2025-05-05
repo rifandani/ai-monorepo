@@ -4,6 +4,7 @@ import type { Variables } from '@/core/types/hono';
 import { routes } from '@/routes';
 // import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { InMemorySpanExporter } from '@opentelemetry/sdk-trace-node';
 import { logger } from '@workspace/core/utils/logger';
@@ -27,6 +28,7 @@ const memorySpanExporter = new InMemorySpanExporter();
 const sdk = new NodeSDK({
   serviceName: 'ai-monorepo:hono',
   traceExporter: memorySpanExporter, // new ConsoleSpanExporter(),
+  instrumentations: [getNodeAutoInstrumentations()],
 });
 
 sdk.start();

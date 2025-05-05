@@ -2,7 +2,9 @@
 
 ## todo
 
+- [ ] example of using llama-index
 - [ ] example of using langchain
+- [ ] integrate LLM observabilty and evals (e.g promptfoo, phoenix, langfuse, helicone)
 
 ## How to MCP
 
@@ -81,3 +83,7 @@ This will start the inspector server on `http://127.0.0.1:6274/`.
 - Testing the `Streamable HTTP` example. Start the hono dev server first. Then, in "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3333/mcp`.
 
 - Testing the `Streamable HTTP` example from the `@modelcontextprotocol/sdk` node_modules. In "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3000/mcp` (it's using express).
+
+## How to Observability and Evals with `langfuse`
+
+We use `langfuse` to observe and evaluate our LLM usage.

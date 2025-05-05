@@ -2,7 +2,7 @@
   "name": "ai-monorepo",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "bun@1.2.9",
+  "packageManager": "bun@1.2.12",
   "description": "AI Monorepo",
   "author": "Tri Rizeki Rifandani",
   "engines": {
@@ -34,7 +34,14 @@
     "tsx": "4.19.3",
     "ultracite": "4.2.1"
   },
-  "trustedDependencies": ["@biomejs/biome", "esbuild", "sharp"],
+  "trustedDependencies": [
+    "@biomejs/biome",
+    "@playwright/browser-chromium",
+    "better-sqlite3",
+    "esbuild",
+    "protobufjs",
+    "sharp"
+  ],
   "commitlint": {
     "extends": ["@commitlint/config-conventional"]
   },
