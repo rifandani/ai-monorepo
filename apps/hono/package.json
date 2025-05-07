@@ -26,7 +26,9 @@
     "mcp:stdio:server:js:run": "dotenvx run -- node src/mcp/stdio/dist/server.js",
     "mcp:stdio:server": "dotenvx run -- tsx src/mcp/stdio/server.ts",
     "mcp:stdio:client": "dotenvx run -- tsx src/mcp/stdio/client.ts",
-    "mcp:markitdown:client": "dotenvx run -- tsx src/mcp/markitdown/client.ts"
+    "mcp:markitdown:client": "dotenvx run -- tsx src/mcp/markitdown/client.ts",
+    "eval": "dotenvx run -- promptfoo eval --config promptfoo/*",
+    "eval:view": "dotenvx run -- promptfoo view -y"
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.13",
@@ -70,6 +72,7 @@
     "@types/pg": "8.11.13",
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "0.31.0",
+    "promptfoo": "0.112.3",
     "tsx": "4.19.3",
     "typescript": "5.8.3",
     "unpdf": "1.0.4"

@@ -1,0 +1,10 @@
+[
+  {
+    "role": "system",
+    "content": "You are an expert literary translator."
+  },
+  {
+    "role": "user",
+    "content": "Translate this text to {{targetLanguage}}, preserving tone and cultural nuances: {{text}}"
+  }
+]

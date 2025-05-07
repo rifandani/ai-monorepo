@@ -84,6 +84,24 @@ This will start the inspector server on `http://127.0.0.1:6274/`.
 
 - Testing the `Streamable HTTP` example from the `@modelcontextprotocol/sdk` node_modules. In "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3000/mcp` (it's using express).
 
-## How to Observability and Evals with `langfuse`
+## How to Evals and Red Teaming with `promptfoo`
 
-We use `langfuse` to observe and evaluate our LLM usage.
+We use `promptfoo` to eval and red teaming our LLM usage. To run the evals, you can use the following command:
+
+```bash
+# use npm to view better logs in terminal
+npm run eval
+
+# or, if you run it from the root
+npm run eval -w @workspaces/hono
+```
+
+To view the evals results, you can use the following command:
+
+```bash
+# use npm to view better logs in terminal
+npm run eval:view
+
+# or, if you run it from the root
+npm run eval:view -w @workspaces/hono
+```
