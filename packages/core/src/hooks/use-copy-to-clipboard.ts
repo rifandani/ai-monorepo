@@ -11,6 +11,11 @@ export interface useCopyToClipboardProps {
  * @param timeout - Timeout for the copied state
  * @returns isCopied - Whether the text is copied
  * @returns copyToClipboard - Function to copy text to clipboard
+ *
+ * @example
+ * ```tsx
+ * const { isCopied, copyToClipboard } = useCopyToClipboard();
+ * ```
  */
 export function useCopyToClipboard(
   { timeout }: useCopyToClipboardProps = { timeout: 1_000 }

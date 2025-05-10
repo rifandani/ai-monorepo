@@ -10,6 +10,15 @@ interface UseAutoScrollOptions {
 
 /**
  * Custom hook to auto-scroll to a target element and pause when the user scrolls away.
+ *
+ * @example
+ * ```tsx
+ * const { anchorRef, isAutoScroll } = useAutoScroll({
+ *    isLoading: status === 'submitted' || status === 'streaming',
+ *    dependency: messages.length,
+ *    isStreaming: () => status === 'streaming',
+ *  });
+ * ```
  */
 export function useAutoScroll({
   isLoading,
