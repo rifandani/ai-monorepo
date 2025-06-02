@@ -2,7 +2,7 @@
   "name": "ai-monorepo",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "bun@1.2.12",
+  "packageManager": "bun@1.2.15",
   "description": "AI Monorepo",
   "author": "Tri Rizeki Rifandani",
   "engines": {

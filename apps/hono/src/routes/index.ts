@@ -22,7 +22,7 @@ export function routes(
   app.route('/mcp-markitdown', mcpMarkitdownApp);
   app.route('/venture-capital', ventureCapitalApp);
   app.route('/deep-research', deepResearchApp);
-  app.route('/images', imagesApp);
+  app.route('/images', imagesApp); // run `db:up` first
   app.route('/llms-text', llmsTextApp);
 
   app.get(
