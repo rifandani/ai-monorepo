@@ -71,15 +71,45 @@ export const gofoodSchema = z.object({
   }),
 });
 export const qualityMetricsSchema = z.object({
-  hasCallToAction: z.boolean().openapi({
-    example: true,
-  }),
-  emotionalAppeal: z.number().min(1).max(10).openapi({
+  hasCallToAction: z
+    .boolean()
+    .describe('Whether the copy has a call to action')
+    .openapi({
+      example: true,
+    }),
+  emotionalAppeal: z
+    .number()
+    .min(1)
+    .max(10)
+    .describe('Emotional appeal of the copy')
+    .openapi({
+      example: 7,
+    }),
+  clarity: z.number().min(1).max(10).describe('Clarity of the copy').openapi({
     example: 7,
   }),
-  clarity: z.number().min(1).max(10).openapi({
-    example: 7,
-  }),
+});
+export const reviewCodeSchema = z.object({
+  issues: z.array(z.string().describe('Issues found in the code')),
+  riskLevel: z
+    .enum(['low', 'medium', 'high'])
+    .describe('Risk level of the issues'),
+  suggestions: z.array(z.string().describe('Suggestions to fix the issues')),
+});
+export const implementationPlanFileSchema = z.object({
+  purpose: z.string().describe('Purpose of the file'),
+  filePath: z.string().describe('File path'),
+  changeType: z.enum(['create', 'modify', 'delete']).describe('Type of change'),
+});
+export const implementationPlanImplementationSchema = z.object({
+  explanation: z.string().describe('Explanation of the implementation changes'),
+  code: z.string().describe('Code of the implementation change'),
+});
+export const implementationPlanSchema = z.object({
+  files: z.array(implementationPlanFileSchema),
+  estimatedComplexity: z
+    .enum(['low', 'medium', 'high'])
+    .describe('Estimated complexity of the implementation'),
 });
 
 export const promptSchema = z.string().openapi({
@@ -241,9 +271,22 @@ const flash20safety = google('gemini-2.0-flash-001', {
     },
   ],
 });
-const flash25 = google('gemini-2.5-flash-preview-04-17');
-const pro25 = google('gemini-2.5-pro-exp-03-25');
+/**
+ * Implicit caching is enabled on Gemini 2.5 models by default.
+ * If a request contains content that is a cache hit, they automatically pass the cost savings back to us.
+ */
+const flash25 = google('gemini-2.5-flash-preview-05-20'); // previously 04-17
+const pro25 = google('gemini-2.5-pro-exp-05-06'); // previously 03-25
+/**
+ * Input token limit: 2,048
+ * Output dimension size: 768
+ */
 const embedding004 = google.textEmbeddingModel('text-embedding-004');
+/**
+ * Input token limit: 8,192
+ * Output dimension size: Elastic, supports: 3072, 1536, or 768
+ */
+const geminiEmbedding = google.textEmbeddingModel('gemini-embedding-exp-03-07');
 
 export const cacheManager = new GoogleAICacheManager(
   process.env.GOOGLE_GENERATIVE_AI_API_KEY as string
@@ -262,8 +305,9 @@ export const models = {
   flash20search,
   flash20safety,
   flash25,
-  // flash25safety, // not supported
-  // flash25search, // not supported
+  // flash25safety, // not supported as of May 2025
+  // flash25search, // not supported as of May 2025
   pro25,
   embedding004,
+  geminiEmbedding,
 };

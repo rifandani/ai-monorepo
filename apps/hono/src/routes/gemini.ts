@@ -8,10 +8,14 @@ import {
   embeddingUsageSchema,
   fileSchema,
   gofoodSchema,
+  implementationPlanFileSchema,
+  implementationPlanImplementationSchema,
+  implementationPlanSchema,
   mockUserSchema,
   promptSchema,
   qualityMetricsSchema,
   reasoningDetailSchema,
+  reviewCodeSchema,
   textSchema,
   usageSchema,
 } from '@/core/api/ai';
@@ -20,6 +24,7 @@ import { CACHE_CONTENT_EXPLICIT_CONTENT } from '@/core/constants/cache';
 import type { Variables } from '@/core/types/hono';
 import { cached } from '@/core/utils/middleware';
 import {
+  answerTool,
   calculateTool,
   getCityAttractionTool,
   getWeatherTool,
@@ -82,15 +87,30 @@ geminiApp.post(
     },
   }),
   zValidator(
-    'form',
+    'json',
     z.object({
       prompt: promptSchema,
     })
   ),
   async (c) => {
-    const { prompt } = c.req.valid('form');
+    const { prompt } = c.req.valid('json');
 
+    /**
+     * Sometimes you need the AI to act in a certain way no matter what prompt it receives.
+     * Something like giving it a role, direction, or a certain set of instructions.
+     * Or any other additional data/context that you want to provide to the AI, so that it could know what to do.
+     */
+    const system = 'Answer in pirate language';
+    /**
+     * It's pretty common if you're building any kind of chat bot to want to keep track of the conversation history.
+     * This is so the LLM has context over the conversation you've already had.
+     * So you can ask follow-up questions without having to rephrase your question every time.
+     */
     const messages: CoreMessage[] = [
+      {
+        role: 'system',
+        content: system,
+      },
       {
         role: 'user',
         content: [
@@ -103,9 +123,14 @@ geminiApp.post(
     ];
 
     const result = await generateText({
+      /**
+       * we can hot swap the model with like openai, anthropic, etc.
+       * no major breaking changes, just change the model.
+       */
       model: models.flash25,
-      system: 'Answer in pirate language',
       messages,
+      // system,
+      // prompt,
     });
 
     return c.json({
@@ -392,17 +417,12 @@ geminiApp.post(
       }),
     });
 
-    for await (const textPart of result.textStream) {
-      // biome-ignore lint/suspicious/noConsoleLog: aaa
-      // biome-ignore lint/suspicious/noConsole: aaa
-      console.log(textPart);
-    }
-
     // Mark the response as a v1 data stream (for AI SDK UI client)
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
-    return stream(ctx, (stream) => stream.pipe(result.toDataStream({})));
+    // use the `toDataStream` method to get a data stream
+    return stream(ctx, (stream) => stream.pipe(result.textStream));
   }
 );
 
@@ -511,12 +531,13 @@ geminiApp.post(
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
-    return stream(ctx, async (stream) => {
+    return stream(ctx, (stream) => {
+      return stream.pipe(result.textStream);
       // or use fullStream to get different types of events, including partial objects, errors, and finish events
-      for await (const objectPart of result.partialObjectStream) {
-        await stream.write(JSON.stringify(objectPart));
-        // await stream.writeln('');
-      }
+      // for await (const objectPart of result.partialObjectStream) {
+      //   await stream.write(JSON.stringify(objectPart));
+      //   // await stream.writeln('');
+      // }
     });
   }
 );
@@ -648,6 +669,11 @@ geminiApp.post(
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
+    /**
+     * Embeddings are numerical representations of text (or other media formats) that capture relationships between inputs.
+     * Text embeddings work by converting text into arrays of floating point numbers, called vectors.
+     * The length of the embedding array is called the vector's dimensionality.
+     */
     const result = await embed({
       model: models.embedding004,
       value: prompt,
@@ -702,7 +728,7 @@ geminiApp.post(
           'The text query to match the predefined values. The query will be embedded and compared to the predefined values.'
         )
         .openapi({
-          example: 'Nasi Goreng',
+          example: 'Hamburger',
         }),
     })
   ),
@@ -734,7 +760,7 @@ geminiApp.post(
       /**
        * A high value (close to 1) indicates that the vectors are very similar, while a low value (close to -1) indicates that they are different.
        */
-      distance: cosineSimilarity(embedding, searchTermResult.embedding),
+      distance: cosineSimilarity(searchTermResult.embedding, embedding),
     }));
 
     return ctx.json({
@@ -778,7 +804,7 @@ geminiApp.post(
 
     startTime(ctx, 'cache.create');
     const { name: cachedContent } = await cacheManager.create({
-      displayName: 'React Native Optimization, and Food Recipes',
+      displayName: 'React Native Optimization',
       model: cacheModelId,
       contents: [
         {
@@ -896,16 +922,41 @@ geminiApp.post(
   zValidator(
     'json',
     z.object({
-      prompt: promptSchema,
+      prompt: z.string().describe('The prompt to generate text').openapi({
+        /**
+         * this will result to -> "I'm sorry, I don't have the information about the capital of Japan. I can only use the tools available to me."
+         * this is because the LLM only focus on the provided tools
+         * for LLM to use the tool while also support general conversation, we need to instruct using system prompt
+         */
+        // example: 'What is the capital of Japan?',
+        example: 'Log this message: What is the capital of Japan?',
+      }),
     })
   ),
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
+    // const system = `
+    //   You are a helpful assistant that can answer questions and use tools to get information.
+    //   If there is no tool to use, you should respond normally by answering the question.
+    // `;
+
+    /**
+     * Function calling lets you connect models to external tools and APIs.
+     * Instead of generating text responses, the model understands when to call specific functions and provides the necessary parameters to execute real-world actions.
+     * This allows the model to act as a bridge between natural language and real-world actions and data.
+     * - Augment Knowledge: Access information from external sources like databases, APIs, and knowledge bases.
+     * - Extend Capabilities: Use external tools to perform computations and extend the limitations of the model, such as using a calculator or creating charts.
+     * - Take Actions: Interact with external systems using APIs, such as scheduling appointments, creating invoices, sending emails, or controlling smart home devices
+     */
     const result = await generateText({
       model: models.flash20,
       prompt,
+      // system,
       tools: {
+        /**
+         * the LLM itself does not execute the tool, but rather our server, that's why we can see the console log in our server, not in google server
+         */
         logToConsoleTool,
       },
     });
@@ -959,14 +1010,22 @@ geminiApp.post(
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
+    const messages: CoreMessage[] = [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: prompt }],
+      },
+    ];
+
+    /**
+     * Aside from tool calls to do things in the world,
+     * LLMs can also react to the information they receive from their tools.
+     * This can create a powerful feedback loop where the LLM is continually grounding itself in the real world.
+     * And this feedback loop is what most people, including Anthropic, call "agents".
+     */
     const result = await generateText({
-      model: models.flash25,
-      messages: [
-        {
-          role: 'user',
-          content: [{ type: 'text', text: prompt }],
-        },
-      ],
+      model: models.flash20,
+      messages,
       tools: {
         getWeatherTool,
         getCityAttractionTool,
@@ -991,6 +1050,8 @@ geminiApp.post(
       Use sequential processing (prompt chaining) workflow.
       The simplest workflow pattern executes steps in a predefined order.
       Each step's output becomes input for the next step, creating a clear chain of operations.
+      This workflow is ideal for situations where the task can be easily and cleanly decomposed into fixed subtasks. 
+      The main goal is to trade off latency for higher accuracy, by making each LLM call an easier task.
     `,
     responses: {
       200: {
@@ -1022,13 +1083,13 @@ geminiApp.post(
 
     // First step: Generate marketing copy with lower cost model
     const { text: copy } = await generateText({
-      model: models.flash25,
+      model: models.flash20,
       prompt: `Write persuasive marketing copy for: ${prompt}. Focus on benefits and emotional appeal.`,
     });
 
-    // Second step: Perform quality check on copy with same model
+    // Second step: Perform first quality check on copy with same model
     const { object: qualityMetrics } = await generateObject({
-      model: models.flash25,
+      model: models.flash20,
       schema: qualityMetricsSchema,
       prompt: `Evaluate this marketing copy for:
     1. Presence of call to action (true/false)
@@ -1070,6 +1131,8 @@ geminiApp.post(
     description: `
       This pattern allows the model to make decisions about which path to take through a workflow based on context and intermediate results.
       The model acts as an intelligent router, directing the flow of execution between different branches of your workflow.
+      Routing works well for complex tasks where there are distinct categories that are better handled separately, 
+      and where classification can be handled accurately, either by an LLM or a more traditional classification model/algorithm.
     `,
     responses: {
       200: {
@@ -1112,17 +1175,13 @@ geminiApp.post(
     const { object: classification } = await generateObject({
       model: models.flash25,
       schema: z.object({
-        reasoning: z.string(),
-        type: z.enum(['general', 'refund', 'technical']),
-        complexity: z.enum(['simple', 'complex']),
+        reasoning: z.string().describe('Brief reasoning for classification'),
+        type: z.enum(['general', 'refund', 'technical']).describe('Query type'),
+        complexity: z
+          .enum(['simple', 'complex'])
+          .describe('Complexity of the query'),
       }),
-      prompt: `Classify this customer query:
-    ${prompt}
-
-    Determine:
-    1. Query type (general, refund, or technical)
-    2. Complexity (simple or complex)
-    3. Brief reasoning for classification`,
+      prompt: `Classify this customer query: ${prompt}`,
     });
 
     /**
@@ -1132,7 +1191,7 @@ geminiApp.post(
     const result = await generateText({
       model:
         classification.complexity === 'simple'
-          ? models.flash25
+          ? models.flash20
           : models.flash25,
       system: {
         general:
@@ -1157,6 +1216,8 @@ geminiApp.post(
   describeRoute({
     description: `
       This pattern takes advantage of parallel execution to improve efficiency while maintaining the benefits of structured workflows.
+      Parallelization is effective when the divided subtasks can be parallelized for speed, or when multiple perspectives or attempts are needed for higher confidence results. 
+      For complex tasks with multiple considerations, LLMs generally perform better when each consideration is handled by a separate LLM call, allowing focused attention on each specific aspect.
     `,
     responses: {
       200: {
@@ -1167,15 +1228,10 @@ geminiApp.post(
               z.object({
                 text: textSchema,
                 reviews: z.array(
-                  z.object({
-                    type: z.enum([
-                      'security',
-                      'performance',
-                      'maintainability',
-                    ]),
-                    issues: z.array(z.string()),
-                    riskLevel: z.enum(['low', 'medium', 'high']),
-                    suggestions: z.array(z.string()),
+                  reviewCodeSchema.extend({
+                    type: z
+                      .enum(['security', 'performance', 'maintainability'])
+                      .describe('Type of the issue'),
                   })
                 ),
               })
@@ -1204,11 +1260,7 @@ geminiApp.post(
           model: models.flash25,
           system:
             'You are an expert in code security. Focus on identifying security vulnerabilities, injection risks, and authentication issues.',
-          schema: z.object({
-            issues: z.array(z.string()),
-            riskLevel: z.enum(['low', 'medium', 'high']),
-            suggestions: z.array(z.string()),
-          }),
+          schema: reviewCodeSchema,
           prompt: `Review this code:
       ${prompt}`,
         }),
@@ -1217,11 +1269,7 @@ geminiApp.post(
           model: models.flash25,
           system:
             'You are an expert in code performance. Focus on identifying performance bottlenecks, memory leaks, and optimization opportunities.',
-          schema: z.object({
-            issues: z.array(z.string()),
-            riskLevel: z.enum(['low', 'medium', 'high']),
-            suggestions: z.array(z.string()),
-          }),
+          schema: reviewCodeSchema,
           prompt: `Review this code:
       ${prompt}`,
         }),
@@ -1230,11 +1278,7 @@ geminiApp.post(
           model: models.flash25,
           system:
             'You are an expert in code quality. Focus on code structure, readability, and adherence to best practices.',
-          schema: z.object({
-            issues: z.array(z.string()),
-            riskLevel: z.enum(['low', 'medium', 'high']),
-            suggestions: z.array(z.string()),
-          }),
+          schema: reviewCodeSchema,
           prompt: `Review this code:
       ${prompt}`,
         }),
@@ -1267,6 +1311,11 @@ geminiApp.post(
     description: `
       In this pattern, a primary model (orchestrator) coordinates the execution of specialized workers. 
       Each worker is optimized for a specific subtask, while the orchestrator maintains overall context and ensures coherent results. 
+
+      This workflow is well-suited for complex tasks where you can't predict the subtasks needed 
+      (in coding, for example, the number of files that need to be changed and the nature of the change in each file likely depend on the task). 
+      Whereas it's topographically similar, the key difference from parallelization is its flexibility—subtasks aren't pre-defined, 
+      but determined by the orchestrator based on the specific input.
     `,
     responses: {
       200: {
@@ -1275,27 +1324,11 @@ geminiApp.post(
           'application/json': {
             schema: resolver(
               z.object({
-                implementationPlan: z.object({
-                  files: z.array(
-                    z.object({
-                      purpose: z.string(),
-                      filePath: z.string(),
-                      changeType: z.enum(['create', 'modify', 'delete']),
-                    })
-                  ),
-                  estimatedComplexity: z.enum(['low', 'medium', 'high']),
-                }),
+                implementationPlan: implementationPlanSchema,
                 fileChanges: z.array(
                   z.object({
-                    file: z.object({
-                      purpose: z.string(),
-                      filePath: z.string(),
-                      changeType: z.enum(['create', 'modify', 'delete']),
-                    }),
-                    implementation: z.object({
-                      explanation: z.string(),
-                      code: z.string(),
-                    }),
+                    file: implementationPlanFileSchema,
+                    implementation: implementationPlanImplementationSchema,
                   })
                 ),
               })
@@ -1322,23 +1355,14 @@ geminiApp.post(
     // Orchestrator: Plan the implementation
     const { object: implementationPlan } = await generateObject({
       model: models.flash25,
-      schema: z.object({
-        files: z.array(
-          z.object({
-            purpose: z.string(),
-            filePath: z.string(),
-            changeType: z.enum(['create', 'modify', 'delete']),
-          })
-        ),
-        estimatedComplexity: z.enum(['low', 'medium', 'high']),
-      }),
+      schema: implementationPlanSchema,
       system:
         'You are a senior software architect planning feature implementations.',
       prompt: `Analyze this feature request and create an implementation plan:
     ${prompt}`,
     });
 
-    // Workers: Execute the planned changes
+    // Workers: Execute the dynamically-generated planned changes (imagine like cursor composer)
     const fileChanges = await Promise.all(
       implementationPlan.files.map(async (file) => {
         // Each worker is specialized for the type of change
@@ -1353,10 +1377,7 @@ geminiApp.post(
 
         const { object: change } = await generateObject({
           model: models.flash25,
-          schema: z.object({
-            explanation: z.string(),
-            code: z.string(),
-          }),
+          schema: implementationPlanImplementationSchema,
           system: workerSystemPrompt,
           prompt: `Implement the changes for ${file.filePath} to support:
         ${file.purpose}
@@ -1385,6 +1406,10 @@ geminiApp.post(
     description: `
       This pattern introduces quality control into workflows by having dedicated evaluation steps that assess intermediate results. 
       Based on the evaluation, the workflow can either proceed, retry with adjusted parameters, or take corrective action.
+
+      This workflow is particularly effective when we have clear evaluation criteria, and when iterative refinement provides measurable value. 
+      The two signs of good fit are, first, that LLM responses can be demonstrably improved when a human articulates their feedback; and second, that the LLM can provide such feedback. 
+      This is analogous to the iterative writing process a human writer might go through when producing a polished document.
     `,
     responses: {
       200: {
@@ -1435,22 +1460,23 @@ geminiApp.post(
     const MAX_ITERATIONS = 3;
 
     // Initial translation
-    const { text: translation } = await generateText({
-      model: models.flash25, // use small model for first attempt
+    const { text: initialTranslation } = await generateText({
+      model: models.flash20, // you can use small model for first attempt
       system: 'You are an expert literary translator.',
       prompt: `Translate this text to ${targetLanguage}, preserving tone and cultural nuances:
     ${text}`,
     });
 
-    currentTranslation = translation;
+    // set the initial translation as the current translation
+    currentTranslation = initialTranslation;
 
     // Evaluation-optimization loop
     while (iterations < MAX_ITERATIONS) {
       // Evaluate current translation
       const { object: evaluation } = await generateObject({
-        model: models.flash25, // use a larger model to evaluate
+        model: models.flash25, // you can use a larger model to evaluate
         schema: z.object({
-          qualityScore: z.number().min(0).max(10),
+          qualityScore: z.number().min(0).max(100),
           preservesTone: z.boolean(),
           preservesNuance: z.boolean(),
           culturallyAccurate: z.boolean(),
@@ -1472,12 +1498,12 @@ geminiApp.post(
 
       // Check if quality meets threshold
       if (
-        evaluation.qualityScore > 7 &&
+        evaluation.qualityScore > 70 &&
         evaluation.preservesTone &&
         evaluation.preservesNuance &&
         evaluation.culturallyAccurate
       ) {
-        break;
+        break; // done, the translation is good enough
       }
 
       // Generate improved translation based on feedback
@@ -1537,11 +1563,11 @@ geminiApp.post(
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
-    const { text } = await generateText({
-      model: models.flash25,
+    const { text, steps } = await generateText({
+      model: models.flash20, // flash25 doesn't work
       tools: {
         calculate: calculateTool,
-        // answer: answerTool,
+        answer: answerTool,
       },
       // toolChoice: 'required',
       maxSteps: 10,
@@ -1555,6 +1581,7 @@ geminiApp.post(
 
     return ctx.json({
       answer: text,
+      steps,
     });
   }
 );
@@ -1590,14 +1617,17 @@ geminiApp.post(
   async (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
+    const messages: CoreMessage[] = [
+      {
+        role: 'user',
+        content: [{ type: 'text', text: prompt }],
+      },
+    ];
+
     const result = await generateText({
+      // the model should support web search tool natively
       model: models.flash20search,
-      messages: [
-        {
-          role: 'user',
-          content: [{ type: 'text', text: prompt }],
-        },
-      ],
+      messages,
     });
     const metadata = result.providerMetadata?.google as
       | GoogleGenerativeAIProviderMetadata
@@ -1648,6 +1678,7 @@ geminiApp.post(
     const { prompt } = ctx.req.valid('json');
 
     const result = await generateText({
+      // make sure the model support safety ratings
       model: models.flash20safety,
       prompt,
     });
@@ -1806,7 +1837,7 @@ geminiApp.post(
   }
 );
 
-// reasoning empty
+// idk, reasoning is empty
 geminiApp.post(
   '/reasoning',
   describeRoute({
@@ -1860,33 +1891,33 @@ geminiApp.post(
     return stream(ctx, async (stream) =>
       stream.pipe(result.toDataStream({ sendReasoning: true }))
     );
+
+    // return stream(ctx, async (stream) => {
+    //   // Read the stream and log chunks
+    //   const reader = result.toDataStream().getReader();
+    //   const decoder = new TextDecoder();
+    //   async function processStream() {
+    //     try {
+    //       while (true) {
+    //         const { done, value } = await reader.read();
+    //         if (done) {
+    //           break;
+    //         }
+    //         const chunkText = decoder.decode(value, { stream: true });
+    //         // biome-ignore lint/suspicious/noConsoleLog: Logging stream output
+    //         // biome-ignore lint/suspicious/noConsole: Logging stream output
+    //         console.log('Stream chunk:', chunkText);
+    //         await stream.write(value);
+    //       }
+    //     } catch (error) {
+    //       logger.error(error, 'Error reading stream');
+    //       stream.close();
+    //     } finally {
+    //       reader.releaseLock();
+    //       stream.close();
+    //     }
+    //   }
+    //   await processStream();
+    // });
   }
 );
-
-// return stream(ctx, async (stream) => {
-//   // Read the stream and log chunks
-//   const reader = result.toDataStream().getReader();
-//   const decoder = new TextDecoder();
-//   async function processStream() {
-//     try {
-//       while (true) {
-//         const { done, value } = await reader.read();
-//         if (done) {
-//           break;
-//         }
-//         const chunkText = decoder.decode(value, { stream: true });
-//         // biome-ignore lint/suspicious/noConsoleLog: Logging stream output
-//         // biome-ignore lint/suspicious/noConsole: Logging stream output
-//         console.log('Stream chunk:', chunkText);
-//         await stream.write(value);
-//       }
-//     } catch (error) {
-//       logger.error(error, 'Error reading stream');
-//       stream.close();
-//     } finally {
-//       reader.releaseLock();
-//       stream.close();
-//     }
-//   }
-//   await processStream();
-// });

@@ -15,6 +15,10 @@ export const logToConsoleTool = tool({
     // biome-ignore lint/suspicious/noConsoleLog: aaa
     // biome-ignore lint/suspicious/noConsole: aaa
     console.log('logToConsoleTool: ', message);
+
+    return {
+      message: `Message logged to console: ${message}`,
+    };
   },
 });
 
@@ -24,6 +28,7 @@ export const getWeatherTool = tool({
   parameters: z.object({
     location: z.string().describe('The location to get the weather for'),
   }),
+  // assume the tool actually call the weather API
   execute: async ({ location }) => ({
     location,
     temperature: 72 + Math.floor(Math.random() * 21) - 10,
@@ -35,9 +40,10 @@ export const getCityAttractionTool = tool({
   parameters: z.object({
     city: z.string().describe('The city to get the attractions for'),
   }),
+  // assume the tool actually call the city attraction API
   // biome-ignore lint/suspicious/useAwait: <explanation>
   execute: async ({ city }: { city: string }) => {
-    if (city === 'Jakarta') {
+    if (city.toLowerCase().includes('jakarta')) {
       return {
         attractions: [
           'Monumen Nasional',
@@ -45,6 +51,12 @@ export const getCityAttractionTool = tool({
           'Kota Tua',
           'Kelenteng Tjoe Hwie Kiong',
         ],
+      };
+    }
+
+    if (city.toLowerCase().includes('balikpapan')) {
+      return {
+        attractions: ['Taman Bekapai', 'Pantai Manggar', 'Pantai Lamaru'],
       };
     }
 

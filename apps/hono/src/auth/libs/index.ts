@@ -20,5 +20,7 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [ENV.APP_URL, 'http://localhost:3002'],
   emailAndPassword: { enabled: true },
-  plugins: [openAPI()],
+  plugins: [
+    openAPI(), // at /api/auth/reference
+  ],
 });
