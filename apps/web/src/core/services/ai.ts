@@ -29,7 +29,10 @@ const flash20search = google('gemini-2.0-flash-001', {
   useSearchGrounding: true,
 });
 const flash25 = google('gemini-2.5-flash-preview-04-17');
-const pro25 = google('gemini-2.5-pro-exp-03-25');
+/**
+ * pro-exp is no longer free as of 3 June 2025
+ */
+// const pro25 = google('gemini-2.5-pro-exp-05-06');
 const embedding004 = google.textEmbeddingModel('text-embedding-004');
 
 export const models = {
@@ -39,7 +42,7 @@ export const models = {
   flash25,
   // flash25safety, // not supported
   // flash25search, // not supported
-  pro25,
+  // pro25,
   embedding004,
 };
 
@@ -275,7 +278,7 @@ async function deepResearch(
 async function generateReport(prompt: string, research: Research) {
   const { learnings, sources, questionsExplored, searchQueries } = research;
   const { text: content } = await generateText({
-    model: pro25,
+    model: models.flash25,
     system: `${DEEP_RESEARCH_SYSTEM_PROMPT}\n- Write in markdown sytax.`,
     prompt: `Generate a comprehensive report focused on "${prompt}". The main research findings should be drawn from the learnings below, with the search queries and related questions explored serving as supplementary context. Focus on synthesizing the key insights into a coherent narrative around the main topic.
 

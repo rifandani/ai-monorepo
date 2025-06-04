@@ -184,18 +184,18 @@ async function getCompanyFinancialInformation(company: string) {
 
 async function generateInvestmentPitch(company: string, research: string) {
   const { text } = await generateText({
-    model: models.pro25,
+    model: models.flash25,
     system: 'You are an expert researcher and analyst',
     prompt: `Generate an investment pitch for ${company} from the perspective of a venture capitalist.\n\n${research}`,
   });
 
   return text;
 }
-export const ventureCapitalApp = new Hono<{
+export const agentVentureCapitalApp = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
-ventureCapitalApp.post(
+agentVentureCapitalApp.post(
   '/',
   describeRoute({
     description: 'Generate an investment pitch for a company',

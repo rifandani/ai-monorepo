@@ -3,7 +3,9 @@ import { experimental_createMCPClient, generateText } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { z } from 'zod';
 
-const pro25 = google('gemini-2.5-pro-exp-03-25');
+// pro-exp is no longer free
+const flash20 = google('gemini-2.0-flash-001'); // stable
+// const flash25 = google('gemini-2.5-flash-preview-05-20'); // previously 04-17
 
 async function main() {
   let mcpClient: Awaited<ReturnType<typeof experimental_createMCPClient>>;
@@ -34,7 +36,7 @@ async function main() {
     });
 
     const { text: answer } = await generateText({
-      model: pro25,
+      model: flash20,
       tools,
       maxSteps: 10,
       system:

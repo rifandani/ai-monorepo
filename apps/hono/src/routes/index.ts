@@ -1,12 +1,13 @@
 import type { Variables } from '@/core/types/hono';
-import { deepResearchApp } from '@/routes/deep-research';
 import { geminiApp } from '@/routes/gemini';
+import { agentDeepResearchApp } from '@/routes/gemini/agent/deep-research';
 import { imagesApp } from '@/routes/images';
 import { llmsTextApp } from '@/routes/llms-text';
 import { mcpApp } from '@/routes/mcp';
-import { mcpMarkitdownApp } from '@/routes/mcp-markitdown';
+import { mcpClientApp } from '@/routes/mcp-client';
+import { mcpClientMarkitdownApp } from '@/routes/mcp-client-markitdown';
 import { ollamaApp } from '@/routes/ollama';
-import { ventureCapitalApp } from '@/routes/venture-capital';
+import { agentVentureCapitalApp } from '@/routes/venture-capital';
 import { Scalar } from '@scalar/hono-api-reference';
 import type { Hono } from 'hono';
 import { openAPISpecs } from 'hono-openapi';
@@ -18,10 +19,11 @@ export function routes(
 ) {
   app.route('/ollama', ollamaApp);
   app.route('/gemini', geminiApp);
+  app.route('/gemini/agent/venture-capital', agentVentureCapitalApp);
+  app.route('/gemini/agent/deep-research', agentDeepResearchApp);
   app.route('/mcp', mcpApp);
-  app.route('/mcp-markitdown', mcpMarkitdownApp);
-  app.route('/venture-capital', ventureCapitalApp);
-  app.route('/deep-research', deepResearchApp);
+  app.route('/mcp-client', mcpClientApp);
+  app.route('/mcp-client-markitdown', mcpClientMarkitdownApp);
   app.route('/images', imagesApp); // run `db:up` first
   app.route('/llms-text', llmsTextApp);
 

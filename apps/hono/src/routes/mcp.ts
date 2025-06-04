@@ -9,6 +9,7 @@ import type {
 import { toFetchResponse, toReqRes } from 'fetch-to-node';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
+import { sleep } from 'radashi';
 import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
@@ -28,6 +29,7 @@ const getServer = () => {
       name: 'stateless-streamable-http-server',
       version: '1.0.0',
     },
+    // this is required, because we use `sendNotification` in the tool
     { capabilities: { logging: {} } }
   );
 
@@ -48,6 +50,24 @@ const getServer = () => {
               type: 'text',
               text: `Please greet ${name} in a friendly manner.`,
             },
+          },
+        ],
+      };
+    }
+  );
+
+  // Create a simple resource at a fixed URI
+  server.resource(
+    'greeting-resource',
+    'https://example.com/greetings/default',
+    { mimeType: 'text/plain' },
+    // biome-ignore lint/suspicious/useAwait: <explanation>
+    async (): Promise<ReadResourceResult> => {
+      return {
+        contents: [
+          {
+            uri: 'https://example.com/greetings/default',
+            text: 'Hello, world!',
           },
         ],
       };
@@ -104,18 +124,33 @@ const getServer = () => {
     }
   );
 
-  // Create a simple resource at a fixed URI
-  server.resource(
-    'greeting-resource',
-    'https://example.com/greetings/default',
-    { mimeType: 'text/plain' },
-    // biome-ignore lint/suspicious/useAwait: <explanation>
-    async (): Promise<ReadResourceResult> => {
+  server.tool(
+    'get-pokemon',
+    'Get Pokemon details by name',
+    {
+      name: z.string().describe('The name of the Pokemon to get'),
+    },
+    async ({ name }) => {
+      await sleep(500);
+      const pokemon =
+        Math.random() > 0.3 ? `${name} has high HP and DEFENSE` : null;
+
+      if (!pokemon) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Failed to retrieve Pokemon data',
+            },
+          ],
+        };
+      }
+
       return {
-        contents: [
+        content: [
           {
-            uri: 'https://example.com/greetings/default',
-            text: 'Hello, world!',
+            type: 'text',
+            text: pokemon,
           },
         ],
       };

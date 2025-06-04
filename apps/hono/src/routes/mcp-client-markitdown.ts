@@ -11,12 +11,12 @@ import { z } from 'zod';
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
 
-export const mcpMarkitdownApp = new Hono<{
+export const mcpClientMarkitdownApp = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
 // doesn't work
-mcpMarkitdownApp.post(
+mcpClientMarkitdownApp.post(
   '/',
   describeRoute({
     description:
@@ -27,7 +27,9 @@ mcpMarkitdownApp.post(
         content: {
           'application/json': {
             schema: z.object({
-              markdown: z.string(),
+              markdown: z.string().openapi({
+                example: '# Hello World',
+              }),
             }),
           },
         },
@@ -70,7 +72,7 @@ mcpMarkitdownApp.post(
     });
 
     const { text } = await generateText({
-      model: models.pro25,
+      model: models.flash20, // flash25 doesn't work
       tools,
       maxSteps: 10,
       system:

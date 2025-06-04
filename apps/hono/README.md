@@ -2,17 +2,28 @@
 
 ## todo
 
-- [ ] example of using llama-index
 - [ ] example of using langchain
-- [ ] integrate LLM observabilty and evals (e.g promptfoo, phoenix, langfuse, helicone)
+- [ ] integrate LLM observabilty (e.g phoenix, langfuse, helicone, posthog, sentry)
 
 ## How to MCP
 
-We have a simple example of a MCP server and client in the `./src/mcp` directory. The `markitdown` folder contains a server in python (cloned from [github](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp), we need to follow their instructions to setup the mcp server) and a client in typescript. The `stdio` folder contains a simple example of a get pokemon MCP server and client using the `stdio` transport.
+We have a simple example of a MCP server and client in the `./src/mcp` directory.
+The `markitdown` folder contains a server in python (cloned from [github](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp), we need to follow their instructions to setup the mcp server) and a client in typescript.
+The `stdio` folder contains a simple example of a get pokemon MCP server and client using the `stdio` transport.
 
 1. Using the `markitdown`
 
-First, start the docker service (orbstack or docker desktop), then run the MCP client script
+First, start the docker service (orbstack or docker desktop), then build the `markitdown` docker image:
+
+```bash
+# cd into /apps/hono/src/mcp/markitdown
+cd apps/hono/src/mcp/markitdown
+
+# for first timer, build the markitdown docker image
+docker build -t markitdown-mcp:latest .
+```
+
+Then, run the MCP client script
 
 ```bash
 # might take a while to get final answer
@@ -21,10 +32,12 @@ bun mcp:markitdown:client
 
 2. Using the `stdio`
 
-There are two ways to run the MCP server, based on your choice, the `client.ts` also need to be adjusted. First, by directly running the server as typescript using `tsx` (recommended).
+There are two ways to run the MCP server, based on your choice, the `client.ts` also need to be adjusted.
+
+First, by directly running the server as typescript using `tsx` (recommended).
 
 ```bash
-# directly run the server as typescript
+# directly run the server
 bun mcp:stdio:server
 ```
 
@@ -36,6 +49,12 @@ bun mcp:stdio:server:js:build
 
 # run the javascript file
 bun mcp:stdio:server:js:run
+```
+
+After running the server, you can run the client to test it.
+
+```bash
+bun mcp:stdio:client
 ```
 
 3. Using the `Streamable HTTP`
@@ -78,11 +97,21 @@ This will start the inspector server on `http://127.0.0.1:6274/`.
 
 - Testing the `markitdown` example. In "Transport Type" choose `STDIO`, in "command" enter `docker`, in "args" enter `run --rm -i markitdown-mcp:latest`.
 
-- Testing the `stdio` example. In "Transport Type" choose `STDIO`, in "command" enter `npm`, in "args" enter `run mcp:stdio:server`.
+- Testing the `stdio` example. In "Transport Type" choose `STDIO`, in "command" enter `npm`, in "args" enter `run mcp:stdio:server`. You can also use "command" `bun`, in "args" enter `run $PWD`.
 
 - Testing the `Streamable HTTP` example. Start the hono dev server first. Then, in "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3333/mcp`.
 
 - Testing the `Streamable HTTP` example from the `@modelcontextprotocol/sdk` node_modules. In "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3000/mcp` (it's using express).
+
+### Updating `markitdown` in `@workspaces/hono/src/mcp/markitdown`
+
+```bash
+# cd into /apps/hono/src/mcp/markitdown
+cd apps/hono/src/mcp/markitdown
+
+# re-clone the markitdown mcp repo
+bunx degit microsoft/markitdown/packages/markitdown-mcp --force
+```
 
 ## How to Evals and Red Teaming with `promptfoo`
 

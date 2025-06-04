@@ -276,7 +276,10 @@ const flash20safety = google('gemini-2.0-flash-001', {
  * If a request contains content that is a cache hit, they automatically pass the cost savings back to us.
  */
 const flash25 = google('gemini-2.5-flash-preview-05-20'); // previously 04-17
-const pro25 = google('gemini-2.5-pro-exp-05-06'); // previously 03-25
+/**
+ * pro-exp is no longer free as of 3 June 2025
+ */
+// const pro25 = google('gemini-2.5-pro-exp-05-06');
 /**
  * Input token limit: 2,048
  * Output dimension size: 768
@@ -307,7 +310,7 @@ export const models = {
   flash25,
   // flash25safety, // not supported as of May 2025
   // flash25search, // not supported as of May 2025
-  pro25,
+  // pro25,
   embedding004,
   geminiEmbedding,
 };

@@ -77,7 +77,7 @@ const accumulatedResearch: Research = {
 async function generateReport(research: Research) {
   // we can use reasoning model here to generate a comprehensive report
   const { text } = await generateText({
-    model: models.pro25,
+    model: models.flash25,
     system: `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:
   - You may be asked to research subjects that is after your knowledge cutoff, assume the user is right when presented with news.
   - The user is a highly experienced analyst, no need to simplify it, be as detailed as possible and make sure your response is correct.
@@ -270,11 +270,11 @@ async function generateSearchQueries(query: string, depth = 1) {
   return object.queries;
 }
 
-export const deepResearchApp = new Hono<{
+export const agentDeepResearchApp = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
-deepResearchApp.post(
+agentDeepResearchApp.post(
   '/',
   describeRoute({
     description: 'Generate search queries for a given query',

@@ -1508,7 +1508,7 @@ geminiApp.post(
 
       // Generate improved translation based on feedback
       const { text: improvedTranslation } = await generateText({
-        model: models.pro25, // use a larger model which excel at translation
+        model: models.flash25, // use a larger model which excel at translation
         system: 'You are an expert literary translator.',
         prompt: `Improve this translation based on the following feedback:
       ${evaluation.specificIssues.join('\n')}
