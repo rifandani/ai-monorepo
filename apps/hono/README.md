@@ -66,6 +66,8 @@ This can be found in the `./src/routes/mcp.ts` file.
 bun dev
 ```
 
+To run the client directly from HTTP request, you can go to `http://localhost:3333/mcp-client` and test it.
+
 4. Using the `Streamable HTTP` example from the `@modelcontextprotocol/sdk` node_modules
 
 To start the streamable http mcp server.
