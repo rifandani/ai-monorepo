@@ -1,11 +1,11 @@
 # Hono
 
-## todo
+## 🎯 Todo
 
 - [ ] example of using langchain
-- [ ] integrate LLM observabilty (e.g phoenix, langfuse, helicone, posthog, sentry)
+- [ ] integrate LLM observability (e.g phoenix, langfuse, helicone, posthog, sentry)
 
-## How to MCP
+## 🌎 How to MCP
 
 We have a simple example of a MCP server and client in the `./src/mcp` directory.
 The `markitdown` folder contains a server in python (cloned from [github](https://github.com/microsoft/markitdown/tree/main/packages/markitdown-mcp), we need to follow their instructions to setup the mcp server) and a client in typescript.
@@ -115,7 +115,7 @@ cd apps/hono/src/mcp/markitdown
 bunx degit microsoft/markitdown/packages/markitdown-mcp --force
 ```
 
-## How to Evals and Red Teaming with `promptfoo`
+## 🧪 How to Evals and Red Teaming with `promptfoo`
 
 We use `promptfoo` to eval and red teaming our LLM usage. To run the evals, you can use the following command:
 

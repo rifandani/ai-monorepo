@@ -2,22 +2,20 @@
 
 import { CodeBlock } from '@/core/components/code-block.client';
 import { marked } from 'marked';
-// import mermaid from 'mermaid';
+import mermaid from 'mermaid';
 import Link from 'next/link';
 import type React from 'react';
-import { memo } from 'react';
+import { type ComponentProps, memo, useEffect } from 'react';
 import type ReactMarkdown from 'react-markdown';
-import { type Components, MarkdownHooks } from 'react-markdown';
+import { MarkdownHooks } from 'react-markdown';
+import type { Components } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import rehypeMermaid from 'rehype-mermaid';
-import rehypeStringify from 'rehype-stringify';
+// import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { twMerge } from 'tailwind-merge';
 import 'katex/dist/katex.min.css';
-
-// to make it work synchronously with `strategy: 'pre-mermaid'`
-// mermaid.initialize({ startOnLoad: true });
 
 /**
  * Parses markdown into blocks of text.
@@ -45,23 +43,66 @@ export function checkLatex(markdown: string): boolean {
   return /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/.test(markdown);
 }
 
+mermaid.initialize({ startOnLoad: true });
+
+function Mermaid({
+  node,
+  className,
+  children,
+  ...props
+}: React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLPreElement>,
+  HTMLPreElement
+> & {
+  node: unknown;
+}) {
+  // tried to use loading spinner but it's not working
+  useEffect(() => {
+    mermaid.run();
+  }, []);
+
+  return (
+    <pre data-testid="markdown-pre-mermaid" className={className} {...props}>
+      {children}
+    </pre>
+  );
+}
+
 const components: Partial<Components> = {
+  pre: ({ node, className, children, ...props }) => {
+    if (className === 'mermaid') {
+      return (
+        <Mermaid node={node} className={className} {...props}>
+          {children}
+        </Mermaid>
+      );
+    }
+
+    return (
+      <pre className={className} {...props}>
+        {children}
+      </pre>
+    );
+  },
   table({ node, className, children, ...props }) {
     return (
-      <table
-        className={twMerge(
-          'table w-full min-w-full caption-bottom border-spacing-0 text-sm outline-hidden [--table-selected-bg:color-mix(in_oklab,var(--color-primary)_5%,white_90%)] **:data-drop-target:border **:data-drop-target:border-primary dark:[--table-selected-bg:color-mix(in_oklab,var(--color-primary)_25%,black_70%)]',
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </table>
+      <div className="overflow-x-auto" data-testid="markdown-table">
+        <table
+          className={twMerge(
+            'table w-full min-w-full caption-bottom border-spacing-0 text-sm outline-hidden [--table-selected-bg:color-mix(in_oklab,var(--color-primary)_5%,white_90%)] **:data-drop-target:border **:data-drop-target:border-primary dark:[--table-selected-bg:color-mix(in_oklab,var(--color-primary)_25%,black_70%)]',
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </table>
+      </div>
     );
   },
   thead({ node, className, children, ...props }) {
     return (
       <thead
+        data-testid="markdown-table-header"
         data-slot="table-header"
         className={twMerge('border-b', className)}
         {...props}
@@ -73,6 +114,7 @@ const components: Partial<Components> = {
   tbody({ node, className, children, ...props }) {
     return (
       <tbody
+        data-testid="markdown-table-body"
         data-slot="table-body"
         className={twMerge('[&_.tr:last-child]:border-0', className)}
         {...props}
@@ -84,6 +126,7 @@ const components: Partial<Components> = {
   th({ node, className, children, ...props }) {
     return (
       <th
+        data-testid="markdown-table-column"
         data-slot="table-column"
         className={twMerge(
           'relative allows-sorting:cursor-pointer whitespace-nowrap px-3 py-3 text-left font-medium outline-hidden data-dragging:cursor-grabbing [&:has([slot=selection])]:pr-0',
@@ -98,6 +141,7 @@ const components: Partial<Components> = {
   tr({ node, className, children, ...props }) {
     return (
       <tr
+        data-testid="markdown-table-row"
         data-slot="table-row"
         className={twMerge(
           'tr group relative cursor-default border-b bg-bg selected:bg-(--table-selected-bg) text-muted-fg outline-hidden ring-primary selected:hover:bg-(--table-selected-bg)/70 focus:ring-0 data-focus-visible:ring-1 dark:selected:hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,black_70%)]',
@@ -115,6 +159,7 @@ const components: Partial<Components> = {
   td({ node, className, children, ...props }) {
     return (
       <td
+        data-testid="markdown-table-cell"
         data-slot="table-cell"
         className={twMerge(
           'group whitespace-nowrap px-3 py-3 outline-hidden',
@@ -130,7 +175,14 @@ const components: Partial<Components> = {
     if ((children as React.ReactNode[])?.length) {
       // biome-ignore lint/nursery/useCollapsedIf: <explanation>
       if ((children as React.ReactNode[])?.[0] === '▍') {
-        return <span className="mt-1 animate-pulse cursor-default">▍</span>;
+        return (
+          <span
+            data-testid="markdown-code-block-loading"
+            className="mt-1 animate-pulse cursor-default"
+          >
+            ▍
+          </span>
+        );
       }
       // (children as string[])[0] = (children as string[])?.[0]?.replace(
       //   '`▍`',
@@ -142,7 +194,11 @@ const components: Partial<Components> = {
 
     if (!match) {
       return (
-        <code className={className} {...props}>
+        <code
+          data-testid="markdown-code-block-notmatch"
+          className={className}
+          {...props}
+        >
           {children}
         </code>
       );
@@ -150,6 +206,7 @@ const components: Partial<Components> = {
 
     return (
       <CodeBlock
+        data-testid="markdown-code-block"
         key={Math.random()}
         language={match[1] || ''}
         value={String(children).replace(/\n$/, '')}
@@ -159,21 +216,29 @@ const components: Partial<Components> = {
   },
   ol: ({ node, children, ...props }) => {
     return (
-      <ol className="ml-4 list-outside list-decimal" {...props}>
+      <ol
+        data-testid="markdown-ordered-list"
+        className="ml-4 list-outside list-decimal"
+        {...props}
+      >
         {children}
       </ol>
     );
   },
   ul: ({ node, children, ...props }) => {
     return (
-      <ul className="ml-4 list-outside list-decimal" {...props}>
+      <ul
+        data-testid="markdown-unordered-list"
+        className="ml-4 list-outside list-decimal"
+        {...props}
+      >
         {children}
       </ul>
     );
   },
   li: ({ node, children, ...props }) => {
     return (
-      <li className="py-1" {...props}>
+      <li data-testid="markdown-list-item" className="py-1" {...props}>
         {children}
       </li>
     );
@@ -182,6 +247,7 @@ const components: Partial<Components> = {
     return (
       // @ts-expect-error
       <Link
+        data-testid="markdown-link"
         className="text-blue-500 hover:underline"
         target="_blank"
         rel="noreferrer"
@@ -193,42 +259,66 @@ const components: Partial<Components> = {
   },
   h1: ({ node, children, ...props }) => {
     return (
-      <h1 className="mt-6 mb-2 font-semibold text-3xl" {...props}>
+      <h1
+        data-testid="markdown-heading-1"
+        className="mt-6 mb-2 font-semibold text-3xl"
+        {...props}
+      >
         {children}
       </h1>
     );
   },
   h2: ({ node, children, ...props }) => {
     return (
-      <h2 className="mt-6 mb-2 font-semibold text-2xl" {...props}>
+      <h2
+        data-testid="markdown-heading-2"
+        className="mt-6 mb-2 font-semibold text-2xl"
+        {...props}
+      >
         {children}
       </h2>
     );
   },
   h3: ({ node, children, ...props }) => {
     return (
-      <h3 className="mt-6 mb-2 font-semibold text-xl" {...props}>
+      <h3
+        data-testid="markdown-heading-3"
+        className="mt-6 mb-2 font-semibold text-xl"
+        {...props}
+      >
         {children}
       </h3>
     );
   },
   h4: ({ node, children, ...props }) => {
     return (
-      <h4 className="mt-6 mb-2 font-semibold text-lg" {...props}>
+      <h4
+        data-testid="markdown-heading-4"
+        className="mt-6 mb-2 font-semibold text-lg"
+        {...props}
+      >
         {children}
       </h4>
     );
   },
   h5: ({ node, children, ...props }) => {
     return (
-      <h5 className="mt-6 mb-2 font-semibold text-base" {...props}>
+      <h5
+        data-testid="markdown-heading-5"
+        className="mt-6 mb-2 font-semibold text-base"
+        {...props}
+      >
         {children}
       </h5>
     );
   },
   h6: ({ node, children, ...props }) => {
     return (
-      <h6 className="mt-6 mb-2 font-semibold text-sm" {...props}>
+      <h6
+        data-testid="markdown-heading-6"
+        className="mt-6 mb-2 font-semibold text-sm"
+        {...props}
+      >
         {children}
       </h6>
     );
@@ -239,11 +329,11 @@ const remarkPlugins = [
   remarkGfm, // github flavored markdown
   remarkMath, // math
 ];
-const rehypePlugins = [
+const rehypePlugins: ComponentProps<typeof MarkdownHooks>['rehypePlugins'] = [
   rehypeKatex, // kaTeX
-  // [rehypeMermaid, { strategy: 'pre-mermaid' }], // mermaid
-  rehypeMermaid, // mermaid
-  rehypeStringify, // stringify
+  [rehypeMermaid, { strategy: 'pre-mermaid' }],
+  // rehypeMermaid, // this is not working, because this runs asynchronously
+  // rehypeStringify,
 ];
 
 const NonMemoizedMarkdown = ({
@@ -251,6 +341,7 @@ const NonMemoizedMarkdown = ({
   ...props
 }: React.ComponentProps<typeof ReactMarkdown>) => {
   return (
+    // <ReactMarkdown
     <MarkdownHooks
       components={components}
       remarkPlugins={remarkPlugins}
@@ -259,6 +350,7 @@ const NonMemoizedMarkdown = ({
     >
       {children}
     </MarkdownHooks>
+    // </ReactMarkdown>
   );
 };
 

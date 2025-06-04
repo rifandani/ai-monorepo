@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import { useCopyToClipboard } from '@workspace/core/hooks/use-copy-to-clipboard';
 import { saveFile } from '@workspace/core/utils/dom';
 import { generateId } from 'ai';
-import { type FC, memo } from 'react';
+import { type FC, memo, useCallback } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { toast } from 'sonner';
@@ -49,8 +49,26 @@ export const programmingLanguages: languageMap = {
 const CodeBlock: FC<Props> = memo(({ language, value }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard();
 
+  const handleDownload = useCallback(() => {
+    const fileExtension = programmingLanguages[language] || '.file';
+    const suggestedFileName = `file-${generateId()}${fileExtension}`;
+    const fileName = window.prompt('Enter file name', suggestedFileName);
+    const blob = new Blob([value], { type: 'text/plain' });
+
+    saveFile(blob, fileName ?? suggestedFileName);
+  }, [language, value]);
+
+  const handleCopy = useCallback(() => {
+    if (isCopied) {
+      return;
+    }
+
+    copyToClipboard(value);
+    toast.success('Code copied to clipboard');
+  }, [isCopied, copyToClipboard, value]);
+
   return (
-    <div className="codeblock relative w-full rounded-lg bg-neutral-800 font-sans">
+    <div className="codeblock relative my-2 w-full rounded-lg bg-neutral-800 font-sans">
       <div className="flex w-full items-center justify-between rounded-t-lg bg-neutral-700 px-6 py-1 pr-4 text-zinc-100">
         <span className="text-xs lowercase">{language}</span>
         <div className="flex items-center space-x-1">
@@ -60,17 +78,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
             appearance="plain"
             size="square-petite"
             className="focus-visible:ring-1"
-            onClick={() => {
-              const fileExtension = programmingLanguages[language] || '.file';
-              const suggestedFileName = `file-${generateId()}${fileExtension}`;
-              const fileName = window.prompt(
-                'Enter file name',
-                suggestedFileName
-              );
-
-              const blob = new Blob([value], { type: 'text/plain' });
-              saveFile(blob, fileName ?? suggestedFileName);
-            }}
+            onClick={handleDownload}
           >
             <Icon icon="lucide:download" className="h-4 w-4" />
             <span className="sr-only">Download</span>
@@ -81,13 +89,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
             appearance="plain"
             size="square-petite"
             className="text-xs focus-visible:ring-1 focus-visible:ring-offset-0"
-            onClick={() => {
-              if (isCopied) {
-                return;
-              }
-              copyToClipboard(value);
-              toast.success('Code copied to clipboard');
-            }}
+            onClick={handleCopy}
           >
             {isCopied ? (
               <Icon icon="lucide:check" className="h-4 w-4" />

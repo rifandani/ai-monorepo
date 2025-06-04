@@ -2,7 +2,6 @@
 
 import { ChatMessageActions } from '@/core/components/chat-message-actions.client';
 import { ChatMessageDeepResearch } from '@/core/components/chat-message-deep-research.client';
-import { Markdown } from '@/core/components/markdown.client';
 import { Badge, Card, Link, Loader } from '@/core/components/ui';
 import { Button } from '@/core/components/ui/button';
 import {
@@ -27,6 +26,12 @@ import { P, match } from 'ts-pattern';
 const LazySpreadsheetEditor = lazy(() =>
   import('@/core/components/sheet-editor.client').then((mod) => ({
     default: mod.SpreadsheetEditor,
+  }))
+);
+
+const LazyMarkdown = lazy(() =>
+  import('@/core/components/markdown.client').then((mod) => ({
+    default: mod.Markdown,
   }))
 );
 
@@ -101,7 +106,10 @@ function PureChatMessage({
                         'rounded-lg bg-secondary px-3 py-2 text-secondary-foreground'
                     )}
                   >
-                    <Markdown>{part.text}</Markdown>
+                    <Suspense fallback={<Loader />}>
+                      <LazyMarkdown>{part.text}</LazyMarkdown>
+                    </Suspense>
+
                     {metadata && (
                       <p className="-bottom-4 absolute right-0 text-xs text-zinc-500">
                         Completed in{' '}

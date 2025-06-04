@@ -1,4 +1,3 @@
-import { registerOTel } from '@vercel/otel';
 import type { Instrumentation } from 'next';
 
 /**
@@ -7,7 +6,6 @@ import type { Instrumentation } from 'next';
  */
 export function register() {
   // process.env.NEXT_RUNTIME
-  registerOTel({ serviceName: '@workspace/web' });
 }
 
 /**

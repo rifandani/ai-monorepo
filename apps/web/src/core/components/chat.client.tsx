@@ -5,9 +5,10 @@ import { ChatMessage } from '@/core/components/chat-message.client';
 import { Button, Note } from '@/core/components/ui';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
-import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
+// import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
+import { loggerBrowser } from '@workspace/core/utils/logger';
 import { type ChatRequestOptions, createIdGenerator } from 'ai';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 const toolsWithConfirmation = {
@@ -60,13 +61,13 @@ export function Chat({
     },
     onToolCall({ toolCall }) {
       // useful for running client-side tools that are automatically executed (e.g. render chart/diagram)
-      console.log(`🐦 ~ "page.tsx" at line 10: toolCall -> `, toolCall);
+      loggerBrowser.info(toolCall, `🐦 ~ "page.tsx" at line 10: toolCall -> `);
     },
     onFinish(message, options) {
-      console.log(`🐯 ~ "page.tsx" at line 13: message, options -> `, {
-        message,
-        options,
-      });
+      loggerBrowser.info(
+        { message, options },
+        `🐯 ~ "page.tsx" at line 13: message, options -> `
+      );
     },
     onError(error) {
       toast.error(error.message);
@@ -74,56 +75,64 @@ export function Chat({
   });
 
   // Manage auto-scroll and user scroll cancel
-  const { anchorRef, isAutoScroll } = useAutoScroll({
-    isLoading: status === 'submitted' || status === 'streaming',
-    dependency: messages.length,
-    isStreaming: () => status === 'streaming',
-  });
+  // const { anchorRef, isAutoScroll } = useAutoScroll({
+  //   isLoading: status === 'submitted' || status === 'streaming',
+  //   dependency: messages.length,
+  //   isStreaming: () => status === 'streaming',
+  // });
 
-  const toolsRequiringConfirmation = getToolsRequiringConfirmation(
-    toolsWithConfirmation
+  const toolsRequiringConfirmation = useMemo(
+    () => getToolsRequiringConfirmation(toolsWithConfirmation),
+    []
   );
   // used to disable input while confirmation is pending
-  const pendingToolCallConfirmation = messages.some((msg: Message) =>
-    msg.parts?.some(
-      (part) =>
-        part.type === 'tool-invocation' &&
-        part.toolInvocation.state === 'call' &&
-        toolsRequiringConfirmation.includes(part.toolInvocation.toolName)
-    )
+  const pendingToolCallConfirmation = useMemo(
+    () =>
+      messages.some((msg: Message) =>
+        msg.parts?.some(
+          (part) =>
+            part.type === 'tool-invocation' &&
+            part.toolInvocation.state === 'call' &&
+            toolsRequiringConfirmation.includes(part.toolInvocation.toolName)
+        )
+      ),
+    [messages, toolsRequiringConfirmation]
   );
 
   // to trim messages and reload from a specific message
-  async function handleRetry(messageId: string, options?: ChatRequestOptions) {
-    // Find the index of the message with the specified ID
-    const messageIndex = messages.findIndex((m) => m.id === messageId);
+  const handleRetry = useCallback(
+    async (messageId: string, options?: ChatRequestOptions) => {
+      // Find the index of the message with the specified ID
+      const messageIndex = messages.findIndex((m) => m.id === messageId);
 
-    if (messageIndex === -1) {
-      // If message or preceding user message not found, perform a normal reload
+      if (messageIndex === -1) {
+        // If message or preceding user message not found, perform a normal reload
+        return await reload(options);
+      }
+
+      // Keep messages up to the specified one (usually the assistant message) and the user message just before it.
+      const relevantMessages = messages.slice(0, messageIndex);
+      const reversedRelevantMessages = [...relevantMessages].reverse();
+      const reversedIndex = reversedRelevantMessages.findIndex(
+        (m) => m.role === 'user'
+      );
+      const userMessageIndex =
+        reversedIndex !== -1 ? relevantMessages.length - 1 - reversedIndex : -1;
+
+      if (userMessageIndex === -1) {
+        // If message or preceding user message not found, perform a normal reload
+        return await reload(options);
+      }
+
+      // trim messages up to the user message
+      const trimmedMessages = messages.slice(0, userMessageIndex + 1);
+      setMessages(trimmedMessages);
+
+      // Reload the conversation
       return await reload(options);
-    }
-
-    // Keep messages up to the specified one (usually the assistant message) and the user message just before it.
-    const relevantMessages = messages.slice(0, messageIndex);
-    const reversedRelevantMessages = [...relevantMessages].reverse();
-    const reversedIndex = reversedRelevantMessages.findIndex(
-      (m) => m.role === 'user'
-    );
-    const userMessageIndex =
-      reversedIndex !== -1 ? relevantMessages.length - 1 - reversedIndex : -1;
-
-    if (userMessageIndex === -1) {
-      // If message or preceding user message not found, perform a normal reload
-      return await reload(options);
-    }
-
-    // trim messages up to the user message
-    const trimmedMessages = messages.slice(0, userMessageIndex + 1);
-    setMessages(trimmedMessages);
-
-    // Reload the conversation
-    return await reload(options);
-  }
+    },
+    [messages, reload, setMessages]
+  );
 
   return (
     <section
@@ -162,7 +171,7 @@ export function Chat({
         setShowSearch={setShowSearch}
         showDeepResearch={showDeepResearch}
         setShowDeepResearch={setShowDeepResearch}
-        isAutoScroll={isAutoScroll}
+        isAutoScroll={false}
         status={status}
         input={input}
         setInput={setInput}
@@ -175,7 +184,7 @@ export function Chat({
         }}
       />
 
-      <div ref={anchorRef} />
+      {/* <div ref={anchorRef} /> */}
     </section>
   );
 }

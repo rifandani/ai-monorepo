@@ -28,12 +28,17 @@ const flash20search = google('gemini-2.0-flash-001', {
   // don't use dynamic retrieval, it's only for 1.5 models and old-fashioned
   useSearchGrounding: true,
 });
-const flash25 = google('gemini-2.5-flash-preview-04-17');
+const flash25 = google('gemini-2.5-flash-preview-05-20'); // previously 04-17
 /**
  * pro-exp is no longer free as of 3 June 2025
  */
 // const pro25 = google('gemini-2.5-pro-exp-05-06');
 const embedding004 = google.textEmbeddingModel('text-embedding-004');
+/**
+ * Input token limit: 8,192
+ * Output dimension size: Elastic, supports: 3072, 1536, or 768
+ */
+const geminiEmbedding = google.textEmbeddingModel('gemini-embedding-exp-03-07');
 
 export const models = {
   flash20,
@@ -44,6 +49,7 @@ export const models = {
   // flash25search, // not supported
   // pro25,
   embedding004,
+  geminiEmbedding,
 };
 
 const DEEP_RESEARCH_SYSTEM_PROMPT = `You are an expert researcher. Today is ${new Date().toISOString()}. Follow these instructions when responding:

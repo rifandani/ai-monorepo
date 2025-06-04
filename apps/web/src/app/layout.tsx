@@ -6,8 +6,8 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { connection } from 'next/server';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import '@/core/styles/globals.css';
 import type React from 'react';
+import '@/core/styles/globals.css';
 
 const fontSans = Geist({
   subsets: ['latin'],
@@ -38,6 +38,12 @@ export default async function RootLayout({
   return (
     // suppressHydrationWarning for next-themes
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        {process.env.NODE_ENV === 'development' && (
+          <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+        )}
+      </head>
+
       <body
         className={`${fontSans.variable} ${fontMono.variable} min-h-svh font-sans antialiased`}
       >

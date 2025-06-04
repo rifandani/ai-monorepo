@@ -26,7 +26,7 @@ export function useCreateToastContext() {
       //   error: <Icon icon="tabler:alert-triangle-filled" />,
       //   warning: <Icon icon="tabler:alert-octagon-filled" />,
       //   success: <Icon icon="tabler:circle-check-filled" />,
-      //   loading: <Loader variant="spin" />,
+      //   loading: <Loader />,
       // },
       toastOptions: {
         // unstyled: true,
