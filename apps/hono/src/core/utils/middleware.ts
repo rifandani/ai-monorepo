@@ -198,7 +198,7 @@ export const guardrailMiddleware: LanguageModelV1Middleware = {
   },
 
   // here you would implement the guardrail logic for streaming
-  // Note: streaming guardrails are difficult to implement, because
+  // NOTE: streaming guardrails are difficult to implement, because
   // you do not know the full content of the stream until it's finished.
 };
 

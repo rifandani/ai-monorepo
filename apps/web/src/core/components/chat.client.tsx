@@ -3,12 +3,13 @@
 import { ChatField } from '@/core/components/chat-field.client';
 import { ChatMessage } from '@/core/components/chat-message.client';
 import { Button, Note } from '@/core/components/ui';
+import { useChatFieldStore } from '@/core/hooks/use-chat-field';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
 // import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
 import { loggerBrowser } from '@workspace/core/utils/logger';
 import { type ChatRequestOptions, createIdGenerator } from 'ai';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
 const toolsWithConfirmation = {
@@ -19,8 +20,8 @@ export function Chat({
   id,
   initialMessages,
 }: { id?: string; initialMessages?: Message[] } = {}) {
-  const [showSearch, setShowSearch] = useState(false);
-  const [showDeepResearch, setShowDeepResearch] = useState(false);
+  const showSearch = useChatFieldStore((state) => state.showSearch);
+  const showDeepResearch = useChatFieldStore((state) => state.showDeepResearch);
   const {
     // data, // custom data from `dataStream.writeData()`
     messages,
@@ -167,10 +168,7 @@ export function Chat({
       )}
 
       <ChatField
-        showSearch={showSearch}
-        setShowSearch={setShowSearch}
-        showDeepResearch={showDeepResearch}
-        setShowDeepResearch={setShowDeepResearch}
+        isEmptyChat={messages.length === 0}
         isAutoScroll={false}
         status={status}
         input={input}

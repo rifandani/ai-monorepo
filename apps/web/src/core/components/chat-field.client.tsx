@@ -7,6 +7,7 @@ import {
   buttonStyles,
 } from '@/core/components/ui';
 import { Textarea } from '@/core/components/ui/textarea';
+import { useChatFieldStore } from '@/core/hooks/use-chat-field';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { Icon } from '@iconify/react';
 import { useAutoResizeTextarea } from '@workspace/core/hooks/use-auto-resize-textarea';
@@ -41,10 +42,7 @@ export function ChatField({
   stop,
   disableSubmit = false,
   isAutoScroll,
-  showSearch,
-  setShowSearch,
-  showDeepResearch,
-  setShowDeepResearch,
+  isEmptyChat,
 }: Pick<UseChatHelpers, 'status' | 'input' | 'setInput' | 'stop'> & {
   onSubmit: (
     evt: { preventDefault: () => void },
@@ -52,11 +50,14 @@ export function ChatField({
   ) => void;
   disableSubmit?: boolean;
   isAutoScroll: boolean;
-  showSearch: boolean;
-  setShowSearch: (showSearch: boolean) => void;
-  showDeepResearch: boolean;
-  setShowDeepResearch: (showDeepResearch: boolean) => void;
+  isEmptyChat: boolean;
 }) {
+  const showSearch = useChatFieldStore((state) => state.showSearch);
+  const setShowSearch = useChatFieldStore((state) => state.setShowSearch);
+  const showDeepResearch = useChatFieldStore((state) => state.showDeepResearch);
+  const setShowDeepResearch = useChatFieldStore(
+    (state) => state.setShowDeepResearch
+  );
   const [files, setFiles] = useState<FileList | null>(null);
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 52,
@@ -80,8 +81,8 @@ export function ChatField({
       onSubmit={handleSubmit}
       className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) py-2"
     >
-      {/* scroll-down button: show when user is not at bottom */}
-      {!isAutoScroll && (
+      {/* scroll-down button: show when user is not at bottom or empty chat */}
+      {!isEmptyChat && !isAutoScroll && (
         <Button
           type="button"
           intent="outline"
