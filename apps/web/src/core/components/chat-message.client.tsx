@@ -155,7 +155,7 @@ function PureChatMessage({
                   .with(
                     { toolName: 'webSearchNative', state: 'result' },
                     (tool) => (
-                      <Disclosure key={`webSearchNative-${tool.toolCallId}`}>
+                      <Disclosure key={`${tool.toolName}-${tool.toolCallId}`}>
                         <DisclosureTrigger className="justify-normal">
                           <Badge
                             shape="circle"
@@ -192,7 +192,7 @@ function PureChatMessage({
                       tool.result.files.map(
                         (file: { base64: string; mimeType: string }) => (
                           <img
-                            key={`generateImage-file-${file.base64}`}
+                            key={`${tool.toolName}-file-${file.base64}`}
                             src={`data:${file.mimeType};base64,${file.base64}`}
                             alt={tool.args.prompt}
                             height={400}
@@ -206,7 +206,7 @@ function PureChatMessage({
                     { toolName: 'generateImage', state: 'call' },
                     (tool) => (
                       <span
-                        key={`generateImage-${tool.toolCallId}-generating`}
+                        key={`${tool.toolName}-${tool.toolCallId}-generating`}
                         className="animate-pulse"
                       >
                         Generating image...
@@ -217,7 +217,7 @@ function PureChatMessage({
                     tool.result.content.map(
                       (content: { type: 'text'; text: string }) => (
                         <p
-                          key={`getPokemon-${tool.toolCallId}-content-${content.text}`}
+                          key={`${tool.toolName}-${tool.toolCallId}-content-${content.text}`}
                           className={twMerge('flex flex-col gap-2')}
                         >
                           {content.text}
@@ -227,7 +227,7 @@ function PureChatMessage({
                   )
                   .with({ toolName: 'getPokemon', state: 'call' }, (tool) => (
                     <span
-                      key={`getPokemon-${tool.toolCallId}-generating`}
+                      key={`${tool.toolName}-${tool.toolCallId}-generating`}
                       className="animate-pulse"
                     >
                       Calling <code>{tool.toolName}</code> MCP server...
@@ -258,7 +258,7 @@ function PureChatMessage({
                     { toolName: 'createSpreadsheet', state: 'call' },
                     (tool) => (
                       <span
-                        key={`createSpreadsheet-${tool.toolCallId}-generating`}
+                        key={`${tool.toolName}-${tool.toolCallId}-generating`}
                         className="animate-pulse"
                       >
                         Generating spreadsheet...
@@ -268,7 +268,9 @@ function PureChatMessage({
                   .with(
                     { toolName: 'createSpreadsheet', state: 'result' },
                     (tool) => (
-                      <Card>
+                      <Card
+                        data-testid={`${tool.toolName}-${tool.toolCallId}-result`}
+                      >
                         <Card.Header>
                           <Card.Title>{tool.result.title}</Card.Title>
                         </Card.Header>

@@ -125,7 +125,8 @@ export function ChatMessageDeepResearch({
               </motion.div>
             </Modal.Trigger>
             <Modal.Content
-              classNames={{ content: 'h-[85vh] overflow-y-auto max-w-4xl' }}
+              size="4xl"
+              classNames={{ content: 'h-[85vh] overflow-y-auto' }}
             >
               <Modal.Header>
                 <Modal.Title className="flex items-center gap-2 pt-2 font-medium text-2xl tracking-tight">
@@ -153,8 +154,8 @@ export function ChatMessageDeepResearch({
                 </Badge>
               </Modal.Trigger>
               <Modal.Content
-                size="2xl"
-                classNames={{ content: 'max-h-[75vh] max-w-3xl' }}
+                size="4xl"
+                classNames={{ content: 'max-h-[75vh]' }}
               >
                 <Modal.Header>
                   <Modal.Title className="flex items-center gap-2 font-medium text-xl tracking-tight">
@@ -192,7 +193,9 @@ export function ChatMessageDeepResearch({
                                   alt="Favicon"
                                   className="h-4 w-4 rounded-full"
                                 /> */}
-                                {source.title}
+                                <p className="text-primary-fg">
+                                  {source.title}
+                                </p>
                               </div>
                               <p className="line-clamp-2 text-sm text-zinc-600">
                                 {source.content}

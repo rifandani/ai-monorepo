@@ -1,6 +1,7 @@
 import type { Annotation } from '@/core/schemas/ai';
 import { models, processToolCalls, tools } from '@/core/services/ai';
 import { loadChat, saveChat } from '@/core/utils/filesystem';
+import { logger } from '@workspace/core/utils/logger';
 import {
   type Message,
   appendClientMessage,
@@ -25,7 +26,7 @@ Do not call createSpreadsheet tool multiple times per request.
 const deepResearchSystemPrompt = `
 Do not call multiple tools at once.
 Do not repeat the results of deepResearch tool calls.
-You can report (max 2 sentences) that the tool has been used successfully.
+You can report a summary (max 2 sentences) of the results of the deepResearch tool.
 `;
 
 async function getPokemonStdioMcpClient() {
@@ -79,13 +80,15 @@ async function markitdownStdioMcpClient() {
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
-  // get the last message from the request:
-  const { message, id, searchMode, deepResearchMode } = (await req.json()) as {
+  const json = (await req.json()) as {
     message: Message;
     id: string;
     searchMode: boolean;
     deepResearchMode: boolean;
   };
+  logger.info(json, 'POST /api/chat start');
+  // get the last message from the request:
+  const { message, id, searchMode, deepResearchMode } = json;
 
   // load the previous messages from the server:
   const previousMessages = await loadChat(id);
@@ -166,7 +169,7 @@ export async function POST(req: Request) {
          * use models.flash20 if you want to use the "human in the loop" tools
          * models.flash25 always calls the "human in the loop" tools multiple times, even if we adjust the system prompt
          */
-        model: models.flash25,
+        model: deepResearchMode ? models.flash20 : models.flash25,
         messages: processedMessages,
         system: deepResearchMode ? deepResearchSystemPrompt : systemPrompt,
         tools: combinedTools,
@@ -183,11 +186,6 @@ export async function POST(req: Request) {
           prefix: 'msgs',
           size: 16,
         }),
-        onChunk() {
-          if (startTime === null) {
-            startTime = Date.now();
-          }
-        },
         async onFinish({ response }) {
           const duration = Date.now() - (startTime ?? 0);
           startTime = null;

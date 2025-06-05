@@ -276,6 +276,9 @@ const flash20safety = google('gemini-2.0-flash-001', {
  * If a request contains content that is a cache hit, they automatically pass the cost savings back to us.
  */
 const flash25 = google('gemini-2.5-flash-preview-05-20'); // previously 04-17
+const flash25search = google('gemini-2.5-flash-preview-05-20', {
+  useSearchGrounding: true,
+});
 /**
  * pro-exp is no longer free as of 3 June 2025
  */
@@ -308,8 +311,8 @@ export const models = {
   flash20search,
   flash20safety,
   flash25,
-  // flash25safety, // not supported as of May 2025
-  // flash25search, // not supported as of May 2025
+  // flash25safety, // not supported as of 5 June 2025
+  flash25search,
   // pro25,
   embedding004,
   geminiEmbedding,

@@ -1626,7 +1626,7 @@ geminiApp.post(
 
     const result = await generateText({
       // the model should support web search tool natively
-      model: models.flash20search,
+      model: models.flash20search, // flash25search is also supported
       messages,
     });
     const metadata = result.providerMetadata?.google as

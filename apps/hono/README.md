@@ -5,6 +5,7 @@
 - [ ] example of MCP OAUTH
 - [ ] example of using langchain
 - [ ] integrate LLM observability (e.g phoenix, langfuse, helicone, posthog, sentry)
+- [ ] add more evals
 
 ## 📝 Notes
 

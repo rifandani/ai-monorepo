@@ -4,7 +4,7 @@
 
 - [ ] error `Maximum update depth exceeded.` when using `useAutoScroll` in `chat.client.tsx`
 - [ ] performance issue in chat
-- [ ] formatting in markdown sometimes it's not rendered correctly especially in ordered list
+- [ ] formatting styles in markdown sometimes not rendered correctly in ordered list
 - [ ] sometimes response text includes ````markdown```` block (look into `fwgamx3VLYjuB1jy.json` chat log), we need to parse it as regular markdown instead of code block. Or adjust system prompt to avoid this
 
 ## 🎯 Todo
@@ -21,7 +21,7 @@
 - chat history saved in `.chats` folder as JSON file
 - "human in the loop" are only supported in `models.flash20`
 
-## 🚧 Debugging
+## 🚧 How to Debug
 
 - add breakpoint anywhere in the code
 - use vscode `launch.json` "Next.js: debug full stack with Chrome" to debug the full stack app

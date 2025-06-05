@@ -30,6 +30,9 @@ const flash20search = google('gemini-2.0-flash-001', {
   useSearchGrounding: true,
 });
 const flash25 = google('gemini-2.5-flash-preview-05-20'); // previously 04-17
+const flash25search = google('gemini-2.5-flash-preview-05-20', {
+  useSearchGrounding: true,
+});
 /**
  * pro-exp is no longer free as of 3 June 2025
  */
@@ -46,8 +49,8 @@ export const models = {
   flash20exp,
   flash20search,
   flash25,
-  // flash25safety, // not supported
-  // flash25search, // not supported
+  // flash25safety, // not supported as of 5 June 2025
+  flash25search,
   // pro25,
   embedding004,
   geminiEmbedding,
@@ -73,6 +76,7 @@ You are a spreadsheet creation assistant. Create a spreadsheet in csv format bas
 `;
 
 async function searchWeb(query: string) {
+  logger.info({ query }, '[searchWeb]: start');
   const {
     // sources,
     // experimental_output: { results },
@@ -92,13 +96,15 @@ async function searchWeb(query: string) {
         .describe('The web search results'),
     }),
   });
-
-  return results.map((r) => ({
+  const response = results.map((r) => ({
     title: r.title,
     url: r.url,
     content: r.content,
     publishedDate: r.publishedDate,
   })) as SearchResult[];
+
+  logger.info({ response }, '[searchWeb]: end');
+  return response;
 }
 
 async function generateSearchQueries(
@@ -106,6 +112,7 @@ async function generateSearchQueries(
   breadth: number,
   learnings?: string[]
 ) {
+  logger.info({ query, breadth, learnings }, '[generateSearchQueries]: start');
   const {
     object: { queries },
   } = await generateObject({
@@ -136,6 +143,7 @@ async function generateSearchQueries(
     }),
   });
 
+  logger.info({ queries }, '[generateSearchQueries]: end');
   return queries;
 }
 
@@ -145,6 +153,10 @@ async function generateLearnings(
   numberOfLearnings: number,
   numberOfFollowUpQuestions: number
 ) {
+  logger.info(
+    { query, results, numberOfLearnings, numberOfFollowUpQuestions },
+    '[generateLearnings]: start'
+  );
   const {
     object: { followUpQuestions, learnings },
   } = await generateObject({
@@ -167,6 +179,7 @@ async function generateLearnings(
     }),
   });
 
+  logger.info({ learnings, followUpQuestions }, '[generateLearnings]: end');
   return {
     learnings,
     followUpQuestions,
@@ -283,6 +296,7 @@ async function deepResearch(
 }
 
 async function generateReport(prompt: string, research: Research) {
+  logger.info({ prompt, research }, '[generateReport]: start');
   const { learnings, sources, questionsExplored, searchQueries } = research;
   const { text: content } = await generateText({
     model: models.flash25,
@@ -314,8 +328,10 @@ async function generateReport(prompt: string, research: Research) {
       title: z.string().describe('The impactful title of the report'),
     }),
   });
+  const response = { content, title: object.title };
 
-  return { content, title: object.title };
+  logger.info(response, '[generateReport]: end');
+  return response;
 }
 
 export const tools = {
@@ -326,8 +342,9 @@ export const tools = {
         query: z.string().min(1).max(200).describe('The search query'),
       }),
       execute: async ({ query }) => {
+        logger.info({ query }, '[webSearchNative]: start');
         const { sources, text } = await generateText({
-          model: models.flash20search,
+          model: models.flash25search,
           prompt: query,
         });
 
@@ -338,6 +355,7 @@ export const tools = {
           } satisfies Annotation);
         }
 
+        logger.info({ sources, text }, '[webSearchNative]: end');
         return {
           sources,
           text,
@@ -362,17 +380,17 @@ export const tools = {
         .number()
         .min(1)
         .max(10)
-        .default(5)
+        .default(3)
         .describe('The number of web search results to return'),
     }),
-    execute: async ({ query, limit = 5 }) => {
+    execute: async ({ query, limit = 3 }) => {
       logger.info({ query, limit }, '[webSearch]: start');
       const {
         // sources,
         // experimental_output: { results },
         object: { results },
       } = await generateObject({
-        model: models.flash20search,
+        model: models.flash25search,
         prompt: query,
         // experimental_output: Output.object({
         //   schema: z.object({
