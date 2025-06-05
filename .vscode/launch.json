@@ -5,7 +5,7 @@
       "name": "Next.js: debug server-side",
       "type": "node-terminal",
       "request": "launch",
-      "command": "bun web:dev"
+      "command": "bun web dev"
     },
     {
       "name": "Next.js: debug client-side (web)",
@@ -27,6 +27,16 @@
         "uriFormat": "%s",
         "webRoot": "${workspaceFolder}"
       }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Next.js: debug full stack with Chrome",
+      "configurations": [
+        "Next.js: debug server-side",
+        "Next.js: debug client-side (web)"
+      ],
+      "stopAll": true
     }
   ]
 }

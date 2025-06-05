@@ -9,7 +9,7 @@ import { type Message, useChat } from '@ai-sdk/react';
 // import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
 import { loggerBrowser } from '@workspace/core/utils/logger';
 import { type ChatRequestOptions, createIdGenerator } from 'ai';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { toast } from 'sonner';
 
 const toolsWithConfirmation = {
@@ -82,22 +82,17 @@ export function Chat({
   //   isStreaming: () => status === 'streaming',
   // });
 
-  const toolsRequiringConfirmation = useMemo(
-    () => getToolsRequiringConfirmation(toolsWithConfirmation),
-    []
+  const toolsRequiringConfirmation = getToolsRequiringConfirmation(
+    toolsWithConfirmation
   );
   // used to disable input while confirmation is pending
-  const pendingToolCallConfirmation = useMemo(
-    () =>
-      messages.some((msg: Message) =>
-        msg.parts?.some(
-          (part) =>
-            part.type === 'tool-invocation' &&
-            part.toolInvocation.state === 'call' &&
-            toolsRequiringConfirmation.includes(part.toolInvocation.toolName)
-        )
-      ),
-    [messages, toolsRequiringConfirmation]
+  const pendingToolCallConfirmation = messages.some((msg: Message) =>
+    msg.parts?.some(
+      (part) =>
+        part.type === 'tool-invocation' &&
+        part.toolInvocation.state === 'call' &&
+        toolsRequiringConfirmation.includes(part.toolInvocation.toolName)
+    )
   );
 
   // to trim messages and reload from a specific message

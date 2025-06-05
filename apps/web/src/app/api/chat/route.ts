@@ -19,6 +19,7 @@ You are a helpful assistant.
 Keep your responses concise and helpful.
 You have a list of tools that you can use to help the user. 
 If there is no tool to use, you should respond normally with a markdown formatted text.
+Do not call createSpreadsheet tool multiple times per request.
 `;
 
 const deepResearchSystemPrompt = `
@@ -161,6 +162,10 @@ export async function POST(req: Request) {
       let startTime: number | null = null;
 
       const result = streamText({
+        /**
+         * use models.flash20 if you want to use the "human in the loop" tools
+         * models.flash25 always calls the "human in the loop" tools multiple times, even if we adjust the system prompt
+         */
         model: models.flash25,
         messages: processedMessages,
         system: deepResearchMode ? deepResearchSystemPrompt : systemPrompt,

@@ -1,16 +1,16 @@
 'use client';
 
 import { ChatMessageActions } from '@/core/components/chat-message-actions.client';
+import { ChatMessageConfirmation } from '@/core/components/chat-message-confirmation.client';
 import { ChatMessageDeepResearch } from '@/core/components/chat-message-deep-research.client';
 import { Badge, Card, Link, Loader } from '@/core/components/ui';
-import { Button } from '@/core/components/ui/button';
 import {
   Disclosure,
   DisclosurePanel,
   DisclosureTrigger,
 } from '@/core/components/ui/disclosure';
 import type { MetadataAnnotation } from '@/core/schemas/ai';
-import { APPROVAL } from '@/core/services/ai';
+import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { formatElapsedTime } from '@/core/utils/time';
 import type { LanguageModelV1Source } from '@ai-sdk/provider';
 import type { useChat } from '@ai-sdk/react';
@@ -35,6 +35,10 @@ const LazyMarkdown = lazy(() =>
   }))
 );
 
+const toolsWithConfirmation = {
+  getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
+};
+
 function PureChatMessage({
   message,
   addToolResult,
@@ -44,6 +48,10 @@ function PureChatMessage({
   addToolResult: ReturnType<typeof useChat>['addToolResult'];
   onRetry: (messageId: string) => void;
 }) {
+  const toolsRequiringConfirmation = getToolsRequiringConfirmation(
+    toolsWithConfirmation
+  );
+
   return (
     <AnimatePresence>
       <motion.div
@@ -225,48 +233,19 @@ function PureChatMessage({
                       Calling <code>{tool.toolName}</code> MCP server...
                     </span>
                   ))
+                  // for all tools that require confirmation (human in the loop)
                   .with(
-                    { toolName: 'getWeatherInformation', state: 'call' },
+                    {
+                      toolName: P.when((toolName) =>
+                        toolsRequiringConfirmation.includes(toolName)
+                      ),
+                      state: 'call',
+                    },
                     (tool) => (
-                      <div
-                        key={`getWeatherInformation-${tool.toolCallId}-content-${tool.args.city}`}
-                        className="flex flex-col gap-2"
-                      >
-                        <Disclosure>
-                          <DisclosureTrigger>
-                            Run <code>{tool.toolName}</code> tool with args:
-                          </DisclosureTrigger>
-                          <DisclosurePanel>
-                            {JSON.stringify(tool.args, null, 2)}
-                          </DisclosurePanel>
-                        </Disclosure>
-
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() =>
-                              // will trigger a call to route handler.
-                              addToolResult({
-                                toolCallId: tool.toolCallId,
-                                result: APPROVAL.YES,
-                              })
-                            }
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            intent="outline"
-                            onClick={() =>
-                              // will trigger a call to route handler.
-                              addToolResult({
-                                toolCallId: tool.toolCallId,
-                                result: APPROVAL.NO,
-                              })
-                            }
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
+                      <ChatMessageConfirmation
+                        tool={tool}
+                        addToolResult={addToolResult}
+                      />
                     )
                   )
                   .with({ toolName: 'deepResearch' }, (tool) => (

@@ -19,3 +19,9 @@
 ## 📝 Notes
 
 - chat history saved in `.chats` folder as JSON file
+- "human in the loop" are only supported in `models.flash20`
+
+## 🚧 Debugging
+
+- add breakpoint anywhere in the code
+- use vscode `launch.json` "Next.js: debug full stack with Chrome" to debug the full stack app

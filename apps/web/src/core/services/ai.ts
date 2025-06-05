@@ -6,6 +6,7 @@ import type {
 } from '@/core/schemas/ai';
 import { searchResultSchema } from '@/core/schemas/ai';
 import { type GoogleGenerativeAIProviderOptions, google } from '@ai-sdk/google';
+import { logger } from '@workspace/core/utils/logger';
 import {
   type DataStreamWriter,
   type Message,
@@ -365,6 +366,7 @@ export const tools = {
         .describe('The number of web search results to return'),
     }),
     execute: async ({ query, limit = 5 }) => {
+      logger.info({ query, limit }, '[webSearch]: start');
       const {
         // sources,
         // experimental_output: { results },
@@ -384,15 +386,17 @@ export const tools = {
             .describe('The web search results'),
         }),
       });
-
       // Process and clean the results
-      return results.map((result) => ({
+      const response = results.map((result) => ({
         title: result.title,
         url: result.url, // hallucination
         snippet: result.content, // Limit snippet length
         domain: new URL(result.url).hostname, // Extract domain for source context
         date: result.publishedDate || 'Date not available', // Include publish date when available
       }));
+
+      logger.info(response, '[webSearch]: end');
+      return response;
     },
   }),
   deepResearch: (dataStream: DataStreamWriter) => {
@@ -424,6 +428,7 @@ export const tools = {
           ),
       }),
       execute: async ({ prompt, depth, breadth }) => {
+        logger.info({ prompt, depth, breadth }, '[deepResearch]: start');
         dataStream.writeMessageAnnotation({
           type: 'deep-research',
           data: { status: 'Beginning deep research' },
@@ -455,14 +460,16 @@ export const tools = {
             ])
           ).values()
         );
-
-        return {
+        const response = {
           report,
           research: {
             ...research,
             sources,
           },
         };
+
+        logger.info(response, '[deepResearch]: end');
+        return response;
       },
     });
   },
@@ -477,15 +484,16 @@ export const tools = {
       style: z
         .string()
         .describe(
-          'The style of the image to generate, e.g. "anime", "realistic", "cartoon", "sketch", "vector", "3D", "abstract", "minimalist", "neon", "cyberpunk", "retro", "vintage", "minimalist", "neon", "cyberpunk", "retro", "vintage"'
+          'The style of the image to generate, e.g. "anime", "realistic", "cartoon", "sketch", "vector", "3D", "abstract", "minimalist", "neon", "cyberpunk", "retro", "vintage"'
         )
         .default('anime')
         .optional(),
     }),
-    execute: async ({ prompt }) => {
+    execute: async ({ prompt, style = 'anime' }) => {
+      logger.info({ prompt, style }, '[generateImage]: start');
       const result = await generateText({
         model: models.flash20exp,
-        prompt,
+        prompt: `${prompt} in ${style} style`,
         providerOptions: {
           google: {
             responseModalities: ['TEXT', 'IMAGE'],
@@ -502,6 +510,7 @@ export const tools = {
         mimeType: file.mimeType,
       }));
 
+      logger.info(`${files.length} image`, '[generateImage]: end');
       // in production, save this image to blob storage and return a URL instead
       return { files, prompt };
     },
@@ -513,6 +522,9 @@ export const tools = {
     }),
     // execute function removed to stop automatic execution (human in the loop)
   }),
+  /**
+   * not used
+   */
   askQuestion: tool({
     description:
       'Ask a clarifying question with multiple options when more information is needed',
@@ -552,6 +564,7 @@ export const tools = {
           ),
       }),
       execute: async ({ query }) => {
+        logger.info({ query }, '[createSpreadsheet]: start');
         dataStream.writeMessageAnnotation({
           type: 'spreadsheet',
           data: {
@@ -569,6 +582,7 @@ export const tools = {
           }),
         });
 
+        logger.info(object, '[createSpreadsheet]: end');
         return object;
       },
     }),
@@ -718,10 +732,18 @@ export async function processToolCalls<
       };
     })
   );
+  const newMessages = [
+    ...messages.slice(0, -1),
+    { ...lastMessage, parts: processedParts },
+  ];
 
   // Finally return the processed messages with updated last message
-  return [...messages.slice(0, -1), { ...lastMessage, parts: processedParts }];
+  return newMessages;
 }
+
+export const toolsWithConfirmation = {
+  getWeatherInformation: tools.getWeatherInformation,
+};
 
 /**
  * Get the tools that require confirmation from the user
