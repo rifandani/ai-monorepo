@@ -5,7 +5,6 @@ import { imagesApp } from '@/routes/images';
 import { llmsTextApp } from '@/routes/llms-text';
 import { mcpApp } from '@/routes/mcp';
 import { mcpClientApp } from '@/routes/mcp-client';
-import { mcpClientMarkitdownApp } from '@/routes/mcp-client-markitdown';
 import { ollamaApp } from '@/routes/ollama';
 import { agentVentureCapitalApp } from '@/routes/venture-capital';
 import { Scalar } from '@scalar/hono-api-reference';
@@ -23,7 +22,6 @@ export function routes(
   app.route('/gemini/agent/deep-research', agentDeepResearchApp);
   app.route('/mcp', mcpApp);
   app.route('/mcp-client', mcpClientApp);
-  app.route('/mcp-client-markitdown', mcpClientMarkitdownApp);
   app.route('/images', imagesApp); // run `db:up` first
   app.route('/llms-text', llmsTextApp);
 

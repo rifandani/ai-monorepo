@@ -179,7 +179,8 @@ mcpApp.post(
 
     try {
       const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
+        sessionIdGenerator: undefined, // for oauth
+        // eventStore, // enable resumability
       });
 
       await server.connect(transport);

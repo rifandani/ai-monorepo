@@ -2,8 +2,13 @@
 
 ## 🎯 Todo
 
+- [ ] example of MCP OAUTH
 - [ ] example of using langchain
 - [ ] integrate LLM observability (e.g phoenix, langfuse, helicone, posthog, sentry)
+
+## 📝 Notes
+
+- when running `bun mcp:stream:example:server` with `--oauth` and found error `Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'src' imported from /Users/rizeki.rifandani/Desktop/dev/projects/ai/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/demoInMemoryOAuthProvider.js`, you should change the `demoInMemoryOAuthProvider.js` file in the `node_modules` from `import { createOAuthMetadata, mcpAuthRouter } from 'src/server/auth/router.js';` to `import { createOAuthMetadata, mcpAuthRouter } from '../../server/auth/router.js';`. After that it still doesn't work when we try to connect through the inspector.
 
 ## 🌎 How to MCP
 
@@ -103,7 +108,7 @@ This will start the inspector server on `http://127.0.0.1:6274/`.
 
 - Testing the `Streamable HTTP` example. Start the hono dev server first. Then, in "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3333/mcp`.
 
-- Testing the `Streamable HTTP` example from the `@modelcontextprotocol/sdk` node_modules. In "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3000/mcp` (it's using express).
+- Testing the `Streamable HTTP` example from the `@modelcontextprotocol/sdk` node_modules. In "Transport Type" choose `Streamable HTTP`, in "URL" enter `http://localhost:3000/mcp` (it's using express). The OAuth Server is running on `http://localhost:3001`.
 
 ### Updating `markitdown` in `@workspaces/hono/src/mcp/markitdown`
 
