@@ -1,3 +1,4 @@
+// do not put any dependencies here that is not available in @workspace/web, this file also used by @workspace/web
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import type {

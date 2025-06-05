@@ -29,9 +29,6 @@ You can report (max 2 sentences) that the tool has been used successfully.
 
 async function getPokemonStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
-    // use this if we want to build it first and run the server as javascript
-    // command: 'node',
-    // args: ['../hono/src/mcp/stdio/dist/server.js'],
     command: 'npx',
     args: ['tsx', '../hono/src/mcp/stdio/server.ts'],
   });
@@ -43,7 +40,7 @@ async function getPokemonStdioMcpClient() {
   const tools = await mcpClient.tools({
     schemas: {
       'get-pokemon': {
-        parameters: z.object({ name: z.string() }),
+        parameters: z.object({ name: z.string().describe('Pokemon name') }),
       },
     },
   });

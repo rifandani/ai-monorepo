@@ -22,6 +22,7 @@
     "@google/generative-ai": "0.24.0",
     "@hookform/resolvers": "5.0.1",
     "@internationalized/date": "3.8.0",
+    "@modelcontextprotocol/sdk": "1.12.1",
     "@next/bundle-analyzer": "15.3.0",
     "@nosecone/next": "1.0.0-beta.5",
     "@opentelemetry/api": "1.9.0",
