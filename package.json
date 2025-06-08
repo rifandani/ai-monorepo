@@ -17,6 +17,7 @@
     "lint-typecheck": "run-p lint hono:typecheck web:typecheck",
     "hono": "bun --elide-lines=0 --filter @workspace/hono",
     "web": "bun --elide-lines=0 --filter @workspace/web",
+    "express": "bun --elide-lines=0 --filter @workspace/express",
     "hono:typecheck": "bun --filter @workspace/hono typecheck",
     "web:typecheck": "bun --filter @workspace/web typecheck"
   },

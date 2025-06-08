@@ -26,7 +26,7 @@ import { fromZodError } from 'zod-validation-error';
 // doesn't support cloudflare workers
 const memorySpanExporter = new InMemorySpanExporter();
 const sdk = new NodeSDK({
-  serviceName: 'ai-monorepo:hono',
+  serviceName: 'ai-monorepo-hono',
   traceExporter: memorySpanExporter, // new ConsoleSpanExporter(),
   instrumentations: [getNodeAutoInstrumentations()],
 });

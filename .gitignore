@@ -130,3 +130,6 @@ prisma/_sqlite/migrations
 
 # web
 .chats
+
+# containers
+container

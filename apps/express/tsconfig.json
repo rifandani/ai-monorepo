@@ -1,0 +1,12 @@
+{
+  "extends": "@workspace/typescript-config/node.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@workspace/core/*": ["../../packages/core/src/*"]
+    },
+    "types": ["bun-types"]
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts"]
+}
