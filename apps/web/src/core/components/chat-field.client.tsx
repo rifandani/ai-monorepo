@@ -10,6 +10,7 @@ import { Textarea } from '@/core/components/ui/textarea';
 import { useChatFieldStore } from '@/core/hooks/use-chat-field';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { Icon } from '@iconify/react';
+import { useStickToBottomContext } from '@workspace/core/components/stick-to-bottom.client';
 import { useAutoResizeTextarea } from '@workspace/core/hooks/use-auto-resize-textarea';
 import type React from 'react';
 import { useState } from 'react';
@@ -34,6 +35,27 @@ function FileDisplay({
   );
 }
 
+function ScrollToBottom() {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
+
+  if (isAtBottom) {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      intent="outline"
+      size="square-petite"
+      shape="circle"
+      className="-top-10 -translate-x-1/2 absolute left-1/2 z-20"
+      onClick={() => scrollToBottom()}
+    >
+      <Icon icon="lucide:chevron-down" className="h-4 w-4" />
+    </Button>
+  );
+}
+
 export function ChatField({
   status,
   input,
@@ -41,7 +63,6 @@ export function ChatField({
   onSubmit,
   stop,
   disableSubmit = false,
-  isAutoScroll,
   isEmptyChat,
 }: Pick<UseChatHelpers, 'status' | 'input' | 'setInput' | 'stop'> & {
   onSubmit: (
@@ -49,9 +70,9 @@ export function ChatField({
     files: FileList | null
   ) => void;
   disableSubmit?: boolean;
-  isAutoScroll: boolean;
   isEmptyChat: boolean;
 }) {
+  console.log(`🐄 ~ "chat-field.client.tsx" at line 38: status -> `, status);
   const showSearch = useChatFieldStore((state) => state.showSearch);
   const setShowSearch = useChatFieldStore((state) => state.setShowSearch);
   const showDeepResearch = useChatFieldStore((state) => state.showDeepResearch);
@@ -82,23 +103,7 @@ export function ChatField({
       className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) py-2"
     >
       {/* scroll-down button: show when user is not at bottom or empty chat */}
-      {!isEmptyChat && !isAutoScroll && (
-        <Button
-          type="button"
-          intent="outline"
-          size="square-petite"
-          shape="circle"
-          className="-top-10 -translate-x-1/2 absolute left-1/2 z-20"
-          onClick={() =>
-            window.scrollTo({
-              top: document.documentElement.scrollHeight,
-              behavior: 'smooth',
-            })
-          }
-        >
-          <Icon icon="lucide:chevron-down" className="h-4 w-4" />
-        </Button>
-      )}
+      {!isEmptyChat && <ScrollToBottom />}
 
       <div className="flex gap-x-2">
         {files &&

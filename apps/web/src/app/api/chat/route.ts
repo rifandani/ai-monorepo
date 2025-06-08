@@ -29,7 +29,7 @@ Do not repeat the results of deepResearch tool calls.
 You can report a summary (max 2 sentences) of the results of the deepResearch tool.
 `;
 
-async function getPokemonStdioMcpClient() {
+async function initPokemonStdioMcpClient() {
   const stdioTransport = new Experimental_StdioMCPTransport({
     command: 'npx',
     args: ['tsx', '../hono/src/mcp/stdio/server.ts'],
@@ -43,32 +43,6 @@ async function getPokemonStdioMcpClient() {
     schemas: {
       'get-pokemon': {
         parameters: z.object({ name: z.string().describe('Pokemon name') }),
-      },
-    },
-  });
-
-  return { mcpClient, tools };
-}
-
-// FIXME: this is not working
-async function markitdownStdioMcpClient() {
-  const stdioTransport = new Experimental_StdioMCPTransport({
-    command: 'docker',
-    args: ['run', '--rm', '-i', 'markitdown-mcp:latest'],
-  });
-
-  const mcpClient = await experimental_createMCPClient({
-    transport: stdioTransport,
-  });
-
-  const tools = await mcpClient.tools({
-    schemas: {
-      convert_to_markdown: {
-        parameters: z
-          .string()
-          .describe(
-            'The URI in which to convert the resource described by an http:, https:, file: or data: into markdown'
-          ),
       },
     },
   });
@@ -122,12 +96,12 @@ export async function POST(req: Request) {
   });
 
   // combined tools
-  const { mcpClient, tools: mcpTools } = await getPokemonStdioMcpClient();
+  const pokemon = await initPokemonStdioMcpClient();
 
   return createDataStreamResponse({
     execute: async (dataStream) => {
       const combinedTools = {
-        ...mcpTools,
+        ...pokemon.tools,
         generateImage: tools.generateImage,
         getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
         createSpreadsheet: tools.createSpreadsheet(dataStream),
@@ -205,7 +179,7 @@ export async function POST(req: Request) {
           });
 
           // we can save the message and the response to storage here
-          await mcpClient.close();
+          await pokemon.mcpClient.close();
         },
       });
 

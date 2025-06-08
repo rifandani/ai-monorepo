@@ -641,136 +641,6 @@ geminiApp.post(
 );
 
 geminiApp.post(
-  '/embed',
-  describeRoute({
-    description: 'Embed text',
-    responses: {
-      200: {
-        description: 'Successful embed text',
-        content: {
-          'application/json': {
-            schema: resolver(
-              z.object({
-                embedding: embeddingSchema,
-                usage: embeddingUsageSchema,
-              })
-            ),
-          },
-        },
-      },
-    },
-  }),
-  zValidator(
-    'json',
-    z.object({
-      prompt: promptSchema,
-    })
-  ),
-  async (ctx) => {
-    const { prompt } = ctx.req.valid('json');
-
-    /**
-     * Embeddings are numerical representations of text (or other media formats) that capture relationships between inputs.
-     * Text embeddings work by converting text into arrays of floating point numbers, called vectors.
-     * The length of the embedding array is called the vector's dimensionality.
-     */
-    const result = await embed({
-      model: models.embedding004,
-      value: prompt,
-    });
-
-    return ctx.json({
-      embedding: result.embedding,
-      usage: result.usage,
-    });
-  }
-);
-
-geminiApp.post(
-  '/embed-many',
-  describeRoute({
-    description: 'Embed many texts',
-    responses: {
-      200: {
-        description: 'Successful embed many texts',
-        content: {
-          'application/json': {
-            schema: resolver(
-              z.object({
-                vector: z.array(
-                  z.object({
-                    prompt: promptSchema,
-                    embedding: embeddingSchema,
-                    distance: z
-                      .number()
-                      .describe(
-                        'The distance between the embedding and the search term. A high value (close to 1) indicates that the vectors are very similar, while a low value (close to -1) indicates that they are different.'
-                      )
-                      .openapi({
-                        example: 0.5,
-                      }),
-                  })
-                ),
-                usage: embeddingUsageSchema,
-              })
-            ),
-          },
-        },
-      },
-    },
-  }),
-  zValidator(
-    'json',
-    z.object({
-      prompt: z
-        .string()
-        .describe(
-          'The text query to match the predefined values. The query will be embedded and compared to the predefined values.'
-        )
-        .openapi({
-          example: 'Hamburger',
-        }),
-    })
-  ),
-  async (ctx) => {
-    const { prompt } = ctx.req.valid('json');
-
-    const searchTermResult = await embed({
-      model: models.embedding004,
-      value: prompt,
-    });
-
-    const predefinedValues = [
-      'Foods',
-      'Drinks',
-      'Animals',
-      'Transportations',
-      'Cities',
-      'Countries',
-    ];
-    // result index is same as predefinedValues index
-    const result = await embedMany({
-      model: models.embedding004,
-      values: predefinedValues,
-    });
-
-    const vector = result.embeddings.map((embedding, index) => ({
-      prompt: predefinedValues[index],
-      embedding,
-      /**
-       * A high value (close to 1) indicates that the vectors are very similar, while a low value (close to -1) indicates that they are different.
-       */
-      distance: cosineSimilarity(searchTermResult.embedding, embedding),
-    }));
-
-    return ctx.json({
-      vector: vector,
-      usage: result.usage,
-    });
-  }
-);
-
-geminiApp.post(
   '/cache-create',
   describeRoute({
     description: 'Cache an input',
@@ -1693,6 +1563,136 @@ geminiApp.post(
       text: result.text,
       usage: result.usage,
       metadata,
+    });
+  }
+);
+
+geminiApp.post(
+  '/embed',
+  describeRoute({
+    description: 'Embed text',
+    responses: {
+      200: {
+        description: 'Successful embed text',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                embedding: embeddingSchema,
+                usage: embeddingUsageSchema,
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: promptSchema,
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    /**
+     * Embeddings are numerical representations of text (or other media formats) that capture relationships between inputs.
+     * Text embeddings work by converting text into arrays of floating point numbers, called vectors.
+     * The length of the embedding array is called the vector's dimensionality.
+     */
+    const result = await embed({
+      model: models.embedding004,
+      value: prompt,
+    });
+
+    return ctx.json({
+      embedding: result.embedding,
+      usage: result.usage,
+    });
+  }
+);
+
+geminiApp.post(
+  '/embed-many',
+  describeRoute({
+    description: 'Embed many texts',
+    responses: {
+      200: {
+        description: 'Successful embed many texts',
+        content: {
+          'application/json': {
+            schema: resolver(
+              z.object({
+                vector: z.array(
+                  z.object({
+                    prompt: promptSchema,
+                    embedding: embeddingSchema,
+                    distance: z
+                      .number()
+                      .describe(
+                        'The distance between the embedding and the search term. A high value (close to 1) indicates that the vectors are very similar, while a low value (close to -1) indicates that they are different.'
+                      )
+                      .openapi({
+                        example: 0.5,
+                      }),
+                  })
+                ),
+                usage: embeddingUsageSchema,
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  zValidator(
+    'json',
+    z.object({
+      prompt: z
+        .string()
+        .describe(
+          'The text query to match the predefined values. The query will be embedded and compared to the predefined values.'
+        )
+        .openapi({
+          example: 'Hamburger',
+        }),
+    })
+  ),
+  async (ctx) => {
+    const { prompt } = ctx.req.valid('json');
+
+    const searchTermResult = await embed({
+      model: models.embedding004,
+      value: prompt,
+    });
+
+    const predefinedValues = [
+      'Foods',
+      'Drinks',
+      'Animals',
+      'Transportations',
+      'Cities',
+      'Countries',
+    ];
+    // result index is same as predefinedValues index
+    const result = await embedMany({
+      model: models.embedding004,
+      values: predefinedValues,
+    });
+
+    const vector = result.embeddings.map((embedding, index) => ({
+      prompt: predefinedValues[index],
+      embedding,
+      /**
+       * A high value (close to 1) indicates that the vectors are very similar, while a low value (close to -1) indicates that they are different.
+       */
+      distance: cosineSimilarity(searchTermResult.embedding, embedding),
+    }));
+
+    return ctx.json({
+      vector: vector,
+      usage: result.usage,
     });
   }
 );

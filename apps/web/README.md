@@ -2,14 +2,13 @@
 
 ## 🐛 Fix
 
-- [ ] error `Maximum update depth exceeded.` when using `useAutoScroll` in `chat.client.tsx`
-- [ ] performance issue in chat
+- [ ] performance issue in mermaid rendering
+- [ ] performance issue in chat field input
 - [ ] formatting styles in markdown sometimes not rendered correctly in ordered list
 - [ ] sometimes response text includes ````markdown```` block (look into `fwgamx3VLYjuB1jy.json` chat log), we need to parse it as regular markdown instead of code block. Or adjust system prompt to avoid this
 
 ## 🎯 Todo
 
-- [ ] support markitdown mcp client
 - [ ] setup auth with better-auth
 - [ ] implement share in chat history, after we setup auth
 - [ ] implement rename in chat history

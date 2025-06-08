@@ -6,7 +6,10 @@ import { Button, Note } from '@/core/components/ui';
 import { useChatFieldStore } from '@/core/hooks/use-chat-field';
 import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
-// import { useAutoScroll } from '@workspace/core/hooks/use-auto-scroll';
+import {
+  StickToBottom,
+  StickToBottomContent,
+} from '@workspace/core/components/stick-to-bottom.client';
 import { loggerBrowser } from '@workspace/core/utils/logger';
 import { type ChatRequestOptions, createIdGenerator } from 'ai';
 import { useCallback } from 'react';
@@ -75,13 +78,6 @@ export function Chat({
     },
   });
 
-  // Manage auto-scroll and user scroll cancel
-  // const { anchorRef, isAutoScroll } = useAutoScroll({
-  //   isLoading: status === 'submitted' || status === 'streaming',
-  //   dependency: messages.length,
-  //   isStreaming: () => status === 'streaming',
-  // });
-
   const toolsRequiringConfirmation = getToolsRequiringConfirmation(
     toolsWithConfirmation
   );
@@ -130,13 +126,24 @@ export function Chat({
     [messages, reload, setMessages]
   );
 
+  const onSubmit = useCallback(
+    (evt: { preventDefault: () => void }, files: FileList | null) => {
+      handleSubmit(evt, {
+        experimental_attachments: files ?? undefined,
+      });
+    },
+    [handleSubmit]
+  );
+
   return (
-    <section
+    <StickToBottom
+      resize="smooth"
+      initial="smooth"
       data-testid="chat-root"
       data-total-messages={messages.length}
-      className="stretch flex w-full flex-col p-5 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
+      className="relative flex h-[100dvh] w-full flex-col p-5 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
     >
-      <div className="flex flex-col gap-y-5">
+      <StickToBottomContent className="flex flex-col gap-y-5">
         {messages.map((message) => (
           <ChatMessage
             key={message.id}
@@ -145,7 +152,7 @@ export function Chat({
             onRetry={handleRetry}
           />
         ))}
-      </div>
+      </StickToBottomContent>
 
       {/* reflects the error object thrown during the fetch request, show generic error message to avoid leaking information from the server */}
       {error && (
@@ -164,20 +171,13 @@ export function Chat({
 
       <ChatField
         isEmptyChat={messages.length === 0}
-        isAutoScroll={false}
         status={status}
         input={input}
         setInput={setInput}
         stop={stop}
         disableSubmit={pendingToolCallConfirmation}
-        onSubmit={(evt, files) => {
-          handleSubmit(evt, {
-            experimental_attachments: files ?? undefined,
-          });
-        }}
+        onSubmit={onSubmit}
       />
-
-      {/* <div ref={anchorRef} /> */}
-    </section>
+    </StickToBottom>
   );
 }

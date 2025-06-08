@@ -9,6 +9,7 @@
   "exports": {
     "./apis/*": "./src/apis/*.ts",
     "./assets/*": "./src/assets/*",
+    "./components/*": "./src/components/*.ts",
     "./constants/*": "./src/constants/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./locales/*": "./src/locales/*.ts",
