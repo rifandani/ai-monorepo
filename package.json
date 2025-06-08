@@ -11,7 +11,7 @@
   "scripts": {
     "prepare": "husky",
     "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
-    "db:up": "docker compose up --build",
+    "compose:up": "docker compose up --build",
     "format": "ultracite format",
     "lint": "ultracite lint",
     "lint-typecheck": "run-p lint hono:typecheck web:typecheck",

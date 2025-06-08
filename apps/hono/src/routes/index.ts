@@ -22,7 +22,7 @@ export function routes(
   app.route('/gemini/agent/deep-research', agentDeepResearchApp);
   app.route('/mcp', mcpApp);
   app.route('/mcp-client', mcpClientApp);
-  app.route('/images', imagesApp); // run `db:up` first
+  app.route('/images', imagesApp); // run `compose:up` first
   app.route('/llms-text', llmsTextApp);
 
   app.get(

@@ -1,7 +1,6 @@
 services:
-  postgres:
+  pgvector_db:
     image: pgvector/pgvector:pg17 # PostgreSQL with pgvector support
-    container_name: pgvector_db
     environment:
       POSTGRES_DB: pgvector_db
       POSTGRES_USER: pgvector_db
@@ -12,18 +11,61 @@ services:
     volumes:
       - pgvector_db_data:/var/lib/postgresql/data
       - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    restart: unless-stopped
+    restart: always
 
-  redis:
+  pggrafana_db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_DB: pggrafana_db
+      POSTGRES_USER: pggrafana_db
+      POSTGRES_PASSWORD: pggrafana_db
+    ports:
+      - "5499:5432"
+    volumes:
+      - pggrafana_db_data:/var/lib/postgresql/data
+
+  redis_cache:
     image: redis:latest
-    container_name: redis_cache
     ports:
       - "6379:6379"
     volumes:
       - redis_cache_data:/data
     restart: unless-stopped
 
+  grafana_monitoring:
+    image: grafana/grafana-oss:latest
+    restart: unless-stopped
+    depends_on:
+      - pggrafana_db
+    environment:
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: pggrafana_db:5432 # to the internal docker network port, not localhost
+      GF_DATABASE_NAME: pggrafana_db
+      GF_DATABASE_USER: pggrafana_db
+      GF_DATABASE_PASSWORD: pggrafana_db
+      GF_DATABASE_SSL_MODE: disable
+    ports:
+      - "3111:3000"
+    volumes:
+      - grafana_monitoring_data:/var/lib/grafana
+
+  otel_collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+
 # Stores data outside the container to ensure persistence
 volumes:
   pgvector_db_data:
+  pggrafana_db_data:
   redis_cache_data: 
+  grafana_monitoring_data:
