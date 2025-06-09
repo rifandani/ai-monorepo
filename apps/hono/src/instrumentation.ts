@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
@@ -81,7 +82,7 @@ const sdk = new NodeSDK({
     [ATTR_SERVICE_VERSION]: '1.0.0',
   }),
   // new ConsoleSpanExporter(), // or new OTLPTraceExporter()
-  traceExporter: new FileSpanExporter(),
+  traceExporter: new OTLPTraceExporter(),
   // metricReader: new PeriodicExportingMetricReader({
   //   exporter: new OTLPMetricExporter(),
   // }),
