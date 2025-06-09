@@ -4,9 +4,6 @@ import type { Variables } from '@/core/types/hono';
 import { routes } from '@/routes';
 // import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { InMemorySpanExporter } from '@opentelemetry/sdk-trace-node';
 import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { rateLimiter } from 'hono-rate-limiter';
@@ -23,22 +20,16 @@ import { HTTPError } from 'ky';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
-// doesn't support cloudflare workers
-const memorySpanExporter = new InMemorySpanExporter();
-const sdk = new NodeSDK({
-  serviceName: 'ai-monorepo-hono',
-  traceExporter: memorySpanExporter, // new ConsoleSpanExporter(),
-  instrumentations: [getNodeAutoInstrumentations()],
-});
-
-sdk.start();
-
 const app = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
 app.use(
   '*',
+  /**
+   * based on Hono's middleware system, it instruments the entire request-response lifecycle.
+   * This means that it doesn't provide fine-grained instrumentation for individual middleware.
+   */
   otel(),
   loggerMiddleware(),
   // reqResLogger(),

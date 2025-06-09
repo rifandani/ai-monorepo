@@ -10,6 +10,9 @@ import {
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 
+// For troubleshooting, set the log level to DiagLogLevel.DEBUG
+// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
 const sdk = new NodeSDK({
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,

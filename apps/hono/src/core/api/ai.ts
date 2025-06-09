@@ -1,6 +1,11 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { GoogleAICacheManager } from '@google/generative-ai/server';
-import { logger } from '@workspace/core/utils/logger';
+import { SpanKind, trace } from '@opentelemetry/api';
+import {
+  ATTR_HTTP_REQUEST_HEADER,
+  ATTR_HTTP_REQUEST_METHOD,
+  ATTR_URL_FULL,
+} from '@opentelemetry/semantic-conventions';
 import { createProviderRegistry } from 'ai';
 import { z } from 'zod';
 
@@ -221,19 +226,121 @@ export const registry = createProviderRegistry({
   google: createGoogleGenerativeAI(),
 });
 
+const tracerProvider = trace.getTracerProvider();
+const tracer = tracerProvider.getTracer('gemini.sdk', '1.0.0');
+
+/**
+ * Recursively flattens nested objects for trace attributes
+ */
+function flattenObjectForTracing(
+  obj: unknown,
+  prefix = '',
+  maxDepth = 3,
+  currentDepth = 0
+): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  if (currentDepth >= maxDepth) {
+    result[prefix] = JSON.stringify(obj);
+    return result;
+  }
+
+  if (obj === null || obj === undefined) {
+    result[prefix] = String(obj);
+    return result;
+  }
+
+  if (typeof obj !== 'object') {
+    result[prefix] = String(obj);
+    return result;
+  }
+
+  if (Array.isArray(obj)) {
+    if (obj.length === 0) {
+      result[prefix] = '[]';
+    } else if (obj.length <= 5) {
+      // For small arrays, expand each item
+      obj.forEach((item, index) => {
+        const newPrefix = prefix ? `${prefix}.${index}` : String(index);
+        Object.assign(
+          result,
+          flattenObjectForTracing(item, newPrefix, maxDepth, currentDepth + 1)
+        );
+      });
+    } else {
+      // For large arrays, just show the count and first few items
+      result[`${prefix}.length`] = String(obj.length);
+      result[`${prefix}.preview`] = `${JSON.stringify(obj.slice(0, 3))}...`;
+    }
+    return result;
+  }
+
+  // Handle regular objects
+  const entries = Object.entries(obj);
+  if (entries.length === 0) {
+    result[prefix] = '{}';
+    return result;
+  }
+
+  for (const [key, value] of entries) {
+    const newPrefix = prefix ? `${prefix}.${key}` : key;
+    Object.assign(
+      result,
+      flattenObjectForTracing(value, newPrefix, maxDepth, currentDepth + 1)
+    );
+  }
+
+  return result;
+}
+
 // by default use GOOGLE_GENERATIVE_AI_API_KEY
 // example fetch wrapper that logs the input to the API call:
 const google = createGoogleGenerativeAI({
   // @ts-expect-error preconnect is bun specific
-  fetch: async (
+  fetch: (
     url: Parameters<typeof fetch>[0],
     options: Parameters<typeof fetch>[1]
   ) => {
-    logger.info(
-      { url, headers: options?.headers, body: options?.body },
-      'FETCH_CALL'
+    return tracer.startActiveSpan(
+      'gemini.sdk.fetch',
+      {
+        kind: SpanKind.CLIENT,
+        attributes: {
+          [ATTR_HTTP_REQUEST_METHOD]: options?.method,
+          [ATTR_URL_FULL]: url.toString(),
+        },
+      },
+      async (span) => {
+        for (const [name, value] of Object.entries(options?.headers ?? {})) {
+          span.setAttribute(ATTR_HTTP_REQUEST_HEADER(name), value);
+        }
+
+        // Handle body properly - parse JSON string if needed
+        if (options?.body) {
+          try {
+            const bodyData =
+              typeof options.body === 'string'
+                ? JSON.parse(options.body)
+                : options.body;
+
+            const flattenedBody = flattenObjectForTracing(
+              bodyData,
+              'http.request.body'
+            );
+            for (const [key, value] of Object.entries(flattenedBody)) {
+              span.setAttribute(key, value);
+            }
+          } catch {
+            // If JSON parsing fails, just set the raw body
+            span.setAttribute('http.request.body', String(options.body));
+          }
+        }
+
+        span.updateName(`${options?.method} ${url}`);
+        span.end();
+        return await fetch(url, options);
+      }
     );
-    return await fetch(url, options);
   },
 });
 

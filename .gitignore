@@ -128,8 +128,11 @@ buck-out/
 *.db-journal
 prisma/_sqlite/migrations
 
-# web
+# custom
 .chats
+.traces
+.metrics
+.logs
 
 # containers
 container
