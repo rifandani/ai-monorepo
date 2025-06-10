@@ -22,6 +22,7 @@ import {
 import { models } from '@/core/api/ai';
 import { CACHE_CONTENT_EXPLICIT_CONTENT } from '@/core/constants/cache';
 import type { Variables } from '@/core/types/hono';
+import { Logger } from '@/core/utils/logger';
 import { cached } from '@/core/utils/middleware';
 import {
   answerTool,
@@ -35,7 +36,7 @@ import {
   type GoogleGenerativeAIProviderOptions,
   google,
 } from '@ai-sdk/google';
-import { logger } from '@workspace/core/utils/logger';
+import type { AnyValueMap } from '@opentelemetry/api-logs';
 import {
   type CoreMessage,
   type FilePart,
@@ -61,6 +62,8 @@ import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
+
+const logger = new Logger('gemini_controller');
 
 export const geminiApp = new Hono<{
   Variables: Variables;
@@ -122,6 +125,7 @@ geminiApp.post(
       },
     ];
 
+    logger.log('Generating text', { prompt });
     const result = await generateText({
       /**
        * we can hot swap the model with like openai, anthropic, etc.
@@ -132,12 +136,16 @@ geminiApp.post(
       // system,
       // prompt,
     });
-
-    return c.json({
+    const response = {
       text: result.text,
       usage: result.usage,
       messages: result.response.messages,
+    };
+
+    logger.log('Generated text response', {
+      response: response as AnyValueMap,
     });
+    return c.json(response);
   }
 );
 
@@ -521,7 +529,9 @@ geminiApp.post(
       onFinish({ object, error }) {
         // handle type validation failure (when the object does not match the schema):
         if (!object) {
-          logger.error(error, 'Stream object error');
+          logger.error('Stream object error', {
+            error: (error as Error).message,
+          });
           return;
         }
       },
@@ -1769,10 +1779,9 @@ geminiApp.post(
       if (result.status === 'fulfilled') {
         allEmbeddings = allEmbeddings.concat(result.value.embeddings);
       } else {
-        logger.error(
-          `Embedding batch ${batchIndex} failed: ${result.reason}`,
-          'Embedding Error'
-        );
+        logger.error(`Embedding batch ${batchIndex} failed`, {
+          error: result.reason,
+        });
       }
     });
 

@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
@@ -78,17 +79,14 @@ class FileSpanExporter implements SpanExporter {
 
 const sdk = new NodeSDK({
   resource: resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: 'ai-monorepo-hono',
-    [ATTR_SERVICE_VERSION]: '1.0.0',
+    [ATTR_SERVICE_NAME]: SERVICE_NAME,
+    [ATTR_SERVICE_VERSION]: SERVICE_VERSION,
   }),
-  // new ConsoleSpanExporter(), // or new OTLPTraceExporter()
+  // new ConsoleSpanExporter(), // or new FileSpanExporter()
   traceExporter: new OTLPTraceExporter(),
   // metricReader: new PeriodicExportingMetricReader({
   //   exporter: new OTLPMetricExporter(),
   // }),
-  // logRecordProcessors: [
-  //   new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
-  // ],
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': {
