@@ -4,18 +4,18 @@ import { Logger } from '@/utils/logger';
 import { SpanStatusCode, ValueType, metrics, trace } from '@opentelemetry/api';
 import express from 'express';
 
-const tracer = trace.getTracer('dice-server', '1.0.0');
-const meter = metrics.getMeter('dice-server', '1.0.0');
-const logger = new Logger('dice-server');
+const tracer = trace.getTracer('diceserver', '1.0.0');
+const meter = metrics.getMeter('diceserver', '1.0.0');
+const logger = new Logger('diceserver');
 const app = express();
 
 app.get('/rolldice', (req, res) => {
-  const histogram = meter.createHistogram('http.server.duration', {
+  const startTime = Date.now();
+  const histogram = meter.createHistogram('http_server_response_time', {
     description: 'The distribution of the HTTP server response time',
     unit: 'milliseconds',
     valueType: ValueType.INT,
   });
-  const startTime = Date.now();
 
   return tracer.startActiveSpan('rollDice', (span) => {
     logger.log('Received request to roll dice');

@@ -1,10 +1,10 @@
 import { Logger } from '@/utils/logger';
 import { metrics, trace } from '@opentelemetry/api';
 
-const tracer = trace.getTracer('dice-lib', '1.0.0');
-const meter = metrics.getMeter('dice-lib', '1.0.0');
-const counter = meter.createCounter('dice-lib.rolls.counter');
-const logger = new Logger('dice-lib');
+const tracer = trace.getTracer('dicelib', '1.0.0');
+const meter = metrics.getMeter('dicelib', '1.0.0');
+const counter = meter.createCounter('dicelib.rolls.counter');
+const logger = new Logger('dicelib');
 
 function rollOnce(i: number, min: number, max: number) {
   return tracer.startActiveSpan(`rollOnce:${i}`, (span) => {

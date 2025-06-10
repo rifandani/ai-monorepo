@@ -20,6 +20,9 @@ export class Logger {
   context: AnyValue;
   logger: ApiLogsLogger;
 
+  /**
+   * @param context - The context of the logger. It will be passed into the attributes of the log record.
+   */
   constructor(context: AnyValue) {
     this.context = context;
 
@@ -33,7 +36,7 @@ export class Logger {
       processors: [new BatchLogRecordProcessor(new OTLPLogExporter())],
     });
 
-    this.logger = loggerProvider.getLogger('default');
+    this.logger = loggerProvider.getLogger('default', '1.0.0');
   }
 
   log(message: string) {
@@ -46,6 +49,8 @@ export class Logger {
       },
     });
 
+    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.log(`[${this.context}] - ${message}`);
   }
 
@@ -59,6 +64,8 @@ export class Logger {
       },
     });
 
+    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.warn(`[${this.context}] - ${message}`);
   }
 
@@ -72,6 +79,8 @@ export class Logger {
       },
     });
 
+    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
+    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.error(`[${this.context}] - ${message}`);
   }
 }

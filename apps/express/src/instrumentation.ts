@@ -22,9 +22,6 @@ const sdk = new NodeSDK({
   metricReader: new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter(),
   }),
-  // logRecordProcessors: [
-  //   new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
-  // ],
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': {
@@ -37,3 +34,4 @@ const sdk = new NodeSDK({
 });
 
 sdk.start();
+console.log('Instrumentation started');
