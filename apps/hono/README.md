@@ -3,7 +3,6 @@
 ## 🎯 Todo
 
 - [ ] example of MCP OAUTH
-- [ ] example of using langchain
 - [ ] add more evals
 
 ## 📝 Note
@@ -126,6 +125,28 @@ bunx degit microsoft/markitdown/packages/markitdown-mcp --force
 We use [traceloop's OpenLLMetry](https://www.traceloop.com/docs/openllmetry/introduction) which is a wrapper for OpenTelemetry built specifically for LLM. You can find the instrumentation in the `./src/instrumentation.ts` file.
 
 Since it is emitting standard OTLP HTTP (standard OpenTelemetry protocol), you can use any OpenTelemetry Collector, which gives you the flexibility to then connect to any backend you want. Just change the `baseUrl` in the `./src/instrumentation.ts` file.
+
+### Grafana
+
+Run docker compose to start the [`grafana/otel-lgtm`](https://github.dev/grafana/docker-otel-lgtm/) container. This will spin up a OpenTelemetry backend including [Prometheus](https://grafana.com/docs/grafana/latest/datasources/prometheus/) (metrics database), [Tempo](https://grafana.com/docs/grafana/latest/datasources/tempo/) (traces database), [Loki](https://grafana.com/docs/grafana/latest/datasources/loki/) (logs database), and [Pyroscope](https://grafana.com/docs/grafana/latest/datasources/pyroscope/) (profiling database). It also spin up Grafana Dashboard for visualization at `http://localhost:3111`. If you haven't logged in, use the following credentials:
+
+- Username: `admin`
+- Password: `admin`
+
+```bash
+# cd into root of the workspace
+cd ../..
+
+# run the docker compose file
+bun compose:up
+```
+
+Then, start the hono server to start sending the metrics, traces, and logs to the backend.
+
+```bash
+# running in port 3333
+bun hono dev
+```
 
 ## 🧪 How to Evals and Red Teaming
 
