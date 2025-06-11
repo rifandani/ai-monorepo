@@ -3,8 +3,10 @@ import * as path from 'node:path';
 import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import {
@@ -84,9 +86,9 @@ const sdk = new NodeSDK({
   }),
   // new ConsoleSpanExporter(), // or new FileSpanExporter()
   traceExporter: new OTLPTraceExporter(),
-  // metricReader: new PeriodicExportingMetricReader({
-  //   exporter: new OTLPMetricExporter(),
-  // }),
+  metricReader: new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporter(),
+  }),
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': {

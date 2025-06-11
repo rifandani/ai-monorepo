@@ -4,13 +4,12 @@
 
 - [ ] example of MCP OAUTH
 - [ ] example of using langchain
-- [ ] integrate LLM observability (e.g phoenix, langfuse, helicone, posthog, sentry)
 - [ ] add more evals
 
-## 📝 Notes
+## 📝 Note
 
 - when running `bun mcp:stream:example:server` with `--oauth` and found error `Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'src' imported from /Users/rizeki.rifandani/Desktop/dev/projects/ai/node_modules/@modelcontextprotocol/sdk/dist/esm/examples/server/demoInMemoryOAuthProvider.js`, you should change the `demoInMemoryOAuthProvider.js` file in the `node_modules` from `import { createOAuthMetadata, mcpAuthRouter } from 'src/server/auth/router.js';` to `import { createOAuthMetadata, mcpAuthRouter } from '../../server/auth/router.js';`. After that it still doesn't work when we try to connect through the inspector.
-- check [`@traceloop/node-server-sdk` PR](https://github.com/traceloop/openllmetry-js/pull/606) periodicallly and then continue on from git stash.
+- `TypeError: resources.Resource is not a constructor`. This is because the `@traceloop/node-server-sdk` is using the old version of `@opentelemetry/resources` which is not compatible. Check [`@traceloop/node-server-sdk` PR](https://github.com/traceloop/openllmetry-js/pull/606) periodicallly and then continue on from git stash.
 
 ## 🌎 How to MCP
 
@@ -122,7 +121,13 @@ cd apps/hono/src/mcp/markitdown
 bunx degit microsoft/markitdown/packages/markitdown-mcp --force
 ```
 
-## 🧪 How to Evals and Red Teaming with `promptfoo`
+## 📊 How to Observability
+
+We use [traceloop's OpenLLMetry](https://www.traceloop.com/docs/openllmetry/introduction) which is a wrapper for OpenTelemetry built specifically for LLM. You can find the instrumentation in the `./src/instrumentation.ts` file.
+
+Since it is emitting standard OTLP HTTP (standard OpenTelemetry protocol), you can use any OpenTelemetry Collector, which gives you the flexibility to then connect to any backend you want. Just change the `baseUrl` in the `./src/instrumentation.ts` file.
+
+## 🧪 How to Evals and Red Teaming
 
 We use `promptfoo` to eval and red teaming our LLM usage. To run the evals, you can use the following command:
 

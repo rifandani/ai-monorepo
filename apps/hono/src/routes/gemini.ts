@@ -515,7 +515,7 @@ geminiApp.post(
     'json',
     z.object({
       prompt: z.string().openapi({
-        example: 'Generate a detailed user profile',
+        example: 'Generate 3 detailed user profiles',
       }),
     })
   ),
@@ -525,7 +525,11 @@ geminiApp.post(
     const result = streamObject({
       model: models.flash25,
       prompt,
-      schema: mockUserSchema,
+      schema: z
+        .array(mockUserSchema)
+        .describe('Array of user profiles')
+        .min(1)
+        .max(3),
       onFinish({ object, error }) {
         // handle type validation failure (when the object does not match the schema):
         if (!object) {

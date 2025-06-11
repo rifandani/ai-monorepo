@@ -2,6 +2,7 @@ import { auth } from '@/auth/libs';
 import { ENV } from '@/core/constants/env';
 import type { Variables } from '@/core/types/hono';
 import { routes } from '@/routes';
+import { metricsMiddleware } from '@/routes/middleware/metrics';
 // import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
 import { logger } from '@workspace/core/utils/logger';
@@ -31,6 +32,7 @@ app.use(
    * This means that it doesn't provide fine-grained instrumentation for individual middleware.
    */
   otel(),
+  metricsMiddleware(),
   loggerMiddleware(),
   // reqResLogger(),
   rateLimiter({
