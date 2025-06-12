@@ -28,13 +28,13 @@ services:
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP http receiver
     volumes:
-      - ./apps/express/container/grafana:/data/grafana
-      - ./apps/express/container/prometheus:/data/prometheus
-      - ./apps/express/container/loki:/data/loki
+      - ./docker/container/grafana:/data/grafana
+      - ./docker/container/prometheus:/data/prometheus
+      - ./docker/container/loki:/data/loki
     environment:
       - GF_PATHS_DATA=/data/grafana
     env_file:
-      - ./apps/express/.env
+      - ./docker/.env
     # stdin_open: true
     # tty: true
 
