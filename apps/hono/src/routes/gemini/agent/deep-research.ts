@@ -381,10 +381,7 @@ agentDeepResearchApp.post(
         const report = await generateReport(research);
         const response = { research, report };
 
-        span.addEvent(
-          'Sending response for /deep-research',
-          crush(response) as Record<string, AttributeValue>
-        );
+        span.setAttributes(crush(response) as Record<string, AttributeValue>);
         return c.json(response);
       },
     });
