@@ -1,3 +1,4 @@
+import { flattenAttributes } from '@/core/utils/object';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { GoogleAICacheManager } from '@google/generative-ai/server';
 import { SpanKind, trace } from '@opentelemetry/api';
@@ -229,70 +230,6 @@ export const registry = createProviderRegistry({
 const tracerProvider = trace.getTracerProvider();
 const tracer = tracerProvider.getTracer('gemini.sdk', '1.0.0');
 
-/**
- * Recursively flattens nested objects for trace attributes
- */
-function flattenObjectForTracing(
-  obj: unknown,
-  prefix = '',
-  maxDepth = 3,
-  currentDepth = 0
-): Record<string, string> {
-  const result: Record<string, string> = {};
-
-  if (currentDepth >= maxDepth) {
-    result[prefix] = JSON.stringify(obj);
-    return result;
-  }
-
-  if (obj === null || obj === undefined) {
-    result[prefix] = String(obj);
-    return result;
-  }
-
-  if (typeof obj !== 'object') {
-    result[prefix] = String(obj);
-    return result;
-  }
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) {
-      result[prefix] = '[]';
-    } else if (obj.length <= 5) {
-      // For small arrays, expand each item
-      obj.forEach((item, index) => {
-        const newPrefix = prefix ? `${prefix}.${index}` : String(index);
-        Object.assign(
-          result,
-          flattenObjectForTracing(item, newPrefix, maxDepth, currentDepth + 1)
-        );
-      });
-    } else {
-      // For large arrays, just show the count and first few items
-      result[`${prefix}.length`] = String(obj.length);
-      result[`${prefix}.preview`] = `${JSON.stringify(obj.slice(0, 3))}...`;
-    }
-    return result;
-  }
-
-  // Handle regular objects
-  const entries = Object.entries(obj);
-  if (entries.length === 0) {
-    result[prefix] = '{}';
-    return result;
-  }
-
-  for (const [key, value] of entries) {
-    const newPrefix = prefix ? `${prefix}.${key}` : key;
-    Object.assign(
-      result,
-      flattenObjectForTracing(value, newPrefix, maxDepth, currentDepth + 1)
-    );
-  }
-
-  return result;
-}
-
 // by default use GOOGLE_GENERATIVE_AI_API_KEY
 // example fetch wrapper that logs the input to the API call:
 const google = createGoogleGenerativeAI({
@@ -302,7 +239,7 @@ const google = createGoogleGenerativeAI({
     options: Parameters<typeof fetch>[1]
   ) => {
     return tracer.startActiveSpan(
-      'gemini.sdk.fetch',
+      'createGoogleGenerativeAI.fetch',
       {
         kind: SpanKind.CLIENT,
         attributes: {
@@ -323,10 +260,9 @@ const google = createGoogleGenerativeAI({
                 ? JSON.parse(options.body)
                 : options.body;
 
-            const flattenedBody = flattenObjectForTracing(
-              bodyData,
-              'http.request.body'
-            );
+            const flattenedBody = flattenAttributes(bodyData, {
+              prefix: 'http.request.body',
+            });
             for (const [key, value] of Object.entries(flattenedBody)) {
               span.setAttribute(key, value);
             }

@@ -1,14 +1,21 @@
 import { models } from '@/core/api/ai';
-import { logger } from '@workspace/core/utils/logger';
+import { recordSpan } from '@/core/utils/telemetry';
+import { type AttributeValue, metrics, trace } from '@opentelemetry/api';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { validator } from 'hono-openapi/zod';
 import type { Variables } from 'hono/types';
+import { crush } from 'radashi';
 import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
+
+const tracer = trace.getTracer('deepResearchEndpoint', '1.0.0');
+const meter = metrics.getMeter('deepResearchEndpoint', '1.0.0');
+const queriesCounter = meter.createCounter('deepResearch.queries');
+const searchResultsCounter = meter.createCounter('deepResearch.searchResults');
 
 const searchResultSchema = z.object({
   title: z.string().describe('The title of the search result'),
@@ -73,7 +80,6 @@ const accumulatedResearch: Research = {
  *         └── "Solid state batteries"
  *         └── "How long does it take to charge an electric car to full capacity"
  */
-
 async function generateReport(research: Research) {
   // we can use reasoning model here to generate a comprehensive report
   const { text } = await generateText({
@@ -92,59 +98,76 @@ async function generateReport(research: Research) {
   - You may use high levels of speculation or prediction, just flag it for me.
   - Use Markdown formatting.`,
     prompt: `Generate a report based on the following research data:\n\n${JSON.stringify(research, null, 2)}`,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: 'generateReport',
+      metadata: crush({ research }) as Record<string, AttributeValue>,
+    },
   });
 
   return text;
 }
 
 async function deepResearch(query: string, depth = 1, breadth = 2) {
-  // if the query is not set, set it
-  if (!accumulatedResearch.query) {
-    accumulatedResearch.query = query;
-  }
+  return await recordSpan({
+    tracer,
+    name: 'deepResearch',
+    attributes: { query, depth, breadth },
+    fn: async (span) => {
+      // if the query is not set, set it
+      if (!accumulatedResearch.query) {
+        span.addEvent('Setting initial query', { query });
+        accumulatedResearch.query = query;
+      }
 
-  // if depth is 0, return the accumulated research
-  if (depth === 0) {
-    return accumulatedResearch;
-  }
+      // if depth is 0, return the accumulated research
+      if (depth === 0) {
+        span.addEvent(
+          'Empty depth, return early',
+          crush(accumulatedResearch) as Record<string, AttributeValue>
+        );
+        return accumulatedResearch;
+      }
 
-  logger.info(`Generating search queries for: ${query}`);
-  const queries = await generateSearchQueries(query, depth);
-  accumulatedResearch.queries = queries;
+      const queries = await generateSearchQueries(query, depth);
+      accumulatedResearch.queries = queries;
 
-  // loop through the search queries (based on input depth)
-  for (const query of queries) {
-    logger.info(`Searching the web for: ${query}`);
-    const searchResults = await searchAndEvaluate(
-      query,
-      accumulatedResearch.searchResults
-    );
-    accumulatedResearch.searchResults.push(...searchResults);
+      // loop through the search queries (based on input depth)
+      for (const query of queries) {
+        queriesCounter.add(1);
+        const searchResults = await searchAndEvaluate(
+          query,
+          accumulatedResearch.searchResults
+        );
+        accumulatedResearch.searchResults.push(...searchResults);
 
-    for (const searchResult of searchResults) {
-      logger.info(
-        `Generating learning & follow-up questions for search result: ${searchResult.url}`
-      );
-      const learnings = await generateLearningAndFollowUpQuestions(
-        query,
-        searchResult
-      );
-      accumulatedResearch.learnings.push(learnings);
-      accumulatedResearch.completedQueries.push(query);
+        for (const searchResult of searchResults) {
+          searchResultsCounter.add(1);
+          const learnings = await generateLearningAndFollowUpQuestions(
+            query,
+            searchResult
+          );
+          accumulatedResearch.learnings.push(learnings);
+          accumulatedResearch.completedQueries.push(query);
 
-      // call deepResearch recursively with decrementing depth and breadth
-      await deepResearch(
-        `Overall research goal: ${query}
+          // call deepResearch recursively with decrementing depth and breadth
+          await deepResearch(
+            `Overall research goal: ${query}
         Previous search queries: ${accumulatedResearch.completedQueries.join(', ')}
         Follow-up questions: ${learnings.followUpQuestions.join(', ')}
         `,
-        depth - 1,
-        Math.ceil(breadth / 2)
-      );
-    }
-  }
+            depth - 1,
+            Math.ceil(breadth / 2)
+          );
+        }
+      }
 
-  return accumulatedResearch;
+      span.setAttributes(
+        crush({ accumulatedResearch }) as Record<string, AttributeValue>
+      );
+      return accumulatedResearch;
+    },
+  });
 }
 
 async function generateLearningAndFollowUpQuestions(
@@ -161,6 +184,14 @@ async function generateLearningAndFollowUpQuestions(
     </search_result>
     `,
     schema: learningSchema,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: 'generateLearningAndFollowUpQuestions',
+      metadata: crush({ query, searchResult }) as Record<
+        string,
+        AttributeValue
+      >,
+    },
   });
 
   return object;
@@ -209,6 +240,11 @@ async function searchAndEvaluate(
             schema: z.object({
               results: z.array(searchResultSchema),
             }),
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: 'searchAndEvaluate_searchWeb',
+              metadata: { query },
+            },
           });
 
           pendingSearchResults.push(...results);
@@ -223,6 +259,7 @@ async function searchAndEvaluate(
         async execute() {
           // biome-ignore lint/style/noNonNullAssertion: <explanation>
           const pendingResult = pendingSearchResults.pop()!;
+
           const { object: evaluation } = await generateObject({
             model: models.flash25,
             prompt: `Evaluate whether the search results are relevant and will help answer the following query: "${query}". If the page already exists in the existing results, mark it as irrelevant.
@@ -238,19 +275,30 @@ async function searchAndEvaluate(
             `,
             output: 'enum',
             enum: ['relevant', 'irrelevant'],
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: 'searchAndEvaluate_evaluate',
+              metadata: pendingResult,
+            },
           });
 
           if (evaluation === 'relevant') {
             finalSearchResults.push(pendingResult);
           }
-          logger.info(`Found: ${pendingResult.url}`);
-          logger.info(`Evaluation completed: ${evaluation}`);
 
           return evaluation === 'irrelevant'
             ? 'Search results are irrelevant. Please search again with a more specific query.'
             : 'Search results are relevant. End research for this query.';
         },
       }),
+    },
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: 'searchAndEvaluate',
+      metadata: crush({ query, accumulatedSources }) as Record<
+        string,
+        AttributeValue
+      >,
     },
   });
 
@@ -265,6 +313,11 @@ async function generateSearchQueries(query: string, depth = 1) {
     schema: z.object({
       queries: z.array(z.string()).min(depth).max(5),
     }),
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: 'generateSearchQueries',
+      metadata: { query, depth },
+    },
   });
 
   return object.queries;
@@ -319,11 +372,21 @@ agentDeepResearchApp.post(
   ),
   async (c) => {
     const { query, depth = 1, breadth = 2 } = c.req.valid('json');
-    const research = await deepResearch(query, depth, breadth);
+    return await recordSpan({
+      tracer,
+      name: 'deepResearchEndpoint',
+      attributes: { query, depth, breadth },
+      fn: async (span) => {
+        const research = await deepResearch(query, depth, breadth);
+        const report = await generateReport(research);
+        const response = { research, report };
 
-    logger.info('Generating research report...');
-    const report = await generateReport(research);
-
-    return c.json({ research, report });
+        span.addEvent(
+          'Sending response for /deep-research',
+          crush(response) as Record<string, AttributeValue>
+        );
+        return c.json(response);
+      },
+    });
   }
 );

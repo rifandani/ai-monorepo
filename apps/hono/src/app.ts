@@ -1,11 +1,11 @@
 import { auth } from '@/auth/libs';
 import { ENV } from '@/core/constants/env';
 import type { Variables } from '@/core/types/hono';
+import { Logger } from '@/core/utils/logger';
 import { routes } from '@/routes';
 import { metricsMiddleware } from '@/routes/middleware/metrics';
 // import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
-import { logger } from '@workspace/core/utils/logger';
 import { Hono } from 'hono';
 import { rateLimiter } from 'hono-rate-limiter';
 import { cors } from 'hono/cors';
@@ -21,6 +21,7 @@ import { HTTPError } from 'ky';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
+const logger = new Logger('honoApp');
 const app = new Hono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
@@ -74,33 +75,37 @@ app.on(['POST', 'GET'], '/api/auth/**', (c) => {
 
 app.onError(async (error, c) => {
   const requestId = c.get('requestId');
-  logger.error(error, `[App]: Error with requestId: ${requestId}`);
-
-  // Log error service, like Sentry, etc
-  // captureException({
-  //   error,
-  //   extra: {
-  //     function: '[FILENAME:FUNCTIONAME]',
-  //   },
-  // })
 
   if (error instanceof ZodError) {
     const errors = fromZodError(error);
+    logger.error(`ZodError with requestId: ${requestId}`, {
+      error: errors.message,
+    });
     return c.json(errors, 400);
   }
   if (error instanceof HTTPError) {
     const errors = await error.response.json();
-    return c.json({ message: error.message, error: errors }, 400);
+    const response = { message: error.message, error: errors };
+    logger.error(`HTTPError with requestId: ${requestId}`, response);
+    return c.json(response, 400);
   }
   if (error instanceof HTTPException) {
+    logger.error(`HTTPException with requestId: ${requestId}`, {
+      error: error.message,
+    });
     // hono built-in http error
     return error.getResponse();
   }
 
+  logger.error(`UnknownError with requestId: ${requestId}`, {
+    error: error.message,
+  });
   return c.json({ ...error, message: error.message }, 500);
 });
 
 app.notFound((c) => {
+  logger.warn('404 Not found');
+
   return c.text('404 Not found', 404);
 });
 

@@ -85,8 +85,8 @@ export class Logger {
     // biome-ignore lint/suspicious/noConsoleLog: <explanation>
     // biome-ignore lint/suspicious/noConsole: <explanation>
     console.log(
-      `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
-      attributes
+      `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`
+      // attributes
     );
   }
 
@@ -108,8 +108,8 @@ export class Logger {
     // biome-ignore lint/suspicious/noConsoleLog: <explanation>
     // biome-ignore lint/suspicious/noConsole: <explanation>
     console.warn(
-      `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
-      attributes
+      `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`
+      // attributes
     );
   }
 
@@ -131,8 +131,8 @@ export class Logger {
     // biome-ignore lint/suspicious/noConsoleLog: <explanation>
     // biome-ignore lint/suspicious/noConsole: <explanation>
     console.error(
-      `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
-      attributes
+      `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`
+      // attributes
     );
   }
 }

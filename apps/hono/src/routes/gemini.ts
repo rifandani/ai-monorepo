@@ -36,7 +36,6 @@ import {
   type GoogleGenerativeAIProviderOptions,
   google,
 } from '@ai-sdk/google';
-import type { AnyValueMap } from '@opentelemetry/api-logs';
 import {
   type CoreMessage,
   type FilePart,
@@ -63,7 +62,7 @@ import { z } from 'zod';
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
 
-const logger = new Logger('gemini_controller');
+const logger = new Logger('geminiEndpoint');
 
 export const geminiApp = new Hono<{
   Variables: Variables;
@@ -125,7 +124,6 @@ geminiApp.post(
       },
     ];
 
-    logger.log('Generating text', { prompt });
     const result = await generateText({
       /**
        * we can hot swap the model with like openai, anthropic, etc.
@@ -142,9 +140,6 @@ geminiApp.post(
       messages: result.response.messages,
     };
 
-    logger.log('Generated text response', {
-      response: response as AnyValueMap,
-    });
     return c.json(response);
   }
 );
