@@ -24,7 +24,7 @@
     "@internationalized/date": "3.8.0",
     "@modelcontextprotocol/sdk": "1.12.1",
     "@next/bundle-analyzer": "15.3.0",
-    "@nosecone/next": "1.0.0-beta.5",
+    "@nosecone/next": "1.0.0-beta.8",
     "@radix-ui/react-scroll-area": "1.2.4",
     "@reactuses/core": "6.0.0",
     "@t3-oss/env-nextjs": "0.12.0",
