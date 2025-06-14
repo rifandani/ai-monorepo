@@ -10,7 +10,7 @@ import {
   StickToBottom,
   StickToBottomContent,
 } from '@workspace/core/components/stick-to-bottom.client';
-import { loggerBrowser } from '@workspace/core/utils/logger';
+import { logger } from '@workspace/core/utils/logger';
 import { type ChatRequestOptions, createIdGenerator } from 'ai';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
@@ -65,13 +65,13 @@ export function Chat({
     },
     onToolCall({ toolCall }) {
       // useful for running client-side tools that are automatically executed (e.g. render chart/diagram)
-      loggerBrowser.info(toolCall, `🐦 ~ "page.tsx" at line 10: toolCall -> `);
+      logger.log(`🐦 ~ "page.tsx" at line 10: toolCall -> `, toolCall);
     },
     onFinish(message, options) {
-      loggerBrowser.info(
-        { message, options },
-        `🐯 ~ "page.tsx" at line 13: message, options -> `
-      );
+      logger.log(`🐯 ~ "page.tsx" at line 13: message, options -> `, {
+        message,
+        options,
+      });
     },
     onError(error) {
       toast.error(error.message);

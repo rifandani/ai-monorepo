@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     searchMode: boolean;
     deepResearchMode: boolean;
   };
-  logger.info(json, 'POST /api/chat start');
+  logger.log('POST /api/chat start', json);
   // get the last message from the request:
   const { message, id, searchMode, deepResearchMode } = json;
 

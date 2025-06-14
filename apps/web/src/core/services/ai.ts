@@ -76,7 +76,7 @@ You are a spreadsheet creation assistant. Create a spreadsheet in csv format bas
 `;
 
 async function searchWeb(query: string) {
-  logger.info({ query }, '[searchWeb]: start');
+  logger.log('[searchWeb]: start', { query });
   const {
     // sources,
     // experimental_output: { results },
@@ -103,7 +103,7 @@ async function searchWeb(query: string) {
     publishedDate: r.publishedDate,
   })) as SearchResult[];
 
-  logger.info({ response }, '[searchWeb]: end');
+  logger.log('[searchWeb]: end', { response });
   return response;
 }
 
@@ -112,7 +112,7 @@ async function generateSearchQueries(
   breadth: number,
   learnings?: string[]
 ) {
-  logger.info({ query, breadth, learnings }, '[generateSearchQueries]: start');
+  logger.log('[generateSearchQueries]: start', { query, breadth, learnings });
   const {
     object: { queries },
   } = await generateObject({
@@ -143,7 +143,7 @@ async function generateSearchQueries(
     }),
   });
 
-  logger.info({ queries }, '[generateSearchQueries]: end');
+  logger.log('[generateSearchQueries]: end', { queries });
   return queries;
 }
 
@@ -153,10 +153,12 @@ async function generateLearnings(
   numberOfLearnings: number,
   numberOfFollowUpQuestions: number
 ) {
-  logger.info(
-    { query, results, numberOfLearnings, numberOfFollowUpQuestions },
-    '[generateLearnings]: start'
-  );
+  logger.log('[generateLearnings]: start', {
+    query,
+    results,
+    numberOfLearnings,
+    numberOfFollowUpQuestions,
+  });
   const {
     object: { followUpQuestions, learnings },
   } = await generateObject({
@@ -179,7 +181,7 @@ async function generateLearnings(
     }),
   });
 
-  logger.info({ learnings, followUpQuestions }, '[generateLearnings]: end');
+  logger.log('[generateLearnings]: end', { learnings, followUpQuestions });
   return {
     learnings,
     followUpQuestions,
@@ -296,7 +298,7 @@ async function deepResearch(
 }
 
 async function generateReport(prompt: string, research: Research) {
-  logger.info({ prompt, research }, '[generateReport]: start');
+  logger.log('[generateReport]: start', { prompt, research });
   const { learnings, sources, questionsExplored, searchQueries } = research;
   const { text: content } = await generateText({
     model: models.flash25,
@@ -330,7 +332,7 @@ async function generateReport(prompt: string, research: Research) {
   });
   const response = { content, title: object.title };
 
-  logger.info(response, '[generateReport]: end');
+  logger.log('[generateReport]: end', response);
   return response;
 }
 
@@ -342,7 +344,7 @@ export const tools = {
         query: z.string().min(1).max(200).describe('The search query'),
       }),
       execute: async ({ query }) => {
-        logger.info({ query }, '[webSearchNative]: start');
+        logger.log('[webSearchNative]: start', { query });
         const { sources, text } = await generateText({
           model: models.flash25search,
           prompt: query,
@@ -355,7 +357,7 @@ export const tools = {
           } satisfies Annotation);
         }
 
-        logger.info({ sources, text }, '[webSearchNative]: end');
+        logger.log('[webSearchNative]: end', { sources, text });
         return {
           sources,
           text,
@@ -384,7 +386,7 @@ export const tools = {
         .describe('The number of web search results to return'),
     }),
     execute: async ({ query, limit = 3 }) => {
-      logger.info({ query, limit }, '[webSearch]: start');
+      logger.log('[webSearch]: start', { query, limit });
       const {
         // sources,
         // experimental_output: { results },
@@ -413,7 +415,7 @@ export const tools = {
         date: result.publishedDate || 'Date not available', // Include publish date when available
       }));
 
-      logger.info(response, '[webSearch]: end');
+      logger.log('[webSearch]: end', response);
       return response;
     },
   }),
@@ -446,7 +448,7 @@ export const tools = {
           ),
       }),
       execute: async ({ prompt, depth, breadth }) => {
-        logger.info({ prompt, depth, breadth }, '[deepResearch]: start');
+        logger.log('[deepResearch]: start', { prompt, depth, breadth });
         dataStream.writeMessageAnnotation({
           type: 'deep-research',
           data: { status: 'Beginning deep research' },
@@ -486,7 +488,7 @@ export const tools = {
           },
         };
 
-        logger.info(response, '[deepResearch]: end');
+        logger.log('[deepResearch]: end', response);
         return response;
       },
     });
@@ -508,7 +510,7 @@ export const tools = {
         .optional(),
     }),
     execute: async ({ prompt, style = 'anime' }) => {
-      logger.info({ prompt, style }, '[generateImage]: start');
+      logger.log('[generateImage]: start', { prompt, style });
       const result = await generateText({
         model: models.flash20exp,
         prompt: `${prompt} in ${style} style`,
@@ -528,7 +530,7 @@ export const tools = {
         mimeType: file.mimeType,
       }));
 
-      logger.info(`${files.length} image`, '[generateImage]: end');
+      logger.log('[generateImage]: end', `${files.length} image`);
       // in production, save this image to blob storage and return a URL instead
       return { files, prompt };
     },
@@ -582,7 +584,7 @@ export const tools = {
           ),
       }),
       execute: async ({ query }) => {
-        logger.info({ query }, '[createSpreadsheet]: start');
+        logger.log('[createSpreadsheet]: start', { query });
         dataStream.writeMessageAnnotation({
           type: 'spreadsheet',
           data: {
@@ -600,7 +602,7 @@ export const tools = {
           }),
         });
 
-        logger.info(object, '[createSpreadsheet]: end');
+        logger.log('[createSpreadsheet]: end', object);
         return object;
       },
     }),

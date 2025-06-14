@@ -1,6 +1,6 @@
 import { ENV } from '@/core/constants/env';
 import { http } from '@/core/services/http';
-import { loggerBrowser } from '@workspace/core/utils/logger';
+import { logger } from '@workspace/core/utils/logger';
 import { createAuthClient } from 'better-auth/react';
 import { toast } from 'sonner';
 
@@ -19,7 +19,7 @@ export const authClient = createAuthClient({
 });
 
 authClient.$store.listen('$sessionSignal', (ctx) => {
-  loggerBrowser.info('$sessionSignal', ctx);
+  logger.log('$sessionSignal', ctx);
 });
 
 export type AuthSession = typeof authClient.$Infer.Session;

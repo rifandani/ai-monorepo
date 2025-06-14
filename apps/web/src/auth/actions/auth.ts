@@ -32,7 +32,7 @@ export const loginAction = actionClient
     authSignInEmailRequestSchema.omit({ callbackURL: true, rememberMe: true })
   )
   .action<ActionResult<null>>(async ({ parsedInput }) => {
-    logger.info(parsedInput, '[login]: Start login');
+    logger.log('[login]: Start login', parsedInput);
     const [error, data] = await tryit(authRepositories(http).signInEmail)({
       json: {
         email: parsedInput.email,
@@ -46,7 +46,7 @@ export const loginAction = actionClient
     }
 
     // INFO: hono backend doesn't set the cookie & we can't use headers from next/headers
-    logger.info(data, '[login]: Start set session cookie');
+    logger.log('[login]: Start set session cookie', data);
     const setCookies = data.headers.get('Set-Cookie');
     const parsed = parseSetCookieHeader(setCookies ?? '');
     const cookie = await cookies();
@@ -71,7 +71,7 @@ export const loginAction = actionClient
     }
 
     // INFO: we can't use redirect in try catch block, because redirect will throw an error object
-    logger.info('[login]: Start redirect to /');
+    logger.log('[login]: Start redirect to /');
     redirect('/');
   });
 
@@ -89,7 +89,7 @@ export const registerAction = actionClient
   .metadata({ actionName: 'register' })
   .schema(authSignUpEmailRequestSchema)
   .action<ActionResult<null>>(async ({ parsedInput }) => {
-    logger.info(parsedInput, '[register]: Start register');
+    logger.log('[register]: Start register', parsedInput);
     const [error, data] = await tryit(authRepositories(http).signUpEmail)({
       json: parsedInput,
     });
@@ -98,7 +98,7 @@ export const registerAction = actionClient
     }
 
     // INFO: hono backend doesn't set the cookie & we can't use headers from next/headers
-    logger.info(data, '[register]: Start set session cookie');
+    logger.log('[register]: Start set session cookie', data);
     const setCookies = data.headers.get('Set-Cookie');
     const parsed = parseSetCookieHeader(setCookies ?? '');
     const cookie = await cookies();
@@ -123,7 +123,7 @@ export const registerAction = actionClient
     }
 
     // INFO: we can't use redirect in try catch block, because redirect will throw an error object
-    logger.info('[register]: Start redirect to /');
+    logger.log('[register]: Start redirect to /');
     redirect('/');
   });
 
@@ -141,10 +141,10 @@ export const registerAction = actionClient
 export const logoutAction = actionClient
   .metadata({ actionName: 'logoutAction' })
   .action(async () => {
-    logger.info('[logout]: Start logging out');
+    logger.log('[logout]: Start logging out');
     const cookieStore = await cookies();
     cookieStore.delete(AUTH_COOKIE_NAME);
 
-    logger.info('[logout]: Start redirect to /login');
+    logger.log('[logout]: Start redirect to /login');
     redirect('/login');
   });

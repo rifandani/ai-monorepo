@@ -25,20 +25,20 @@ export async function repositoryErrorMapper(
 ): Promise<ActionResult<null>> {
   return await match(error)
     .with(P.instanceOf(HTTPError), async (err) => {
-      logger.error(err, '[repository]: HTTPError');
+      logger.error('[repository]: HTTPError', err);
       const json = await err.response.json<ErrorResponseSchema>();
       return { data: null, error: json.message };
     })
     .with(P.instanceOf(ZodError), (err) => {
-      logger.error(err, '[repository]: ZodError');
+      logger.error('[repository]: ZodError', err);
       return { data: null, error: fromZodError(err).message };
     })
     .with(P.instanceOf(TimeoutError), (err) => {
-      logger.error(err, '[repository]: TimeoutError');
+      logger.error('[repository]: TimeoutError', err);
       return { data: null, error: err.message };
     })
     .otherwise((err) => {
-      logger.error(err, '[repository]: Error');
+      logger.error('[repository]: Error', err);
       return { data: null, error: err.message };
     });
 }

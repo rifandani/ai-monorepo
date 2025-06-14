@@ -69,7 +69,7 @@ export async function GET(req: NextRequest): Promise<Response | ImageResponse> {
       throw e;
     }
 
-    logger.error(e.message, 'Failed to generate the image');
+    logger.error('Failed to generate the image', e.message);
     return new Response('Failed to generate the image', {
       status: 500,
     });

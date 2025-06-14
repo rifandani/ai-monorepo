@@ -4,7 +4,7 @@ import { type AttributeValue, metrics, trace } from '@opentelemetry/api';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
-import { validator } from 'hono-openapi/zod';
+import { resolver, validator } from 'hono-openapi/zod';
 import type { Variables } from 'hono/types';
 import { crush } from 'radashi';
 import { z } from 'zod';
@@ -336,15 +336,17 @@ agentDeepResearchApp.post(
         description: 'The generated search queries',
         content: {
           'application/json': {
-            schema: z.object({
-              research: z.object({
-                query: z.string(),
-                queries: z.array(z.string()),
-                searchResults: z.array(searchResultSchema),
-                learnings: z.array(learningSchema),
-                completedQueries: z.array(z.string()),
-              }),
-            }),
+            schema: resolver(
+              z.object({
+                research: z.object({
+                  query: z.string(),
+                  queries: z.array(z.string()),
+                  searchResults: z.array(searchResultSchema),
+                  learnings: z.array(learningSchema),
+                  completedQueries: z.array(z.string()),
+                }),
+              })
+            ),
           },
         },
       },

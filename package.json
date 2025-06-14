@@ -25,15 +25,15 @@
     "@biomejs/biome": "1.9.4",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
-    "@types/node": "22.15.29",
+    "@types/node": "22.15.31",
     "@workspace/typescript-config": "workspace:*",
     "bumpp": "10.1.1",
     "husky": "9.1.7",
     "npm-run-all2": "8.0.4",
     "rimraf": "6.0.1",
     "typescript": "5.8.3",
-    "tsx": "4.19.4",
-    "ultracite": "4.2.6"
+    "tsx": "4.20.3",
+    "ultracite": "4.2.10"
   },
   "trustedDependencies": [
     "@biomejs/biome",

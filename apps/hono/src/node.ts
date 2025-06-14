@@ -4,5 +4,5 @@ import { logger } from '@workspace/core/utils/logger';
 import { app } from './app';
 
 serve({ ...app, port: PORT }, (info) => {
-  logger.info(`Started development server: http://localhost:${info.port}`);
+  logger.log(`Started development server: http://localhost:${info.port}`);
 });

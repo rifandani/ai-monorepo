@@ -2,7 +2,7 @@ import { models, textSchema, usageSchema } from '@/core/api/ai';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
-import { validator } from 'hono-openapi/zod';
+import { resolver, validator } from 'hono-openapi/zod';
 import type { Variables } from 'hono/types';
 import { z } from 'zod';
 
@@ -204,10 +204,12 @@ agentVentureCapitalApp.post(
         description: 'The investment pitch',
         content: {
           'application/json': {
-            schema: z.object({
-              text: textSchema,
-              usage: usageSchema,
-            }),
+            schema: resolver(
+              z.object({
+                text: textSchema,
+                usage: usageSchema,
+              })
+            ),
           },
         },
       },

@@ -7,7 +7,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 
 const timestamps = {
   createdAt: timestamp().defaultNow().notNull(),

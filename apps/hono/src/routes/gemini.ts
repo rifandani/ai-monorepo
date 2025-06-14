@@ -396,7 +396,7 @@ geminiApp.post(
         description: 'Successful stream text',
         content: {
           'text/plain': {
-            schema: textSchema,
+            schema: resolver(textSchema),
           },
         },
       },
@@ -438,7 +438,7 @@ geminiApp.post(
         description: 'Successful stream data',
         content: {
           'text/plain': {
-            schema: textSchema,
+            schema: resolver(textSchema),
           },
         },
       },
@@ -500,7 +500,7 @@ geminiApp.post(
         description: 'Successful stream object',
         content: {
           'text/plain': {
-            schema: textSchema,
+            schema: resolver(textSchema),
           },
         },
       },

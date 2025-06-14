@@ -1,6 +1,7 @@
 import { db } from '@/core/db';
 import { imagesTable, selectImagesTableSchema } from '@/core/db/schema';
 import { google } from '@ai-sdk/google';
+import { zValidator } from '@hono/zod-validator';
 import { embed } from 'ai';
 import {
   type SQL,
@@ -13,10 +14,9 @@ import {
 } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
-import { resolver, validator as zValidator } from 'hono-openapi/zod';
 import type { Variables } from 'hono/types';
 import { unique } from 'radashi';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
@@ -26,10 +26,7 @@ const imageSchema = selectImagesTableSchema.extend({
     .number()
     .describe(
       'Similarity score from 0 to 1, 0 means no query provided, 1 means direct match using database queries'
-    )
-    .openapi({
-      example: 0.5,
-    }),
+    ),
 });
 const embedding004 = google.textEmbeddingModel('text-embedding-004');
 const { embedding: _, ...rest } = getTableColumns(imagesTable);
@@ -104,12 +101,30 @@ imagesApp.get(
         description: 'Successful get images',
         content: {
           'application/json': {
-            schema: resolver(
-              z.object({
-                error: z.string().nullable().describe('Error message'),
-                data: z.array(imageSchema),
-              })
-            ),
+            schema: {
+              type: 'object',
+              properties: {
+                error: {
+                  type: 'string',
+                  nullable: true,
+                  description: 'Error message',
+                },
+                data: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      title: { type: 'string' },
+                      description: { type: 'string' },
+                      path: { type: 'string' },
+                      embedding: { type: 'array', items: { type: 'number' } },
+                      similarity: { type: 'number' },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -118,9 +133,7 @@ imagesApp.get(
   zValidator(
     'query',
     z.object({
-      query: z.string().openapi({
-        example: 'cat',
-      }),
+      query: z.string(),
     })
   ),
   async (c) => {

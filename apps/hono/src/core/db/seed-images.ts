@@ -80,20 +80,20 @@ const mockImagesWithoutEmbedding: Omit<ImageTable, 'id'>[] = [
 ];
 
 async function main() {
-  logger.info('seeding "images" table started...');
+  logger.log('seeding "images" table started...');
 
-  logger.info('clearing "images" table...');
+  logger.log('clearing "images" table...');
   await reset(db, imagesTable);
-  logger.info('"images" table cleared');
+  logger.log('"images" table cleared');
 
-  logger.info('generating embeddings for "images" table...');
+  logger.log('generating embeddings for "images" table...');
   const { embeddings } = await embedMany({
     model: textEmbedding004,
     values: mockImagesWithoutEmbedding.map(
       (img) => `${img.title}\n${img.description}`
     ),
   });
-  logger.info('embeddings generated for "images" table');
+  logger.log('embeddings generated for "images" table');
 
   const mockImagesWithEmbedding = mockImagesWithoutEmbedding.map(
     (img, index) => ({
@@ -101,11 +101,11 @@ async function main() {
       embedding: embeddings[index] as number[],
     })
   );
-  logger.info('inserting images into database...');
+  logger.log('inserting images into database...');
   await db.insert(imagesTable).values(mockImagesWithEmbedding);
-  logger.info('images inserted into database');
+  logger.log('images inserted into database');
 
-  logger.info('database seeding complete');
+  logger.log('database seeding complete');
 }
 
 if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {

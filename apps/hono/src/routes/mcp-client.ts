@@ -12,7 +12,7 @@ import {
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
-import { validator } from 'hono-openapi/zod';
+import { resolver, validator } from 'hono-openapi/zod';
 import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
@@ -23,7 +23,7 @@ export const mcpClientApp = new Hono<{
 }>(); // .basePath('/api/v1');
 
 mcpClientApp.get('/', (c) => {
-  logger.info('Received GET MCP request');
+  logger.log('Received GET MCP request');
   return c.json(
     {
       jsonrpc: '2.0',
@@ -38,7 +38,7 @@ mcpClientApp.get('/', (c) => {
 });
 
 mcpClientApp.delete('/', (c) => {
-  logger.info('Received DELETE MCP request');
+  logger.log('Received DELETE MCP request');
   return c.json(
     {
       jsonrpc: '2.0',
@@ -62,11 +62,13 @@ mcpClientApp.post(
         description: 'Successful streamable HTTP MCP',
         content: {
           'application/json': {
-            schema: z.object({
-              markdown: z.string().openapi({
-                example: '# Hello World',
-              }),
-            }),
+            schema: resolver(
+              z.object({
+                markdown: z.string().openapi({
+                  example: '# Hello World',
+                }),
+              })
+            ),
           },
         },
       },
@@ -156,11 +158,13 @@ mcpClientApp.post(
         description: 'Successful conversion to Markdown',
         content: {
           'application/json': {
-            schema: z.object({
-              markdown: z.string().openapi({
-                example: '# Hello World',
-              }),
-            }),
+            schema: resolver(
+              z.object({
+                markdown: z.string().openapi({
+                  example: '# Hello World',
+                }),
+              })
+            ),
           },
         },
       },

@@ -35,7 +35,7 @@ function getCachedResult(key: string | object) {
 
     return result ?? null;
   } catch (error) {
-    logger.error(error, 'Cache error: ');
+    logger.error('Cache error: ', error);
     return null;
   }
 }
@@ -51,9 +51,9 @@ function updateCache(
     const cache = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
     const updatedCache = { ...cache, [key]: value };
     fs.writeFileSync(CACHE_FILE, JSON.stringify(updatedCache, null, 2));
-    logger.info(key, 'Cache updated for key:');
+    logger.log('Cache updated for key: ', key);
   } catch (error) {
-    logger.error(error, 'Failed to update cache:');
+    logger.error('Failed to update cache: ', error);
   }
 }
 
@@ -82,14 +82,14 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
       ...cleanPrompt(params.prompt),
       _function: 'generate',
     });
-    logger.info(cacheKey, 'Cache Key:');
+    logger.log('Cache Key: ', cacheKey);
 
     const cached = getCachedResult(cacheKey) as Awaited<
       ReturnType<LanguageModelV1['doGenerate']>
     > | null;
 
     if (cached && cached !== null) {
-      logger.info('Cache Hit');
+      logger.log('Cache Hit');
       return {
         ...cached,
         response: {
@@ -101,7 +101,7 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
       };
     }
 
-    logger.info('Cache Miss');
+    logger.log('Cache Miss');
     const result = await doGenerate();
 
     updateCache(cacheKey, result);
@@ -113,14 +113,14 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
       ...cleanPrompt(params.prompt),
       _function: 'stream',
     });
-    logger.info(cacheKey, 'Cache Key:');
+    logger.log('Cache Key: ', cacheKey);
 
     // Check if the result is in the cache
     const cached = getCachedResult(cacheKey);
 
     // If cached, return a simulated ReadableStream that yields the cached result
     if (cached && cached !== null) {
-      logger.info('Cache Hit');
+      logger.log('Cache Hit');
       // Format the timestamps in the cached response
       const formattedChunks = (cached as LanguageModelV1StreamPart[]).map(
         (p) => {
@@ -141,7 +141,7 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
       };
     }
 
-    logger.info('Cache Miss');
+    logger.log('Cache Miss');
     // If not cached, proceed with streaming
     const { stream, ...rest } = await doStream();
 
@@ -204,20 +204,20 @@ export const guardrailMiddleware: LanguageModelV1Middleware = {
 
 export const logMiddleware: LanguageModelV1Middleware = {
   wrapGenerate: async ({ doGenerate, params }) => {
-    logger.info('doGenerate called');
-    logger.info(params, 'params:');
+    logger.log('doGenerate called');
+    logger.log('params: ', params);
 
     const result = await doGenerate();
 
-    logger.info('doGenerate finished');
-    logger.info(result.text, 'generated text:');
+    logger.log('doGenerate finished');
+    logger.log('generated text: ', result.text);
 
     return result;
   },
 
   wrapStream: async ({ doStream, params }) => {
-    logger.info('doStream called');
-    logger.info(params, 'params:');
+    logger.log('doStream called');
+    logger.log('params: ', params);
 
     const { stream, ...rest } = await doStream();
 
@@ -236,8 +236,8 @@ export const logMiddleware: LanguageModelV1Middleware = {
       },
 
       flush() {
-        logger.info('doStream finished');
-        logger.info(generatedText, 'generated text:');
+        logger.log('doStream finished');
+        logger.log('generated text: ', generatedText);
       },
     });
 

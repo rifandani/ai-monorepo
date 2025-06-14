@@ -5,7 +5,6 @@ import {
   DEFAULT_SERVER_ERROR_MESSAGE,
   createSafeActionClient,
 } from 'next-safe-action';
-import { zodAdapter } from 'next-safe-action/adapters/zod';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import 'server-only';
@@ -19,11 +18,10 @@ export interface ActionResult<T> {
  * Default action client with logging middleware
  */
 export const actionClient = createSafeActionClient({
-  validationAdapter: zodAdapter(),
   handleServerError: (error) => {
     logger.error(
-      error instanceof Error ? error.message : error,
-      '[actionClient]: Error default server error handler'
+      '[actionClient]: Error default server error handler',
+      error instanceof Error ? error.message : error
     );
 
     if (error instanceof Error) {
@@ -46,7 +44,7 @@ export const actionClient = createSafeActionClient({
     const endTime = performance.now();
 
     // Log the action execution time
-    logger.info(
+    logger.log(
       `[actionClient]: ${metadata.actionName} | ${endTime - startTime}ms`
     );
 
@@ -73,13 +71,13 @@ export const authActionClient = actionClient
     );
     if (parsedSession.error) {
       logger.error(
-        parsedSession.error,
-        '[authActionClient]: Unauthorized: Session is not valid'
+        '[authActionClient]: Unauthorized: Session is not valid',
+        parsedSession.error
       );
       throw new Error('[authActionClient]: Unauthorized: Session is not valid');
     }
 
-    logger.info('[authActionClient]: Authorized: Session is valid');
+    logger.log('[authActionClient]: Authorized: Session is valid');
     // Return the next middleware with `userId` value in the context
     return next({ ctx: { session: parsedSession.data } });
   });

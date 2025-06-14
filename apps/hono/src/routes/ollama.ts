@@ -335,9 +335,9 @@ ollamaApp.post(
       !response.message.tool_calls ||
       response.message.tool_calls.length === 0
     ) {
-      logger.info(
-        response.message.content,
-        "The model didn't use the function. Its response was:"
+      logger.log(
+        "The model didn't use the function. Its response was:",
+        response.message.content
       );
       return;
     }
