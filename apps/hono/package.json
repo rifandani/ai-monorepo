@@ -27,8 +27,11 @@
     "mcp:stdio:server": "dotenvx run -- tsx src/mcp/stdio/server.ts",
     "mcp:stdio:client": "dotenvx run -- tsx src/mcp/stdio/client.ts",
     "mcp:markitdown:client": "dotenvx run -- tsx src/mcp/markitdown-client/client.ts",
+    "evalmod": "dotenvx run -- tsx promptfoo/app.ts",
     "eval": "dotenvx run -- promptfoo eval --config promptfoo/*",
-    "eval:view": "dotenvx run -- promptfoo view -y"
+    "eval:view": "dotenvx run -- promptfoo view -y",
+    "redteam": "dotenvx run -- promptfoo redteam run --config promptfoo/redteam/*",
+    "redteam:view": "dotenvx run -- promptfoo readteam report"
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.19",

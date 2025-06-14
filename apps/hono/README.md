@@ -147,16 +147,16 @@ Then, start the hono server to start sending the metrics, traces, and logs to th
 bun hono dev
 ```
 
-## 🧪 How to Evals and Red Teaming
+## 🧪 How to Evals
 
-We use `promptfoo` to eval and red teaming our LLM usage. To run the evals, you can use the following command:
+> ERROR: `SqliteError: FOREIGN KEY constraint failed`
+> We need to update the `promptfoo` library first.
+
+We use `promptfoo` to evaluate our LLM usage. To run the evals, you can use the following command:
 
 ```bash
 # use npm to view better logs in terminal
 npm run eval
-
-# or, if you run it from the root
-npm run eval -w @workspaces/hono
 ```
 
 To view the evals results, you can use the following command:
@@ -164,7 +164,20 @@ To view the evals results, you can use the following command:
 ```bash
 # use npm to view better logs in terminal
 npm run eval:view
+```
 
-# or, if you run it from the root
-npm run eval:view -w @workspaces/hono
+## How to Red Teaming
+
+We use `promptfoo` to run red teaming on our LLM usage. To run the red teaming, you can use the following command:
+
+```bash
+# use npm to view better logs in terminal
+npm run redteam
+```
+
+To view the red teaming results, you can use the following command:
+
+```bash
+# use npm to view better logs in terminal
+npm run redteam:view
 ```
