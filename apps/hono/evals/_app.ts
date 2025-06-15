@@ -1,3 +1,9 @@
+/**
+ * We don't use promptfoo as node module.
+ * This is just an example how to use it as node module.
+ * Use it as CLI instead by running `bun eval`.
+ */
+
 import path from 'node:path';
 import promptfoo from 'promptfoo';
 import type { EvaluateOptions, EvaluateTestSuite } from 'promptfoo';
@@ -29,9 +35,15 @@ async function runEval() {
     ...testSuite,
   };
 
+  console.log('Running eval test suite hitting', finalTestSuite.description);
   const evalResults = await promptfoo.evaluate(finalTestSuite, options);
   const summary = await evalResults.toEvaluateSummary();
   console.log('Eval summary', summary.stats);
+
+  const file = await evalResults.toResultsFile();
+  console.log('Eval results file', file);
+
+  await evalResults.save();
 }
 
 runEval();

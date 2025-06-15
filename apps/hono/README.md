@@ -3,7 +3,6 @@
 ## 🎯 Todo
 
 - [ ] example of MCP OAUTH
-- [ ] add more evals
 - [ ] replace all `'zod'` occurences with `'zod/v4'` in the codebase. currently `hono-openapi` is not working with zod 4. `hono-openapi` is waiting on `zod-openapi` to support zod 4 in this [issue](https://github.com/samchungy/zod-openapi/issues/432).
 - [ ] consider to use `@hono/zod-openapi` instead. then, we can use it to generate llms text like [scalar did](https://github.com/scalar/scalar/blob/c52765bcc5eea27b5c34d3bfed7df12eec33a42c/integrations/hono/playground/index.ts)
 
@@ -151,35 +150,27 @@ bun hono dev
 
 ## 🧪 How to Evals
 
-> ERROR: `SqliteError: FOREIGN KEY constraint failed`
-> We need to update the `promptfoo` library first.
-
-We use `promptfoo` to evaluate our LLM usage. To run the evals, you can use the following command:
+We use `promptfoo` to evaluate our LLM usage.
 
 ```bash
-# use npm to view better logs in terminal
-npm run eval
+# run the evals
+bun eval
+
+# view the evals results
+bun eval:view
 ```
 
-To view the evals results, you can use the following command:
+## 🕵🏻‍♂️ How to Red Teaming
+
+We use `promptfoo` to run red teaming (pen-testing) on our LLM usage.
 
 ```bash
-# use npm to view better logs in terminal
-npm run eval:view
-```
-
-## How to Red Teaming
-
-We use `promptfoo` to run red teaming on our LLM usage. To run the red teaming, you can use the following command:
-
-```bash
-# use npm to view better logs in terminal
-npm run redteam
+# run the red teaming
+bun redteam
 ```
 
 To view the red teaming results, you can use the following command:
 
 ```bash
-# use npm to view better logs in terminal
-npm run redteam:view
+bun redteam:view
 ```

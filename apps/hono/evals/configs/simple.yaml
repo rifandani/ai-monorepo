@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+description: "http://localhost:3333/gemini/generate"
+outputPath: "evals/results/simple.json"
+
+providers:
+  - id: file://../custom-provider.ts
+    label: gemini-2.5-flash-preview-05-20
+    prompts: ["simple_prompt"]
+    config:
+      model: gemini-2.5-flash-preview-05-20
+
+prompts:
+  - label: simple_prompt
+    raw: "You are an expert literary translator. Answer in a simple and concise manner. When you have multiple answers to the translation, use a line break to separate them and make sure to it max 3 answers. Translate this text to {{targetLanguage}}, preserving tone and cultural nuances: {{text}}"
+
+tests:
+  - vars:
+      targetLanguage: Indonesian
+      text: Hello World
+    assert:
+      - type: contains
+        value: "Halo"
+      - type: contains
+        value: "Hai"
+      - type: contains
+        value: "Dunia"

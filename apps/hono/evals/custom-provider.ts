@@ -1,15 +1,15 @@
+import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import promptfoo from 'promptfoo';
 import type { ApiProvider, ProviderOptions, ProviderResponse } from 'promptfoo';
-import { models } from '../src/core/api/ai';
 
-export class AiSdkApiProvider implements ApiProvider {
+export default class AiSdkApiProvider implements ApiProvider {
   protected providerId: string;
   config: Record<string, string>;
 
   constructor(options: ProviderOptions) {
     // The caller may override Provider ID (e.g. when using multiple instances of the same provider)
-    this.providerId = options.id || 'custom provider';
+    this.providerId = options.id || 'AiSdkApiProvider';
 
     // The config object contains any options passed to the provider in the config file.
     this.config = options.config;
@@ -20,6 +20,11 @@ export class AiSdkApiProvider implements ApiProvider {
   }
 
   async callApi(prompt: string): Promise<ProviderResponse> {
+    console.log('[AiSdkApiProvider]: callApi', {
+      prompt,
+      providerId: this.providerId,
+      config: this.config,
+    });
     const cache = await promptfoo.cache.getCache();
 
     // Create a unique cache key based on the prompt and context
@@ -28,9 +33,10 @@ export class AiSdkApiProvider implements ApiProvider {
     // Check if the response is already cached
     const cachedResponse = await cache.get(cacheKey);
     if (cachedResponse) {
+      console.log('[AiSdkApiProvider]: cachedResponse', { cachedResponse });
       return {
         // Required
-        output: JSON.parse(cachedResponse),
+        output: cachedResponse,
 
         // Optional
         tokenUsage: {
@@ -45,15 +51,20 @@ export class AiSdkApiProvider implements ApiProvider {
     }
 
     // If not cached, make the function call
+    const model = this.config.model || 'gemini-2.5-flash-preview-05-20'; // gemini-2.0-flash-001
     const { text, usage } = await generateText({
-      model: models.flash25,
-      messages: JSON.parse(prompt),
+      model: google(model),
+      prompt,
       maxRetries: 0,
     });
-    const inputCost = 0.15 / 1_000_000; // 2.5 flash
-    const outputCost = 0.6 / 1_000_000; // 2.5 flash
-    // const inputCost = 0.1 / 1_000_000; // 2.0 flash
-    // const outputCost = 0.025 / 1_000_000; // 2.0 flash
+    const inputCost =
+      model === 'gemini-2.5-flash-preview-05-20'
+        ? 0.15 / 1_000_000
+        : 0.1 / 1_000_000; // 2.0 flash
+    const outputCost =
+      model === 'gemini-2.5-flash-preview-05-20'
+        ? 0.6 / 1_000_000
+        : 0.025 / 1_000_000; // 2.0 flash
     const totalCost =
       inputCost * usage.promptTokens + outputCost * usage.completionTokens ||
       undefined;
@@ -62,7 +73,10 @@ export class AiSdkApiProvider implements ApiProvider {
     try {
       await cache.set(cacheKey, text);
     } catch (error) {
-      console.error('Failed to store response in cache:', error);
+      console.error(
+        '[AiSdkApiProvider]: callApi failed to store response in cache',
+        error
+      );
     }
 
     return {
