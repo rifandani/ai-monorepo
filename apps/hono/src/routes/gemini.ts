@@ -55,7 +55,6 @@ import { describeRoute } from 'hono-openapi';
 import { resolver, validator as zValidator } from 'hono-openapi/zod';
 import { stream } from 'hono/streaming';
 import { endTime, startTime } from 'hono/timing';
-// import pdf from 'pdf-parse/lib/pdf-parse.js';
 import { extractText, getDocumentProxy } from 'unpdf';
 import { z } from 'zod';
 
