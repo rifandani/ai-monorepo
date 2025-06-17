@@ -150,7 +150,7 @@ bun hono dev
 
 ## 🧪 How to Evals
 
-We use `promptfoo` to evaluate our LLM usage.
+We use `promptfoo` to evaluate our prompts.
 
 ```bash
 # run the evals
@@ -160,9 +160,11 @@ bun eval
 bun eval:view
 ```
 
+> Create a multiple eval file in the `./evals/configs` and run it with `promptfoo eval --config evals/configs/*` doesn't work as expected, it will merge all the .yaml configs, instead of treating them as separate configs.
+
 ## 🕵🏻‍♂️ How to Red Teaming
 
-We use `promptfoo` to run red teaming (pen-testing) on our LLM usage.
+We use `promptfoo` to run red teaming (pen-testing, end-to-end testing by hitting the API endpoints) on our LLM usage.
 
 ```bash
 # run the red teaming

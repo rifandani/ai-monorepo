@@ -133,6 +133,7 @@ prisma/_sqlite/migrations
 .traces
 .metrics
 .logs
+.results
 
 # containers
 container

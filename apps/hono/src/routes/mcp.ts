@@ -9,11 +9,50 @@ import type {
 import { toFetchResponse, toReqRes } from 'fetch-to-node';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
-import { sleep } from 'radashi';
 import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
+
+const POKE_API_BASE = 'https://pokeapi.co/api/v2';
+
+interface PokemonAbility {
+  id: string;
+  name: string;
+}
+
+interface Pokemon {
+  id: string;
+  name: string;
+  abilities: { ability: PokemonAbility }[];
+  stats: { base_stat: number; stat: { name: string } }[];
+}
+
+async function makePokeApiRequest<T>(path: string): Promise<T | null> {
+  try {
+    const url = `${POKE_API_BASE}${path}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP Error Status: ${response.status}`);
+    }
+    return (await response.json()) as T;
+  } catch (error) {
+    console.error('[ERROR] Failed to make PokeAPI request:', error);
+    return null;
+  }
+}
+
+function formatPokemonData(pokemon: Pokemon) {
+  return [
+    `Name: ${pokemon.name}`,
+    `Abilities: ${pokemon.abilities
+      .map((ability) => ability.ability.name)
+      .join(', ')}`,
+    `Stats: ${pokemon.stats
+      .map((stat) => `${stat.stat.name}: ${stat.base_stat}`)
+      .join(', ')}`,
+  ].join('\n');
+}
 
 export const mcpApp = new Hono<{
   Variables: Variables;
@@ -131,9 +170,8 @@ const getServer = () => {
       name: z.string().describe('The name of the Pokemon to get'),
     },
     async ({ name }) => {
-      await sleep(500);
-      const pokemon =
-        Math.random() > 0.3 ? `${name} has high HP and DEFENSE` : null;
+      const path = `/pokemon/${name.toLowerCase()}`;
+      const pokemon = await makePokeApiRequest<Pokemon>(path);
 
       if (!pokemon) {
         return {
@@ -150,7 +188,7 @@ const getServer = () => {
         content: [
           {
             type: 'text',
-            text: pokemon,
+            text: formatPokemonData(pokemon),
           },
         ],
       };

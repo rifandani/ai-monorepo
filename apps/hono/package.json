@@ -27,8 +27,9 @@
     "mcp:stdio:server": "dotenvx run -- tsx src/mcp/stdio/server.ts",
     "mcp:stdio:client": "dotenvx run -- tsx src/mcp/stdio/client.ts",
     "mcp:markitdown:client": "dotenvx run -- tsx src/mcp/markitdown-client/client.ts",
-    "eval": "dotenvx run -- promptfoo eval --config evals/configs/*",
+    "eval": "dotenvx run -- promptfoo eval --config evals/configs/* --verbose",
     "eval:view": "dotenvx run -- promptfoo view -y",
+    "eval:clean": "rm -rf evals/.results && rm -rf ~/.promptfoo/cache",
     "redteam": "dotenvx run -- promptfoo redteam run --config evals/configs-redteam/*",
     "redteam:view": "dotenvx run -- promptfoo readteam report"
   },
