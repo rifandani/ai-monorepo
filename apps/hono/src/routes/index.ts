@@ -1,6 +1,6 @@
 import type { Variables } from '@/core/types/hono';
 import { geminiApp } from '@/routes/gemini';
-import { agentDeepResearchApp } from '@/routes/gemini/agent/deep-research';
+import { agentDeepResearchApp } from '@/routes/gemini/agent/deep-research/deep-research';
 import { imagesApp } from '@/routes/images';
 import { llmsTextApp } from '@/routes/llms-text';
 import { mcpApp } from '@/routes/mcp';

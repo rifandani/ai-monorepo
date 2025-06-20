@@ -22,7 +22,7 @@ const searchResultSchema = z.object({
   content: z.string().describe('The content of the search result'),
   url: z.string().describe('The url of the search result source'),
 });
-type SearchResult = z.infer<typeof searchResultSchema>;
+export type SearchResult = z.infer<typeof searchResultSchema>;
 
 const learningSchema = z.object({
   learning: z.string().describe('The learning from the search result'),
@@ -197,7 +197,14 @@ async function generateLearningAndFollowUpQuestions(
   return object;
 }
 
-async function searchAndEvaluate(
+/**
+ * Search the web for information about a given query, and evaluate if the results are relevant and will help answer the following query
+ *
+ * @param query - The query to search for
+ * @param accumulatedSources - The accumulated search results
+ * @returns The final search results
+ */
+export async function searchAndEvaluate(
   query: string,
   accumulatedSources: SearchResult[]
 ) {
@@ -305,7 +312,14 @@ async function searchAndEvaluate(
   return finalSearchResults;
 }
 
-async function generateSearchQueries(query: string, depth = 1) {
+/**
+ * Generate search queries for a given query and depth
+ *
+ * @param query - The query to generate search queries for
+ * @param depth - The number of levels of search queries to generate. Default is 1.
+ * @returns The generated search queries
+ */
+export async function generateSearchQueries(query: string, depth = 1) {
   const { object } = await generateObject({
     model: models.flash25,
     // search query should not be too long/detailed to avoid not being able to find results

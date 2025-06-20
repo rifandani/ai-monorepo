@@ -10,5 +10,5 @@
     },
     "types": ["bun-types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "vitest.config.ts"]
 }

@@ -160,11 +160,19 @@ bun eval
 bun eval:view
 ```
 
-> Create a multiple eval file in the `./evals/configs` and run it with `promptfoo eval --config evals/configs/*` doesn't work as expected, it will merge all the .yaml configs, instead of treating them as separate configs.
+> Creating multiple eval file in the `./evals/configs` and run it with `promptfoo eval --config evals/configs/*` doesn't work as expected, it will merge all the .yaml configs, instead of treating them as separate configs.
+
+We also use `evalite` to evaluate our functions, which act and considered as a unit test for our AI app.
+`evalite` runs on top of `vitest`, so to create a new eval, create a new file with the name `*.eval.ts`.
+
+```bash
+# run the evals, see the results in the terminal, and open the results as UI at http://localhost:3006/
+bun evalite
+```
 
 ## 🕵🏻‍♂️ How to Red Teaming
 
-We use `promptfoo` to run red teaming (pen-testing, end-to-end testing by hitting the API endpoints) on our LLM usage.
+We use `promptfoo` to run red teaming (end-to-end pen-testing by hitting the API endpoints) on our LLM usage.
 
 ```bash
 # run the red teaming
