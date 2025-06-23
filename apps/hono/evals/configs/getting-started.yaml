@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: "Getting started"
+outputPath: "evals/.results/getting-started.json"
+
+prompts:
+  - "Convert this English to {{language}}: {{input}}"
+  - "Translate to {{language}}: {{input}}"
+
+providers:
+  - id: file://../custom-provider.ts
+    label: gemini-2.5-flash-preview-05-20
+    config:
+      model: gemini-2.5-flash-preview-05-20
+
+tests:
+  - vars:
+      language: French
+      input: Hello world
+    assert:
+      - type: contains
+        value: "Bonjour le monde"
+  - vars:
+      language: Spanish
+      input: Where is the library?
+    assert:
+      - type: icontains
+        value: "Dónde está la biblioteca"

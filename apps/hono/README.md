@@ -153,8 +153,8 @@ bun hono dev
 We use `promptfoo` to evaluate our prompts.
 
 ```bash
-# run the evals
-bun eval
+# run multiple evals
+bun eval hono getting-started
 
 # view the evals results
 bun eval:view
