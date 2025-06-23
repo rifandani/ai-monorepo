@@ -31,8 +31,8 @@
     "eval": "dotenvx run -- tsx evals/runeval.ts",
     "eval:view": "dotenvx run -- promptfoo view -y",
     "eval:clean": "rm -rf evals/.results && rm -rf ~/.promptfoo/cache",
-    "redteam": "dotenvx run -- promptfoo redteam run --config evals/configs-redteam/*",
-    "redteam:view": "dotenvx run -- promptfoo readteam report"
+    "redteam": "dotenvx run -- tsx evals/runredteam.ts",
+    "redteam:view": "dotenvx run -- promptfoo redteam report"
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.19",
