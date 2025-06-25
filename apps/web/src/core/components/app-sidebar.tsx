@@ -2,6 +2,9 @@
 
 import { deleteChatAction } from '@/core/actions/chat';
 import { Avatar } from '@/core/components/ui/avatar';
+import { Button } from '@/core/components/ui/button';
+import { Field, FieldControl, FieldLabel } from '@/core/components/ui/field';
+import { Input } from '@/core/components/ui/input';
 import { Link } from '@/core/components/ui/link';
 import { Menu } from '@/core/components/ui/menu';
 import {
@@ -20,7 +23,7 @@ import {
 import { Icon } from '@iconify/react';
 import { useAction } from 'next-safe-action/hooks';
 import { useParams } from 'next/navigation';
-import type React from 'react';
+import React, { useState, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 interface ChatHistoryItem {
@@ -39,6 +42,39 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
   const params = useParams();
   const { execute: deleteChat, isPending: isDeleting } =
     useAction(deleteChatAction);
+  const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
+  const [renamingChatValue, setRenamingChatValue] = useState<string>('');
+  const [chatDisplayNames, setChatDisplayNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    // Load stored chat names from local storage
+    const storedNames = localStorage.getItem('chatDisplayNames');
+    if (storedNames) {
+      setChatDisplayNames(JSON.parse(storedNames));
+    }
+  }, []);
+
+  const handleRenameClick = (chat: ChatHistoryItem) => {
+    setRenamingChatId(chat.id);
+    setRenamingChatValue(chatDisplayNames[chat.id] || chat.content);
+  };
+
+  const handleRenameSave = (chatId: string) => {
+    if (renamingChatValue.trim() === '') return;
+
+    const updatedDisplayNames = {
+      ...chatDisplayNames,
+      [chatId]: renamingChatValue,
+    };
+    setChatDisplayNames(updatedDisplayNames);
+    localStorage.setItem('chatDisplayNames', JSON.stringify(updatedDisplayNames));
+    setRenamingChatId(null);
+    setRenamingChatValue('');
+  };
+
+  const getDisplayName = (chat: ChatHistoryItem) => {
+    return chatDisplayNames[chat.id] || chat.content;
+  }
 
   return (
     <Sidebar {...props}>
@@ -63,71 +99,104 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
 
           <SidebarSection title="History">
             {/* Map over the chatHistory prop */}
-            {chatHistory.map((chat) => (
-              <SidebarItem key={chat.id} isCurrent={params.id === chat.id}>
-                {({ isCollapsed }) => (
-                  <>
-                    {/* Update href to link to the chat page */}
-                    <SidebarLink href={`/chat/${chat.id}`}>
-                      <SidebarLabel>{chat.content}</SidebarLabel>
-                    </SidebarLink>
-                    {!isCollapsed && (
-                      <Menu>
-                        <Menu.Trigger aria-label="Manage">
-                          <Icon icon="lucide:more-horizontal" />
-                        </Menu.Trigger>
-                        <Menu.Content offset={0} placement="right top">
-                          <Menu.Item
-                            isDisabled={isDeleting}
-                            className="gap-2"
-                            onAction={() => {
-                              // TODO: implement share after we setup auth
-                            }}
-                          >
-                            <Icon icon="lucide:upload" />
-                            Share
-                          </Menu.Item>
-                          <Menu.Item
-                            isDisabled={isDeleting}
-                            className="gap-2"
-                            onAction={() => {
-                              // TODO: implement rename
-                            }}
-                          >
-                            <Icon icon="lucide:pencil" />
-                            Rename
-                          </Menu.Item>
-                          <Menu.Item
-                            isDisabled={isDeleting}
-                            className="gap-2"
-                            onAction={() => {
-                              // TODO: implement archive
-                            }}
-                          >
-                            <Icon icon="lucide:archive" />
-                            Archive
-                          </Menu.Item>
-                          <Menu.Item
-                            isDanger
-                            isDisabled={isDeleting}
-                            className="gap-2"
-                            onAction={() =>
-                              deleteChat({
-                                id: chat.id,
-                                redirect: params.id === chat.id,
-                              })
-                            }
-                          >
-                            <Icon icon="lucide:trash" />
-                            Delete
-                          </Menu.Item>
-                        </Menu.Content>
-                      </Menu>
-                    )}
-                  </>
-                )}
-              </SidebarItem>
-            ))}
+            {chatHistory.map((chat) =>
+              renamingChatId === chat.id ? (
+                <SidebarItem key={chat.id} className="flex-col items-start px-2 py-1.5">
+                  <Field className="w-full">
+                    <FieldLabel className="sr-only">Rename chat</FieldLabel>
+                    <FieldControl>
+                      <Input
+                        value={renamingChatValue}
+                        onChange={(e) => setRenamingChatValue(e.target.value)}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRenameSave(chat.id);
+                          if (e.key === 'Escape') setRenamingChatId(null);
+                        }}
+                      />
+                    </FieldControl>
+                  </Field>
+                  <div className="mt-1.5 flex w-full justify-end gap-x-1.5">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onPress={() => handleRenameSave(chat.id)}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      onPress={() => setRenamingChatId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </SidebarItem>
+              ) : (
+                <SidebarItem key={chat.id} isCurrent={params.id === chat.id}>
+                  {({ isCollapsed }) => (
+                    <>
+                      {/* Update href to link to the chat page */}
+                      <SidebarLink href={`/chat/${chat.id}`}>
+                        <SidebarLabel>{getDisplayName(chat)}</SidebarLabel>
+                      </SidebarLink>
+                      {!isCollapsed && (
+                        <Menu>
+                          <Menu.Trigger aria-label="Manage">
+                            <Icon icon="lucide:more-horizontal" />
+                          </Menu.Trigger>
+                          <Menu.Content offset={0} placement="right top">
+                            <Menu.Item
+                              isDisabled={isDeleting}
+                              className="gap-2"
+                              onAction={() => {
+                                // TODO: implement share after we setup auth
+                              }}
+                            >
+                              <Icon icon="lucide:upload" />
+                              Share
+                            </Menu.Item>
+                            <Menu.Item
+                              isDisabled={isDeleting}
+                              className="gap-2"
+                              onAction={() => handleRenameClick(chat)}
+                            >
+                              <Icon icon="lucide:pencil" />
+                              Rename
+                            </Menu.Item>
+                            <Menu.Item
+                              isDisabled={isDeleting}
+                              className="gap-2"
+                              onAction={() => {
+                                // TODO: implement archive
+                              }}
+                            >
+                              <Icon icon="lucide:archive" />
+                              Archive
+                            </Menu.Item>
+                            <Menu.Item
+                              isDanger
+                              isDisabled={isDeleting}
+                              className="gap-2"
+                              onAction={() =>
+                                deleteChat({
+                                  id: chat.id,
+                                  redirect: params.id === chat.id,
+                                })
+                              }
+                            >
+                              <Icon icon="lucide:trash" />
+                              Delete
+                            </Menu.Item>
+                          </Menu.Content>
+                        </Menu>
+                      )}
+                    </>
+                  )}
+                </SidebarItem>
+              )
+            )}
           </SidebarSection>
         </SidebarSectionGroup>
       </SidebarContent>
