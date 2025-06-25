@@ -135,6 +135,7 @@ prisma/_sqlite/migrations
 .logs
 .results
 .evalite
+.mastra
 
 # containers
 container

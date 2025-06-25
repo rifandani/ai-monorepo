@@ -3,6 +3,7 @@
 ## 🎯 Todo
 
 - [ ] example of MCP OAUTH
+- [ ] example of [Memories](https://ai-sdk.dev/providers/community-providers/mem0)
 - [ ] replace all `'zod'` occurences with `'zod/v4'` in the codebase. currently `hono-openapi` is not working with zod 4. `hono-openapi` is waiting on `zod-openapi` to support zod 4 in this [issue](https://github.com/samchungy/zod-openapi/issues/432).
 - [ ] consider to use `@hono/zod-openapi` instead. then, we can use it to generate llms text like [scalar did](https://github.com/scalar/scalar/blob/c52765bcc5eea27b5c34d3bfed7df12eec33a42c/integrations/hono/playground/index.ts)
 
@@ -176,7 +177,7 @@ We use `promptfoo` to run red teaming (end-to-end pen-testing by hitting the API
 
 ```bash
 # run the red teaming
-bun redteam
+bun redteam deep-research
 ```
 
 To view the red teaming results, you can use the following command:

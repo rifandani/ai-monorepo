@@ -1,27 +1,7 @@
 {
   "name": "ai-monorepo",
   "version": "1.0.0",
-  "private": true,
-  "packageManager": "bun@1.2.15",
-  "description": "AI Monorepo",
   "author": "Tri Rizeki Rifandani",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "prepare": "husky",
-    "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
-    "compose:up": "docker compose up --build",
-    "format": "ultracite format",
-    "lint": "ultracite lint",
-    "lint-typecheck": "run-p lint hono:typecheck web:typecheck",
-    "hono": "bun --elide-lines=0 --filter @workspace/hono",
-    "web": "bun --elide-lines=0 --filter @workspace/web",
-    "hono:ci": "bun --filter @workspace/hono",
-    "web:ci": "bun --filter @workspace/web",
-    "hono:typecheck": "bun hono:ci typecheck",
-    "web:typecheck": "bun web:ci typecheck"
-  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@commitlint/cli": "19.8.1",
@@ -32,9 +12,35 @@
     "husky": "9.1.7",
     "npm-run-all2": "8.0.4",
     "rimraf": "6.0.1",
-    "typescript": "5.8.3",
     "tsx": "4.20.3",
+    "typescript": "5.8.3",
     "ultracite": "4.2.10"
+  },
+  "commitlint": {
+    "extends": ["@commitlint/config-conventional"]
+  },
+  "description": "AI Monorepo",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "bun@1.2.17",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
+    "compose:up": "docker compose up --build",
+    "format": "ultracite format",
+    "lint": "ultracite lint",
+    "lint-typecheck": "run-p lint hono:typecheck web:typecheck",
+    "hono": "bun --elide-lines=0 --filter @workspace/hono",
+    "web": "bun --elide-lines=0 --filter @workspace/web",
+    "mastra": "bun --elide-lines=0 --filter @workspace/mastra",
+    "hono:ci": "bun --filter @workspace/hono",
+    "web:ci": "bun --filter @workspace/web",
+    "mastra:ci": "bun --filter @workspace/mastra",
+    "hono:typecheck": "bun hono:ci typecheck",
+    "web:typecheck": "bun web:ci typecheck",
+    "mastra:typecheck": "bun mastra:ci typecheck"
   },
   "trustedDependencies": [
     "@biomejs/biome",
@@ -44,8 +50,5 @@
     "protobufjs",
     "sharp"
   ],
-  "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
-  },
   "workspaces": ["apps/*", "packages/*"]
 }

@@ -1,0 +1,36 @@
+import { models } from '@/core/utils/ai';
+import { ENV } from '@/core/utils/env';
+import { Memory } from '@mastra/memory';
+import { PgVector } from '@mastra/pg';
+
+const vector = new PgVector({
+  connectionString: ENV.DATABASE_URL,
+  schemaName: 'mastra',
+});
+
+/**
+ * Initialize memory storage with PostgresStore and vector with PgVector for persistence
+ */
+export const stagehandMemory = new Memory({
+  // we don't need to use storage here again, because we are already using it in the main mastra instance
+  // storage: new PostgresStore({
+  //   connectionString: ENV.DATABASE_URL,
+  //   schemaName: 'mastra',
+  // }),
+  vector,
+  embedder: models.embedding004, // or you can use local embedder `import { fastembed } from "@mastra/fastembed"` which uses onnx runtime
+  options: {
+    lastMessages: 10, // default is 10
+    workingMemory: {
+      enabled: true, // default is false
+    },
+    semanticRecall: {
+      topK: 2, // default is 2
+      messageRange: {
+        before: 2, // default is 2
+        after: 2, // default is 2
+      },
+      scope: 'thread', // default is 'thread'. 'thread' is like the chat id, and 'resource' is like the user id
+    },
+  },
+});
