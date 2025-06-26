@@ -39,4 +39,16 @@ bun mastra dev
 
 ## 🧪 How to Evals
 
-Coming soon...
+There are 2 ways to run evals:
+
+### Using Dev Playground
+
+Run the dev playground and talk to an agent. The evals will be available after some conversations.
+
+### Using Vitest
+
+By using `vitest`, we're running the evals as a unit test. This means we can run the evals in the CI/CD pipeline.
+
+```bash
+bun test
+```

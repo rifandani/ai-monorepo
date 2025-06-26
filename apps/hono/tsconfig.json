@@ -10,5 +10,6 @@
     },
     "types": ["bun-types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "vitest.config.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

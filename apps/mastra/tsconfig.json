@@ -9,6 +9,6 @@
     },
     "types": ["bun-types"]
   },
-  "include": ["**/*.ts", "**/*.spec.ts"],
+  "include": ["**/*.ts", "**/*.spec.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", ".mastra"]
 }

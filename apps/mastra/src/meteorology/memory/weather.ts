@@ -31,19 +31,19 @@ export const weatherMemory = new Memory({
     },
     workingMemory: {
       enabled: true, // default is false
-      template: `
-# User Profile
- 
-## Personal Info
- 
-- Name:
-- Location:
-- Timezone:
- 
-## Preferences
- 
-- Communication Style: [e.g., Formal, Casual]
-`,
+      //       template: `
+      // # User Profile
+
+      // ## Personal Info
+
+      // - Name:
+      // - Location:
+      // - Timezone:
+
+      // ## Preferences
+
+      // - Communication Style: [e.g., Formal, Casual]
+      // `,
     },
   },
 });

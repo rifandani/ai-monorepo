@@ -14,6 +14,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed-images": "dotenvx run -- bun src/core/db/seed-images.ts",
     "db:studio": "drizzle-kit studio --port 3003 --verbose",
+    "test": "dotenvx run -- vitest",
     "dev": "mastra dev",
     "build": "mastra build",
     "mcp:inspector": "npx -y @modelcontextprotocol/inspector"
@@ -24,6 +25,7 @@
     "@dotenvx/dotenvx": "1.44.2",
     "@google/generative-ai": "0.24.1",
     "@mastra/core": "0.10.6",
+    "@mastra/evals": "0.10.5",
     "@mastra/libsql": "0.10.3",
     "@mastra/memory": "0.10.4",
     "@mastra/pg": "0.11.0",
@@ -52,6 +54,7 @@
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "0.31.1",
     "tsx": "4.20.3",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
   }
 }
