@@ -35,7 +35,7 @@ interface NonRevealableTextFieldProps extends BaseTextFieldProps {
 
 type TextFieldProps = RevealableTextFieldProps | NonRevealableTextFieldProps;
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
 function TextField({
   placeholder,
   label,
@@ -73,9 +73,9 @@ function TextField({
         <>
           {label && <Label>{label}</Label>}
           <FieldGroup
+            data-loading={isPending ? 'true' : undefined}
             isDisabled={props.isDisabled}
             isInvalid={!!errorMessage}
-            data-loading={isPending ? 'true' : undefined}
           >
             {prefix && typeof prefix === 'string' ? (
               <span className="ml-2 text-muted-fg">{prefix}</span>
@@ -85,15 +85,15 @@ function TextField({
             <Input placeholder={placeholder} />
             {isRevealable ? (
               <ButtonPrimitive
-                type="button"
                 aria-label="Toggle password visibility"
-                onPress={handleTogglePasswordVisibility}
                 className="relative mr-1 grid shrink-0 place-content-center rounded-sm border-transparent outline-hidden data-focus-visible:*:data-[slot=icon]:text-primary *:data-[slot=icon]:text-muted-fg"
+                onPress={handleTogglePasswordVisibility}
+                type="button"
               >
                 {isPasswordVisible ? (
-                  <Icon icon="mdi:eye-off" className="size-4" />
+                  <Icon className="size-4" icon="mdi:eye-off" />
                 ) : (
-                  <Icon icon="mdi:eye" className="size-4" />
+                  <Icon className="size-4" icon="mdi:eye" />
                 )}
               </ButtonPrimitive>
             ) : isPending ? (

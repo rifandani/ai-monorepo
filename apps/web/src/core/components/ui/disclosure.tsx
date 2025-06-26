@@ -28,8 +28,8 @@ function DisclosureGroup({
 }: DisclosureGroupProps) {
   return (
     <Accordion
-      ref={ref}
       data-slot="disclosure-group"
+      ref={ref}
       {...props}
       className={composeTailwindRenderProps(
         className,
@@ -51,8 +51,8 @@ interface DisclosureProps extends CollapsibleProps {
 function Disclosure({ className, ref, ...props }: DisclosureProps) {
   return (
     <Collapsible
-      ref={ref}
       data-slot="disclosure"
+      ref={ref}
       {...props}
       className={composeTailwindRenderProps(
         className,
@@ -75,12 +75,12 @@ function DisclosureTrigger({
   return (
     <Heading>
       <Button
-        ref={ref}
-        slot="trigger"
         className={composeTailwindRenderProps(
           className,
           'group/trigger [&[aria-expanded=true]_[data-slot=disclosure-chevron]]:-rotate-90 **:data-[slot=icon]:-mx-0.5 flex w-full items-center justify-between gap-x-2 py-3 text-left font-medium open:text-fg focus:text-fg focus:outline-hidden disabled:cursor-default disabled:opacity-50 **:data-[slot=disclosure-chevron]:size-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:text-sm forced-colors:disabled:text-[GrayText] **:[span]:flex **:[span]:items-center **:[span]:gap-x-1 **:[span]:*:data-[slot=icon]:mr-1'
         )}
+        ref={ref}
+        slot="trigger"
         {...props}
       >
         {(values) => (
@@ -89,9 +89,9 @@ function DisclosureTrigger({
               ? props.children(values)
               : props.children}
             <Icon
-              icon="mdi:chevron-left"
-              data-slot="disclosure-chevron"
               className="internal-chevron ml-auto size-4 shrink-0 transition duration-300"
+              data-slot="disclosure-chevron"
+              icon="mdi:chevron-left"
             />
           </>
         )}
@@ -106,17 +106,17 @@ interface DisclosurePanelProps extends DisclosurePanelPrimitiveProps {
 function DisclosurePanel({ className, ref, ...props }: DisclosurePanelProps) {
   return (
     <CollapsiblePanel
-      ref={ref}
-      data-slot="disclosure-panel"
       className={composeTailwindRenderProps(
         className,
         'overflow-hidden text-muted-fg text-sm transition-all **:data-[slot=disclosure-group]:border-t **:data-[slot=disclosure-group]:**:[.internal-chevron]:hidden has-data-[slot=disclosure-group]:**:[button]:px-4'
       )}
+      data-slot="disclosure-panel"
+      ref={ref}
       {...props}
     >
       <div
-        data-slot="disclosure-panel-content"
         className="pt-0 not-has-data-[slot=disclosure-group]:group-data-expanded/disclosure:pb-3 [&:has([data-slot=disclosure-group])_&]:px-11"
+        data-slot="disclosure-panel-content"
       >
         {props.children}
       </div>

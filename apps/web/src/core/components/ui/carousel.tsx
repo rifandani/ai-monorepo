@@ -3,8 +3,8 @@
 import { Icon } from '@iconify/react';
 import type { UseEmblaCarouselType } from 'embla-carousel-react';
 import useEmblaCarousel from 'embla-carousel-react';
-import type { HTMLAttributes } from 'react';
 import type React from 'react';
+import type { HTMLAttributes } from 'react';
 import {
   createContext,
   use,
@@ -18,10 +18,10 @@ import type {
   ListBoxSectionProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   ListBox,
   ListBoxItem,
   ListBoxSection,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -90,13 +90,13 @@ function Carousel({
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
-  const onSelect = useCallback((api: CarouselApi) => {
-    if (!api) {
+  const onSelect = useCallback((_api: CarouselApi) => {
+    if (!_api) {
       return;
     }
 
-    setCanScrollPrev(api.canScrollPrev());
-    setCanScrollNext(api.canScrollNext());
+    setCanScrollPrev(_api.canScrollPrev());
+    setCanScrollNext(_api.canScrollNext());
   }, []);
 
   const scrollPrev = useCallback(() => {
@@ -145,7 +145,7 @@ function Carousel({
   );
 
   useEffect(() => {
-    if (!api || !setApi) {
+    if (!(api && setApi)) {
       return;
     }
 
@@ -169,11 +169,11 @@ function Carousel({
   return (
     <CarouselContext value={value}>
       <div
-        onKeyDownCapture={handleKeyDown}
-        className={twMerge('relative', className)}
-        // biome-ignore lint/a11y/useSemanticElements: <explanation>
-        role="region"
         aria-roledescription="carousel"
+        className={twMerge('relative', className)}
+        onKeyDownCapture={handleKeyDown}
+        // biome-ignore lint/a11y/useSemanticElements: xxx
+        role="region"
         {...props}
       >
         {children}
@@ -190,11 +190,11 @@ function CarouselContent<T extends object>({
 
   return (
     <ListBox
-      layout={orientation === 'vertical' ? 'stack' : 'grid'}
       aria-label="Slides"
+      className="overflow-hidden"
+      layout={orientation === 'vertical' ? 'stack' : 'grid'}
       orientation={orientation}
       ref={carouselRef}
-      className="overflow-hidden"
     >
       <ListBoxSection
         className={twMerge(
@@ -228,11 +228,11 @@ function CarouselItem({ className, ...props }: ListBoxItemProps) {
     <ListBoxItem
       aria-label={`Slide ${props.id}`}
       aria-roledescription="slide"
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         carouselItem({
           ...renderProps,
           orientation,
-          className,
+          className: _className,
         })
       )}
       {...props}
@@ -248,13 +248,13 @@ function CarouselHandler({
   const { orientation } = useCarousel();
   return (
     <div
-      data-slot="carousel-handler"
-      ref={ref}
       className={twMerge(
         'relative z-10 mt-6 flex items-center gap-x-2',
         orientation === 'horizontal' ? 'justify-end' : 'justify-center',
         className
       )}
+      data-slot="carousel-handler"
+      ref={ref}
       {...props}
     />
   );
@@ -278,24 +278,24 @@ function CarouselButton({
   return (
     <Button
       aria-label={isNext ? 'Next slide' : 'Previous slide'}
-      data-handler={segment}
-      intent={intent}
-      ref={ref}
-      size={size}
-      shape={shape}
       className={composeTailwindRenderProps(
         className,
         orientation === 'vertical' ? 'rotate-90' : ''
       )}
+      data-handler={segment}
+      intent={intent}
       isDisabled={!canScroll}
       onPress={scroll}
+      ref={ref}
+      shape={shape}
+      size={size}
       {...props}
     >
       <Icon
+        className="size-4"
         icon={
           isNext ? 'ion:chevron-forward-outline' : 'ion:chevron-back-outline'
         }
-        className="size-4"
       />
     </Button>
   );

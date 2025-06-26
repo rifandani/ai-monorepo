@@ -28,7 +28,6 @@ export function createUseStorageState(getStorage: () => Storage | undefined) {
     let storage: Storage | undefined;
     const {
       onError = (e) => {
-        // biome-ignore lint/suspicious/noConsole: <explanation>
         console.error(e);
       },
     } = options;
@@ -107,7 +106,6 @@ export function createUseStorageState(getStorage: () => Storage | undefined) {
         try {
           storage?.setItem(key, serializer(currentState));
         } catch (e) {
-          // biome-ignore lint/suspicious/noConsole: <explanation>
           console.error(e);
         }
       }

@@ -152,24 +152,22 @@ function TableColumn({
     >
       {({ allowsSorting, sortDirection, isHovered }) => (
         <div className="flex items-center gap-2 **:data-[slot=icon]:shrink-0">
-          <>
-            {props.children as React.ReactNode}
-            {allowsSorting && (
-              <span
-                className={twMerge(
-                  'grid size-[1.15rem] flex-none shrink-0 place-content-center rounded bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200',
-                  isHovered ? 'bg-secondary-fg/10' : '',
-                  className
-                )}
-              >
-                <Icon
-                  icon="mdi:chevron-down"
-                  className={sortDirection === 'ascending' ? 'rotate-180' : ''}
-                />
-              </span>
-            )}
-            {isResizable && <ColumnResizer />}
-          </>
+          {props.children as React.ReactNode}
+          {allowsSorting && (
+            <span
+              className={twMerge(
+                'grid size-[1.15rem] flex-none shrink-0 place-content-center rounded bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200',
+                isHovered ? 'bg-secondary-fg/10' : '',
+                className
+              )}
+            >
+              <Icon
+                className={sortDirection === 'ascending' ? 'rotate-180' : ''}
+                icon="mdi:chevron-down"
+              />
+            </span>
+          )}
+          {isResizable && <ColumnResizer />}
         </div>
       )}
     </Column>
@@ -192,9 +190,9 @@ function TableHeader<T extends object>({
     useTableOptions();
   return (
     <TableHeaderPrimitive
+      className={twMerge('border-b', className)}
       data-slot="table-header"
       ref={ref}
-      className={twMerge('border-b', className)}
       {...props}
     >
       {allowsDragging && <Column className="w-0" />}
@@ -224,9 +222,9 @@ function TableRow<T extends object>({
   const { selectionBehavior, allowsDragging } = useTableOptions();
   return (
     <Row
-      ref={ref}
       data-slot="table-row"
       id={id}
+      ref={ref}
       {...props}
       className={twMerge(
         'tr group relative cursor-default border-b bg-bg selected:bg-(--table-selected-bg) text-muted-fg outline-hidden ring-primary selected:hover:bg-(--table-selected-bg)/70 focus:ring-0 data-focus-visible:ring-1 dark:selected:hover:bg-[color-mix(in_oklab,var(--color-primary)_30%,black_70%)]',
@@ -242,7 +240,7 @@ function TableRow<T extends object>({
             className="relative bg-transparent py-1.5 pl-3.5 pressed:text-fg text-muted-fg"
             slot="drag"
           >
-            <Icon icon="mdi:menu" className="size-4" />
+            <Icon className="size-4" icon="mdi:menu" />
           </Button>
         </Cell>
       )}

@@ -88,7 +88,7 @@ export function useDynamicList<T>(initialList: T[] = []) {
 
   // Retrieve index from uuid
   const getIndex = useCallback(
-    (key: number) => keyList.current.findIndex((ele) => ele === key),
+    (key: number) => keyList.current.indexOf(key),
     []
   );
 

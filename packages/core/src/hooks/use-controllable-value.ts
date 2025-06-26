@@ -53,18 +53,15 @@ export function useControllableValue<T = any>(
   } = options;
 
   const value = props[valuePropName] as T;
-  const isControlled = Object.prototype.hasOwnProperty.call(
-    props,
-    valuePropName
-  );
+  const isControlled = Object.hasOwn(props, valuePropName);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   const initialValue = useMemo(() => {
     if (isControlled) {
       return value;
     }
 
-    if (Object.prototype.hasOwnProperty.call(props, defaultValuePropName)) {
+    if (Object.hasOwn(props, defaultValuePropName)) {
       return props[defaultValuePropName];
     }
 

@@ -67,7 +67,7 @@ function Navbar({
   const open = openProp ?? _open;
 
   const setOpen = useCallback(
-    (value: boolean | ((value: boolean) => boolean)) => {
+    (value: boolean | ((_value: boolean) => boolean)) => {
       if (setOpenProp) {
         return setOpenProp?.(typeof value === 'function' ? value(open) : value);
       }
@@ -78,7 +78,7 @@ function Navbar({
   );
 
   const toggleNavbar = useCallback(() => {
-    setOpen((open) => !open);
+    setOpen((__open) => !__open);
   }, [setOpen]);
 
   const contextValue = useMemo<NavbarContextProps>(
@@ -96,7 +96,6 @@ function Navbar({
   return (
     <NavbarContext value={contextValue}>
       <header
-        data-navbar-intent={intent}
         className={twMerge(
           'relative isolate flex w-full flex-col',
           intent === 'navbar' && '',
@@ -104,6 +103,7 @@ function Navbar({
           intent === 'inset' && 'min-h-svh bg-navbar dark:bg-bg',
           className
         )}
+        data-navbar-intent={intent}
         {...props}
       >
         {children}
@@ -152,13 +152,13 @@ function NavbarNav({
     return (
       <Sheet isOpen={open} onOpenChange={setOpen} {...props}>
         <Sheet.Content
-          side={side}
           aria-label="Compact Navbar"
-          data-navbar="compact"
           classNames={{
             content: 'text-fg [&>button]:hidden',
           }}
+          data-navbar="compact"
           isFloat={intent === 'floating'}
+          side={side}
         >
           <Sheet.Body className="px-2 md:px-4">{props.children}</Sheet.Body>
         </Sheet.Content>
@@ -168,9 +168,9 @@ function NavbarNav({
 
   return (
     <div
+      className={navStyles({ isSticky, intent, className })}
       data-navbar-nav="true"
       ref={ref}
-      className={navStyles({ isSticky, intent, className })}
       {...props}
     >
       <div>{props.children}</div>
@@ -190,19 +190,19 @@ function NavbarTrigger({
   const { toggleNavbar } = useNavbar();
   return (
     <Button
-      ref={ref}
+      aria-label={props['aria-label'] || 'Toggle Navbar'}
+      className={className}
       data-navbar-trigger="true"
       intent="plain"
-      aria-label={props['aria-label'] || 'Toggle Navbar'}
-      size="square-petite"
-      className={className}
       onPress={(event) => {
         onPress?.(event);
         toggleNavbar();
       }}
+      ref={ref}
+      size="square-petite"
       {...props}
     >
-      <Icon icon="mdi:menu" className="size-4" />
+      <Icon className="size-4" icon="mdi:menu" />
       <span className="sr-only">Toggle Navbar</span>
     </Button>
   );
@@ -214,12 +214,12 @@ function NavbarSection({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <LayoutGroup id={id}>
       <div
-        data-navbar-section="true"
         className={twMerge(
           'flex',
           isCompact ? 'flex-col gap-y-4' : 'flex-row items-center gap-x-3',
           className
         )}
+        data-navbar-section="true"
         {...props}
       >
         {props.children}
@@ -236,7 +236,6 @@ function NavbarItem({ className, isCurrent, ...props }: NavbarItemProps) {
   const { intent, isCompact } = useNavbar();
   return (
     <Link
-      data-navbar-item="true"
       aria-current={isCurrent ? 'page' : undefined}
       className={composeTailwindRenderProps(
         className,
@@ -249,6 +248,7 @@ function NavbarItem({ className, isCurrent, ...props }: NavbarItemProps) {
           isCurrent && 'cursor-default text-navbar-fg'
         )
       )}
+      data-navbar-item="true"
       {...props}
     >
       {(values) => (
@@ -261,9 +261,9 @@ function NavbarItem({ className, isCurrent, ...props }: NavbarItemProps) {
             !isCompact &&
             intent !== 'floating' && (
               <motion.span
-                layoutId="current-indicator"
-                data-slot="current-indicator"
                 className="absolute inset-x-2 bottom-[calc(var(--navbar-height)*-0.33)] h-0.5 rounded-full bg-fg"
+                data-slot="current-indicator"
+                layoutId="current-indicator"
               />
             )}
         </>
@@ -287,8 +287,8 @@ function NavbarLogo({ className, ...props }: LinkProps) {
 function NavbarFlex({ className, ref, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
-      ref={ref}
       className={twMerge('flex items-center gap-2 md:gap-3', className)}
+      ref={ref}
       {...props}
     />
   );
@@ -303,7 +303,6 @@ function NavbarCompact({ className, ref, ...props }: NavbarCompactProps) {
   const { intent } = useNavbar();
   return (
     <div
-      ref={ref}
       className={twMerge(
         'flex justify-between bg-navbar text-navbar-fg peer-has-[[data-navbar-intent=floating]]:border md:hidden',
         intent === 'floating' && 'h-12 rounded-lg border px-3.5',
@@ -311,6 +310,7 @@ function NavbarCompact({ className, ref, ...props }: NavbarCompactProps) {
         intent === 'navbar' && 'h-14 border-b px-4',
         className
       )}
+      ref={ref}
       {...props}
     />
   );
@@ -336,13 +336,13 @@ function NavbarInset({
   const { intent } = useNavbar();
   return (
     <main
-      ref={ref}
-      data-navbar-intent={intent}
       className={twMerge(
         'flex flex-1 flex-col',
         intent === 'inset' && 'bg-navbar pb-2 md:px-2 dark:bg-bg',
         className
       )}
+      data-navbar-intent={intent}
+      ref={ref}
     >
       <div className={insetStyles({ intent, className })}>{props.children}</div>
     </main>

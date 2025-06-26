@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
-import promptfoo from 'promptfoo';
 import type { ApiProvider, ProviderOptions, ProviderResponse } from 'promptfoo';
+import promptfoo from 'promptfoo';
 
 export default class AiSdkApiProvider implements ApiProvider {
   protected providerId: string;

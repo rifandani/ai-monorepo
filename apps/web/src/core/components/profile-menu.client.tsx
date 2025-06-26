@@ -1,11 +1,11 @@
 'use client';
 
-import { logoutAction } from '@/auth/actions/auth';
-import { Avatar } from '@/core/components/ui/avatar';
-import { Menu } from '@/core/components/ui/menu';
 import { Icon } from '@iconify/react';
 import { useTranslations } from 'next-intl';
 import { useAction } from 'next-safe-action/hooks';
+import { logoutAction } from '@/auth/actions/auth';
+import { Avatar } from '@/core/components/ui/avatar';
+import { Menu } from '@/core/components/ui/menu';
 
 export function ProfileMenu({ username }: { username: string }) {
   const t = useTranslations('core');
@@ -29,11 +29,11 @@ export function ProfileMenu({ username }: { username: string }) {
         <Menu.Section>
           <Menu.Header separator>{t('account')}</Menu.Header>
 
-          <Menu.Item id="profile" className="gap-x-2" isDisabled={isPending}>
+          <Menu.Item className="gap-x-2" id="profile" isDisabled={isPending}>
             <Icon icon="lucide:user" />
             <span>{t('profile')}</span>
           </Menu.Item>
-          <Menu.Item id="settings" className="gap-x-2" isDisabled={isPending}>
+          <Menu.Item className="gap-x-2" id="settings" isDisabled={isPending}>
             <Icon icon="lucide:settings" />
             <span>{t('settings')}</span>
           </Menu.Item>
@@ -42,7 +42,7 @@ export function ProfileMenu({ username }: { username: string }) {
         <Menu.Separator />
 
         <Menu.Section>
-          <Menu.Item id="logout" className="gap-x-2" isDisabled={isPending}>
+          <Menu.Item className="gap-x-2" id="logout" isDisabled={isPending}>
             <Icon icon="lucide:log-out" />
             <p>{t('logout')}</p>
           </Menu.Item>

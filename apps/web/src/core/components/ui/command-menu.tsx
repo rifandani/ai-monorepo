@@ -102,13 +102,13 @@ function CommandMenu({
     <CommandMenuContext value={{ isPending, escapeButton }}>
       <ModalContext value={{ isOpen: props.isOpen, onOpenChange }}>
         <ModalOverlay
-          isDismissable={isDismissable}
           className={twMerge([
             'fixed inset-0 z-50 max-h-(--visual-viewport-height) bg-black/15 dark:bg-black/40',
             'data-entering:fade-in data-exiting:fade-out data-entering:animate-in data-exiting:animate-in',
             isBlurred && props.isOpen ? 'backdrop-blur' : '',
             classNames?.overlay ?? '',
           ])}
+          isDismissable={isDismissable}
         >
           <Modal
             className={twMerge([
@@ -142,7 +142,7 @@ function CommandMenuSearch({
   placeholder,
   ...props
 }: CommandMenuSearchProps) {
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: xxx
   const state = use(OverlayTriggerStateContext)!;
   const { isPending, escapeButton } = useCommandMenu();
   return (
@@ -160,19 +160,19 @@ function CommandMenuSearch({
         <Loader className="size-4.5" variant="spin" />
       ) : (
         <Icon
-          icon="mdi:magnify"
-          data-slot="command-menu-search-icon"
           className="size-5 shrink-0 text-muted-fg"
+          data-slot="command-menu-search-icon"
+          icon="mdi:magnify"
         />
       )}
       <Input
-        placeholder={placeholder ?? 'Search...'}
         className="w-full min-w-0 bg-transparent px-2.5 py-2 text-base text-fg placeholder-muted-fg outline-hidden focus:outline-hidden sm:text-sm [&::-ms-reveal]:hidden [&::-webkit-search-cancel-button]:hidden"
+        placeholder={placeholder ?? 'Search...'}
       />
       {escapeButton && (
         <Button
-          onPress={() => state?.close()}
           className="hidden cursor-pointer rounded border text-current/90 hover:bg-muted lg:inline lg:px-1.5 lg:py-0.5 lg:text-xs"
+          onPress={() => state?.close()}
         >
           Esc
         </Button>
@@ -185,10 +185,10 @@ const renderer: CollectionRenderer = {
   CollectionRoot(props) {
     if (props.collection.size === 0) {
       return (
-        // biome-ignore lint/a11y/useFocusableInteractive: <explanation>
+        // biome-ignore lint/a11y/useFocusableInteractive: xxx
         <div
-          role="menuitem"
           className="col-span-full p-4 text-center text-muted-fg text-sm"
+          role="menuitem"
         >
           No results found.
         </div>
@@ -223,11 +223,11 @@ function CommandMenuSection<T extends object>({
 }: MenuSectionProps<T>) {
   return (
     <MenuSection
-      ref={ref}
       className={twMerge(
         className,
         'col-span-full grid grid-cols-[auto_1fr] gap-y-[calc(var(--spacing)*0.25)]'
       )}
+      ref={ref}
       {...props}
     >
       {'title' in props && (
@@ -250,8 +250,8 @@ function CommandMenuItem({
   return (
     <Menu.Item
       {...props}
-      textValue={textValue}
       className={composeTailwindRenderProps(className, 'gap-y-0.5 px-2.5 py-2')}
+      textValue={textValue}
     />
   );
 }
@@ -268,7 +268,6 @@ function CommandMenuDescription({
   return (
     <span
       {...props}
-      slot="command-menu-description"
       className={twMerge(
         'ml-auto hidden text-sm sm:inline',
         match(intent)
@@ -279,6 +278,7 @@ function CommandMenuDescription({
           .otherwise(() => 'text-muted-fg group-selected:text-fg/70'),
         className
       )}
+      slot="command-menu-description"
     />
   );
 }

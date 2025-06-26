@@ -7,12 +7,12 @@ import type {
   SliderTrackProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   SliderOutput,
   Slider as SliderPrimitive,
   SliderStateContext,
   SliderThumb,
   SliderTrack,
-  composeRenderProps,
 } from 'react-aria-components';
 import { tv } from 'tailwind-variants';
 
@@ -76,8 +76,8 @@ function Slider({
   const renderThumb = (value: number) => {
     const thumb = (
       <Thumb
-        index={value}
         aria-label={props.thumbLabels?.[value]}
+        index={value}
         onFocusChange={onFocusChange}
         onHoverStart={onHoverStart}
       />
@@ -95,11 +95,11 @@ function Slider({
       >
         {thumb}
         <Tooltip.Content
-          showArrow={false}
-          offset={orientation === 'horizontal' ? 8 : -140}
-          crossOffset={orientation === 'horizontal' ? -85 : 0}
           className="min-w-6 px-1.5 py-1 text-xs"
+          crossOffset={orientation === 'horizontal' ? -85 : 0}
+          offset={orientation === 'horizontal' ? 8 : -140}
           placement={orientation === 'vertical' ? 'right' : 'top'}
+          showArrow={false}
         >
           <SliderOutput />
         </Tooltip.Content>
@@ -109,10 +109,10 @@ function Slider({
 
   return (
     <SliderPrimitive
-      orientation={orientation}
-      className={composeRenderProps(className, (className, renderProps) =>
-        sliderStyles({ ...renderProps, className })
+      className={composeRenderProps(className, (_className, renderProps) =>
+        sliderStyles({ ...renderProps, className: _className })
       )}
+      orientation={orientation}
       {...props}
     >
       <div className="flex text-fg">
@@ -132,7 +132,7 @@ function Slider({
           <>
             <Filler />
             {state.values.map((_, i) => (
-              // eslint-disable-next-line react/no-array-index-key
+              // biome-ignore lint/suspicious/noArrayIndexKey: xxx
               <React.Fragment key={i}>{renderThumb(i)}</React.Fragment>
             ))}
           </>
@@ -190,7 +190,7 @@ function Filler({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   };
 
   return (
-    <div {...props} style={getStyle()} className={filler({ className })} />
+    <div {...props} className={filler({ className })} style={getStyle()} />
   );
 }
 
@@ -214,8 +214,8 @@ function Thumb({ className, ...props }: SliderThumbProps) {
   return (
     <SliderThumb
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
-        thumbStyles({ ...renderProps, className })
+      className={composeRenderProps(className, (_className, renderProps) =>
+        thumbStyles({ ...renderProps, className: _className })
       )}
     />
   );

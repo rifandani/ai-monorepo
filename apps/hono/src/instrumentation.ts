@@ -1,6 +1,6 @@
 // import * as fs from 'node:fs';
 // import * as path from 'node:path';
-import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
+
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 // import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
@@ -13,6 +13,7 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 
 // For troubleshooting, set the log level to DiagLogLevel.DEBUG
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);

@@ -64,7 +64,7 @@ server.prompt(
   {
     name: z.string().describe('Pokemon name to include in greeting'),
   },
-  // biome-ignore lint/suspicious/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: xxx
   async ({ name }): Promise<GetPromptResult> => {
     return {
       messages: [
@@ -87,7 +87,7 @@ server.resource(
   {
     description: 'A simple moves resource from pikachu',
   },
-  // biome-ignore lint/suspicious/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: xxx
   async (): Promise<ReadResourceResult> => {
     return {
       contents: [

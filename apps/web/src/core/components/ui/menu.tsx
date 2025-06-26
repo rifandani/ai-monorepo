@@ -1,5 +1,8 @@
 'use client';
 
+import { Icon } from '@iconify/react';
+import type React from 'react';
+import { createContext, use } from 'react';
 import type {
   ButtonProps,
   MenuItemProps as MenuItemPrimitiveProps,
@@ -8,20 +11,16 @@ import type {
   MenuTriggerProps as MenuTriggerPrimitiveProps,
   PopoverProps,
 } from 'react-aria-components';
-
-import { Icon } from '@iconify/react';
-import type React from 'react';
-import { createContext, use } from 'react';
 import {
   Button,
   Collection,
+  composeRenderProps,
   Header,
   MenuItem as MenuItemPrimitive,
   Menu as MenuPrimitive,
   MenuSection as MenuSectionPrimitive,
   MenuTrigger as MenuTriggerPrimitive,
   SubmenuTrigger as SubmenuTriggerPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import type { VariantProps } from 'tailwind-variants';
@@ -82,9 +81,9 @@ interface MenuTriggerProps extends ButtonProps {
 function MenuTrigger({ className, ref, ...props }: MenuTriggerProps) {
   return (
     <Button
-      ref={ref}
-      data-slot="menu-trigger"
       className={trigger({ className })}
+      data-slot="menu-trigger"
+      ref={ref}
       {...props}
     >
       {(values) => (
@@ -126,19 +125,19 @@ function MenuContent<T extends object>({
   const { respectScreen } = use(MenuContext);
   return (
     <PopoverContent
-      isOpen={props.isOpen}
-      onOpenChange={props.onOpenChange}
-      shouldFlip={props.shouldFlip}
-      respectScreen={respectScreen}
-      showArrow={showArrow}
-      offset={props.offset}
-      placement={props.placement}
-      crossOffset={props.crossOffset}
-      triggerRef={props.triggerRef}
       arrowBoundaryOffset={props.arrowBoundaryOffset}
       className={popover({
         className: popoverClassName,
       })}
+      crossOffset={props.crossOffset}
+      isOpen={props.isOpen}
+      offset={props.offset}
+      onOpenChange={props.onOpenChange}
+      placement={props.placement}
+      respectScreen={respectScreen}
+      shouldFlip={props.shouldFlip}
+      showArrow={showArrow}
+      triggerRef={props.triggerRef}
     >
       <MenuPrimitive className={menu({ className })} {...props} />
     </PopoverContent>
@@ -161,20 +160,20 @@ function MenuItem({
     props.textValue || (typeof children === 'string' ? children : undefined);
   return (
     <MenuItemPrimitive
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         dropdownItemStyles({
           ...renderProps,
           className: renderProps.hasSubmenu
             ? twMerge([
                 'data-open:data-danger:bg-danger/10 data-open:data-danger:text-danger',
                 'data-open:bg-accent data-open:text-accent-fg data-open:*:data-[slot=icon]:text-accent-fg data-open:*:[.text-muted-fg]:text-accent-fg',
-                className,
+                _className,
               ])
-            : className,
+            : _className,
         })
       )}
-      textValue={textValue}
       data-danger={isDanger ? 'true' : undefined}
+      textValue={textValue}
       {...props}
     >
       {(values) => (
@@ -183,17 +182,17 @@ function MenuItem({
             <>
               {values.selectionMode === 'single' && (
                 <span
-                  data-slot="bullet-icon"
                   className="-mx-0.5 mr-2 flex size-4 shrink-0 items-center justify-center **:data-[slot=indicator]:size-2.5 **:data-[slot=indicator]:shrink-0"
+                  data-slot="bullet-icon"
                 >
-                  <Icon icon="mdi:circle-medium" data-slot="indicator" />
+                  <Icon data-slot="indicator" icon="mdi:circle-medium" />
                 </span>
               )}
               {values.selectionMode === 'multiple' && (
                 <Icon
-                  icon="mdi:check"
                   className="-mx-0.5 mr-2 size-4"
                   data-slot="checked-icon"
+                  icon="mdi:check"
                 />
               )}
             </>
@@ -203,9 +202,9 @@ function MenuItem({
 
           {values.hasSubmenu && (
             <Icon
-              icon="mdi:chevron-right"
-              data-slot="chevron"
               className="absolute right-2 size-3.5"
+              data-slot="chevron"
+              icon="mdi:chevron-right"
             />
           )}
         </>
@@ -249,8 +248,8 @@ function MenuSection<T extends object>({
 }: MenuSectionProps<T>) {
   return (
     <MenuSectionPrimitive
-      ref={ref}
       className={section({ className })}
+      ref={ref}
       {...props}
     >
       {'title' in props && <Header className={header()}>{props.title}</Header>}

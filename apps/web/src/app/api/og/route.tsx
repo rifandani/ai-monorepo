@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 //   new URL('./Inter-SemiBold.ttf', import.meta.url),
 // ).then(res => res.arrayBuffer())
 
-// biome-ignore lint/suspicious/useAwait: <explanation>
+// biome-ignore lint/suspicious/useAwait: xxx
 export async function GET(req: NextRequest): Promise<Response | ImageResponse> {
   try {
     const { searchParams } = new URL(req.url);

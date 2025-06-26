@@ -90,7 +90,7 @@ function DateInput({ className, ...props }: Omit<DateInputProps, 'children'>) {
       )}
       {...props}
     >
-      {(segment) => <DateSegment segment={segment} className={segmentStyles} />}
+      {(segment) => <DateSegment className={segmentStyles} segment={segment} />}
     </DateInputPrimitive>
   );
 }

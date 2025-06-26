@@ -23,11 +23,11 @@ function ColorThumb(props: ColorThumbProps) {
   return (
     <ColorThumbPrimitive
       {...props}
+      className={thumbStyles}
       style={({ defaultStyle, isDisabled }) => ({
         ...defaultStyle,
         backgroundColor: isDisabled ? undefined : defaultStyle.backgroundColor,
       })}
-      className={thumbStyles}
     />
   );
 }

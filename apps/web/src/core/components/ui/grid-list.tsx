@@ -5,9 +5,9 @@ import type React from 'react';
 import type { GridListItemProps, GridListProps } from 'react-aria-components';
 import {
   Button,
+  composeRenderProps,
   GridListItem as GridListItemPrimitive,
   GridList as GridListPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -58,16 +58,16 @@ function GridListItem({ className, ...props }: GridListItemProps) {
     <GridListItemPrimitive
       textValue={textValue}
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
-        itemStyles({ ...renderProps, className })
+      className={composeRenderProps(className, (_className, renderProps) =>
+        itemStyles({ ...renderProps, className: _className })
       )}
     >
       {(values) => (
         <>
           {values.allowsDragging && (
             <Button
-              slot="drag"
               className="cursor-grab data-dragging:cursor-grabbing *:data-[slot=icon]:text-muted-fg"
+              slot="drag"
             >
               <Icon icon="mdi:drag" />
             </Button>
@@ -95,7 +95,7 @@ function GridEmptyState({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  return <div ref={ref} className={twMerge('p-6', className)} {...props} />;
+  return <div className={twMerge('p-6', className)} ref={ref} {...props} />;
 }
 
 GridList.Item = GridListItem;

@@ -12,7 +12,7 @@ export function useCreateToastContext() {
   const { theme } = useTheme();
   const [toastConfig, setToastConfig, resetToastConfig] =
     useResetState<ToasterProps>({
-      duration: 3_000,
+      duration: 3000,
       position: 'bottom-right',
       theme: theme
         ? theme === 'auto'

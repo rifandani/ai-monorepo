@@ -1,19 +1,19 @@
-import type { Annotation } from '@/core/schemas/ai';
-import { models, processToolCalls, tools } from '@/core/services/ai';
-import { loadChat, saveChat } from '@/core/utils/filesystem';
 import { logger } from '@workspace/core/utils/logger';
 import {
-  type Message,
   appendClientMessage,
   appendResponseMessages,
   createDataStreamResponse,
   createIdGenerator,
   experimental_createMCPClient,
+  type Message,
   smoothStream,
   streamText,
 } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { z } from 'zod';
+import type { Annotation } from '@/core/schemas/ai';
+import { models, processToolCalls, tools } from '@/core/services/ai';
+import { loadChat, saveChat } from '@/core/utils/filesystem';
 
 const systemPrompt = `
 You are a helpful assistant.
@@ -39,7 +39,7 @@ async function initPokemonStdioMcpClient() {
     transport: stdioTransport,
   });
 
-  const tools = await mcpClient.tools({
+  const mcpTools = await mcpClient.tools({
     schemas: {
       'get-pokemon': {
         parameters: z.object({ name: z.string().describe('Pokemon name') }),
@@ -47,7 +47,7 @@ async function initPokemonStdioMcpClient() {
     },
   });
 
-  return { mcpClient, tools };
+  return { mcpClient, tools: mcpTools };
 }
 
 // Allow streaming responses up to 120 seconds
@@ -74,6 +74,7 @@ export async function POST(req: Request) {
   });
 
   // filter through messages and remove base64 image data to avoid sending too much tokens to the model (not needed if we are using object storage and the data is an url)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
   const formattedMessages = messages.map((msg) => {
     if (msg.role === 'assistant') {
       for (const ti of msg.toolInvocations ?? []) {
@@ -126,7 +127,7 @@ export async function POST(req: Request) {
         },
         {
           // type-safe object for tools without an execute function
-          // biome-ignore lint/suspicious/useAwait: <explanation>
+          // biome-ignore lint/suspicious/useAwait: xxx
           getWeatherInformation: async ({ city }) => {
             const conditions = ['sunny', 'cloudy', 'rainy', 'snowy'];
             return `The weather in ${city} is ${

@@ -1,10 +1,10 @@
+import { Mastra } from '@mastra/core/mastra';
+import { PostgresStore } from '@mastra/pg';
 import { ENV } from '@/core/utils/env';
 import { OtelLogger } from '@/core/utils/logger';
 import { weatherAgent } from '@/meteorology/agents/weather';
 import { weatherWorkflow } from '@/meteorology/workflows/weather';
 import { stagehandAgent } from '@/web/agents/stagehand';
-import { Mastra } from '@mastra/core/mastra';
-import { PostgresStore } from '@mastra/pg';
 
 const logger = new OtelLogger({ name: 'mastra', level: 'info' }, true); // disable extra console log
 

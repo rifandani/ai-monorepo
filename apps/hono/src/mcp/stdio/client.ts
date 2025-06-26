@@ -43,7 +43,7 @@ async function main() {
       model: flash20,
       tools,
       maxSteps: 10,
-      onStepFinish: async ({ toolResults }) => {
+      onStepFinish: ({ toolResults }) => {
         console.log(`STEP RESULTS: ${JSON.stringify(toolResults, null, 2)}`);
       },
       prompt:
@@ -52,7 +52,7 @@ async function main() {
 
     console.log(`FINAL ANSWER: ${answer}`);
   } finally {
-    // @ts-ignore
+    // @ts-expect-error
     await mcpClient?.close();
   }
 }

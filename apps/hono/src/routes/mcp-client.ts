@@ -1,7 +1,3 @@
-import { models } from '@/core/api/ai';
-import { ENV } from '@/core/constants/env';
-import type { Variables } from '@/core/types/hono';
-import { fileToDataUri } from '@/core/utils/converter';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { logger } from '@workspace/core/utils/logger';
 import {
@@ -14,6 +10,10 @@ import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator } from 'hono-openapi/zod';
 import { z } from 'zod';
+import { models } from '@/core/api/ai';
+import { ENV } from '@/core/constants/env';
+import type { Variables } from '@/core/types/hono';
+import { fileToDataUri } from '@/core/utils/converter';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
@@ -28,7 +28,7 @@ mcpClientApp.get('/', (c) => {
     {
       jsonrpc: '2.0',
       error: {
-        code: -32000,
+        code: -32_000,
         message: 'Method not allowed.',
       },
       id: null,
@@ -43,7 +43,7 @@ mcpClientApp.delete('/', (c) => {
     {
       jsonrpc: '2.0',
       error: {
-        code: -32000,
+        code: -32_000,
         message: 'Method not allowed.',
       },
       id: null,

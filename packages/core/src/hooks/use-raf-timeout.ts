@@ -53,7 +53,7 @@ export function useRafTimeout(fn: () => void, delay: number | undefined) {
   const fnRef = useLatest(fn);
   const timerRef = useRef<Handle>(null);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   useEffect(() => {
     if (!isNumber(delay) || delay < 0) {
       return;

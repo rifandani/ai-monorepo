@@ -80,11 +80,11 @@ interface RadioProps extends RadioPrimitiveProps {
 function Radio({ description, label, ref, className, ...props }: RadioProps) {
   return (
     <RadioPrimitive
-      ref={ref}
       className={composeTailwindRenderProps(
         className,
         'group flex items-center gap-2 text-fg text-sm transition disabled:text-fg/50 forced-colors:disabled:text-[GrayText]'
       )}
+      ref={ref}
       {...props}
     >
       {(renderProps) => (

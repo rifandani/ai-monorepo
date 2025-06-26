@@ -47,7 +47,7 @@ export interface UseColorModeOptions<T extends string = BasicColorMode> {
    */
   onChanged?: (
     mode: T | BasicColorMode,
-    defaultHandler: (mode: T | BasicColorMode) => void
+    defaultHandler: (_mode: T | BasicColorMode) => void
   ) => void;
 
   /**
@@ -148,7 +148,7 @@ export function useColorMode<T extends string = BasicColorMode>(
    * @param _mode Color mode value to apply
    */
   const updateHTMLAttrs = useCallback(
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
     (_selector: string, _attribute: string, _mode = '') => {
       const el = window.document.querySelector(_selector);
       if (!el) {

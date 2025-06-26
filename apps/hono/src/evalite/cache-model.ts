@@ -10,13 +10,13 @@ const createKey = (params: LanguageModelV1CallOptions) => {
 };
 
 const createResultFromCachedObject = (
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   obj: any
 ): Awaited<ReturnType<LanguageModelV1['doGenerate']>> => {
   if (obj?.response?.timestamp) {
     obj.response.timestamp = new Date(obj.response.timestamp);
   }
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   return obj as any;
 };
 

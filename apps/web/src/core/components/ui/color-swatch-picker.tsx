@@ -20,8 +20,8 @@ function ColorSwatchPicker({
 }: ColorSwatchPickerProps) {
   return (
     <ColorSwatchPickerPrimitive
-      layout={layout}
       className={composeTailwindRenderProps(className, 'flex gap-1')}
+      layout={layout}
       {...props}
     >
       {children}

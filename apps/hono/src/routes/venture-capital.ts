@@ -1,10 +1,10 @@
-import { models, textSchema, usageSchema } from '@/core/api/ai';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
+import type { Variables } from 'hono/types';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator } from 'hono-openapi/zod';
-import type { Variables } from 'hono/types';
 import { z } from 'zod';
+import { models, textSchema, usageSchema } from '@/core/api/ai';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';

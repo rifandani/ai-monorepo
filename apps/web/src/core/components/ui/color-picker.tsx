@@ -47,21 +47,21 @@ function ColorPicker({
       <ColorPickerPrimitive {...props}>
         <Popover>
           <Button
-            isDisabled={isDisabled}
-            size={label ? 'medium' : 'square-petite'}
-            intent="plain"
             className={twJoin(
               '*:data-[slot=color-swatch]:-mx-0.5 w-auto px-2.5',
               !label && 'size-10'
             )}
+            intent="plain"
+            isDisabled={isDisabled}
+            size={label ? 'medium' : 'square-petite'}
           >
             <ColorSwatch className="size-6" />
             {label && label}
           </Button>
           <PopoverContent
             className="overflow-auto **:data-[slot=color-area]:w-full **:data-[slot=color-slider]:w-full sm:min-w-min sm:max-w-56 sm:**:data-[slot=color-area]:size-56 *:[[role=dialog]]:p-4 sm:*:[[role=dialog]]:p-3"
-            showArrow={showArrow}
             placement={placement}
+            showArrow={showArrow}
           >
             <div className="flex flex-col gap-y-1.5">
               {children || (
@@ -72,13 +72,13 @@ function ColorPicker({
                     yChannel="brightness"
                   />
                   <ColorSlider
-                    showOutput={false}
-                    colorSpace="hsb"
                     channel="hue"
+                    colorSpace="hsb"
+                    showOutput={false}
                   />
                   <div className="flex items-center gap-1.5">
                     {eyeDropper && <EyeDropper />}
-                    <ColorField className="h-9" aria-label="Hex" />
+                    <ColorField aria-label="Hex" className="h-9" />
                   </div>
                 </>
               )}
@@ -98,7 +98,7 @@ declare global {
 }
 
 function EyeDropper() {
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: xxx
   const state = use(ColorPickerStateContext)!;
 
   if (!window.EyeDropper) {
@@ -108,7 +108,6 @@ function EyeDropper() {
   return (
     <Button
       aria-label="Eye dropper"
-      size="square-petite"
       intent="outline"
       onPress={() => {
         const eyeDropper = window.EyeDropper ? new window.EyeDropper() : null;
@@ -116,8 +115,9 @@ function EyeDropper() {
           ?.open()
           .then((result) => state.setColor(parseColor(result.sRGBHex)));
       }}
+      size="square-petite"
     >
-      <Icon icon="mdi:eyedropper" className="size-4" />
+      <Icon className="size-4" icon="mdi:eyedropper" />
     </Button>
   );
 }

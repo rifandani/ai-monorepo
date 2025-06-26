@@ -1,13 +1,13 @@
-import { models } from '@/core/api/ai';
-import { recordSpan } from '@/core/utils/telemetry';
 import { type AttributeValue, metrics, trace } from '@opentelemetry/api';
 import { generateObject, generateText, tool } from 'ai';
 import { Hono } from 'hono';
+import type { Variables } from 'hono/types';
 import { describeRoute } from 'hono-openapi';
 import { resolver, validator } from 'hono-openapi/zod';
-import type { Variables } from 'hono/types';
 import { crush } from 'radashi';
 import { z } from 'zod';
+import { models } from '@/core/api/ai';
+import { recordSpan } from '@/core/utils/telemetry';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
@@ -133,10 +133,10 @@ async function deepResearch(query: string, depth = 1, breadth = 2) {
       accumulatedResearch.queries = queries;
 
       // loop through the search queries (based on input depth)
-      for (const query of queries) {
+      for (const _query of queries) {
         queriesCounter.add(1);
         const searchResults = await searchAndEvaluate(
-          query,
+          _query,
           accumulatedResearch.searchResults
         );
         accumulatedResearch.searchResults.push(...searchResults);
@@ -144,15 +144,15 @@ async function deepResearch(query: string, depth = 1, breadth = 2) {
         for (const searchResult of searchResults) {
           searchResultsCounter.add(1);
           const learnings = await generateLearningAndFollowUpQuestions(
-            query,
+            _query,
             searchResult
           );
           accumulatedResearch.learnings.push(learnings);
-          accumulatedResearch.completedQueries.push(query);
+          accumulatedResearch.completedQueries.push(_query);
 
           // call deepResearch recursively with decrementing depth and breadth
           await deepResearch(
-            `Overall research goal: ${query}
+            `Overall research goal: ${_query}
         Previous search queries: ${accumulatedResearch.completedQueries.join(', ')}
         Follow-up questions: ${learnings.followUpQuestions.join(', ')}
         `,
@@ -223,7 +223,7 @@ export async function searchAndEvaluate(
         parameters: z.object({
           query: z.string().min(1),
         }),
-        async execute({ query }) {
+        async execute({ query: _query }) {
           /**
            * we can't get real `sources` based on the search results using `experimental_output`
            * it throws an error: "ToolExecutionError: Error executing tool searchWeb: Unable to submit request because controlled generation is not supported with google_search tool"
@@ -238,7 +238,7 @@ export async function searchAndEvaluate(
             object: { results },
           } = await generateObject({
             model: models.flash20search,
-            prompt: query,
+            prompt: _query,
             // experimental_output: Output.object({
             //   schema: z.object({
             //     results: z.array(searchResultSchema),
@@ -250,7 +250,7 @@ export async function searchAndEvaluate(
             experimental_telemetry: {
               isEnabled: true,
               functionId: 'searchAndEvaluate_searchWeb',
-              metadata: { query },
+              metadata: { query: _query },
             },
           });
 
@@ -264,7 +264,7 @@ export async function searchAndEvaluate(
         description: 'Evaluate the search results',
         parameters: z.object({}),
         async execute() {
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: xxx
           const pendingResult = pendingSearchResults.pop()!;
 
           const { object: evaluation } = await generateObject({

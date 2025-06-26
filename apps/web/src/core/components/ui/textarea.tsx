@@ -6,9 +6,9 @@ import type {
   ValidationResult,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   TextArea as TextAreaPrimitive,
   TextField as TextFieldPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { tv } from 'tailwind-variants';
 import { Description, FieldError, Label } from './field';
@@ -48,14 +48,14 @@ function Textarea({
     >
       {label && <Label>{label}</Label>}
       <TextAreaPrimitive
-        ref={textAreaRef}
-        placeholder={placeholder}
-        className={composeRenderProps(className, (className, renderProps) =>
+        className={composeRenderProps(className, (_className, renderProps) =>
           textareaStyles({
             ...renderProps,
-            className,
+            className: _className,
           })
         )}
+        placeholder={placeholder}
+        ref={textAreaRef}
       />
       {description && <Description>{description}</Description>}
       <FieldError>{errorMessage}</FieldError>

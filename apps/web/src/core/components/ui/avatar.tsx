@@ -46,26 +46,25 @@ function Avatar({
     >
       {initials && (
         <svg
-          className="size-full select-none fill-current p-[5%] font-medium text-[48px] uppercase"
-          viewBox="0 0 100 100"
           aria-hidden={alt ? undefined : 'true'}
           aria-label={alt}
+          className="size-full select-none fill-current p-[5%] font-medium text-[48px] uppercase"
+          viewBox="0 0 100 100"
         >
           {alt && <title>{alt}</title>}
           <text
-            x="50%"
-            y="50%"
             alignmentBaseline="middle"
             dominantBaseline="middle"
-            textAnchor="middle"
             dy=".125em"
+            textAnchor="middle"
+            x="50%"
+            y="50%"
           >
             {initials}
           </text>
         </svg>
       )}
-      {/* biome-ignore lint/nursery/noImgElement: <explanation> */}
-      {src && <img className="size-full" src={src} alt={alt} />}
+      {src && <img alt={alt} className="size-full" src={src} />}
     </span>
   );
 }

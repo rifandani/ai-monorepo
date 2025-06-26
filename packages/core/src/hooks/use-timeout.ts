@@ -21,7 +21,7 @@ export function useTimeout(fn: () => void, delay?: number) {
     }
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   useEffect(() => {
     if (!isNumber(delay) || delay < 0) {
       return;

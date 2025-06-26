@@ -9,12 +9,12 @@ import type {
 } from 'react-aria-components';
 import {
   Collection,
+  composeRenderProps,
   Header,
   ListBoxItem as ListBoxItemPrimitive,
   ListBoxSection,
   Separator,
   Text,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -80,21 +80,21 @@ type DropdownItemProps = ListBoxItemProps;
 function DropdownItem({ className, ...props }: DropdownItemProps) {
   return (
     <ListBoxItemPrimitive
+      className={composeRenderProps(className, (_className, renderProps) =>
+        dropdownItemStyles({ ...renderProps, className: _className })
+      )}
       textValue={
         typeof props.children === 'string' ? props.children : props.textValue
       }
-      className={composeRenderProps(className, (className, renderProps) =>
-        dropdownItemStyles({ ...renderProps, className })
-      )}
       {...props}
     >
       {composeRenderProps(props.children, (children, { isSelected }) => (
         <>
           {isSelected && (
             <Icon
-              icon="mdi:check"
               className="-mx-0.5 mr-2"
               data-slot="checked-icon"
+              icon="mdi:check"
             />
           )}
           {typeof children === 'string' ? (
@@ -127,14 +127,14 @@ function DropdownItemDetails({
 
   return (
     <div
-      data-slot="dropdown-item-details"
       className="col-start-2 flex flex-col gap-y-1"
+      data-slot="dropdown-item-details"
       {...restProps}
     >
       {label && (
         <Text
-          slot={slot ?? 'label'}
           className={twMerge('font-medium sm:text-sm', classNames?.label)}
+          slot={slot ?? 'label'}
           {...restProps}
         >
           {label}
@@ -142,8 +142,8 @@ function DropdownItemDetails({
       )}
       {description && (
         <Text
-          slot={slot ?? 'description'}
           className={twMerge('text-muted-fg text-xs', classNames?.description)}
+          slot={slot ?? 'description'}
           {...restProps}
         >
           {description}
@@ -161,9 +161,9 @@ interface DropdownLabelProps extends TextProps {
 function DropdownLabel({ className, ref, ...props }: DropdownLabelProps) {
   return (
     <Text
-      slot="label"
-      ref={ref}
       className={twMerge('col-start-2', className)}
+      ref={ref}
+      slot="label"
       {...props}
     />
   );
@@ -172,8 +172,8 @@ function DropdownLabel({ className, ref, ...props }: DropdownLabelProps) {
 function DropdownSeparator({ className, ...props }: SeparatorProps) {
   return (
     <Separator
-      orientation="horizontal"
       className={twMerge('-mx-1 col-span-full my-1 h-px bg-border', className)}
+      orientation="horizontal"
       {...props}
     />
   );

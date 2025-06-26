@@ -1,4 +1,3 @@
-import { SERVICE_NAME } from '@/core/constants/global';
 import {
   type Attributes,
   type Span,
@@ -7,6 +6,7 @@ import {
   type Tracer,
   trace,
 } from '@opentelemetry/api';
+import { SERVICE_NAME } from '@/core/constants/global';
 
 /**
  * Tracer implementation that does nothing (null object).
@@ -21,7 +21,7 @@ export const noopTracer: Tracer = {
     arg1: unknown,
     arg2?: unknown,
     arg3?: F
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: xxx
   ): ReturnType<any> {
     if (typeof arg1 === 'function') {
       return arg1(noopSpan);

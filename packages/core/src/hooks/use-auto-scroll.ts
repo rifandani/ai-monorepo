@@ -59,7 +59,7 @@ export function useAutoScroll({
   }, [dependency]);
 
   // Auto-scroll on updates and during streaming
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   useEffect(() => {
     if (!isAutoScroll) {
       return;

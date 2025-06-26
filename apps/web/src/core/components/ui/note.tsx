@@ -53,26 +53,26 @@ function Note({
             {match(intent)
               .with('default', 'info', () => (
                 <Icon
-                  icon="mdi:alert-circle-outline"
                   className="mr-3 size-5 rounded-full leading-loose ring-4 ring-current/30"
+                  icon="mdi:alert-circle-outline"
                 />
               ))
               .with('warning', () => (
                 <Icon
-                  icon="mdi:alert-outline"
                   className="mr-3 size-5 rounded-full leading-loose ring-4 ring-current/30"
+                  icon="mdi:alert-outline"
                 />
               ))
               .with('danger', () => (
                 <Icon
-                  icon="mdi:alert-outline"
                   className="mr-3 size-5 rounded-full leading-loose ring-4 ring-current/30"
+                  icon="mdi:alert-outline"
                 />
               ))
               .with('success', () => (
                 <Icon
-                  icon="mdi:check-circle-outline"
                   className="mr-3 size-5 rounded-full leading-loose ring-4 ring-current/30"
+                  icon="mdi:check-circle-outline"
                 />
               ))
               .exhaustive()}

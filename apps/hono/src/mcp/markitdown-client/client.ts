@@ -60,7 +60,7 @@ async function main() {
 
     console.log(`FINAL ANSWER: ${answer}`);
   } finally {
-    // @ts-ignore
+    // @ts-expect-error
     await mcpClient?.close();
   }
 }

@@ -1,13 +1,6 @@
-import { auth } from '@/auth/libs';
-import { ENV } from '@/core/constants/env';
-import type { Variables } from '@/core/types/hono';
-import { Logger } from '@/core/utils/logger';
-import { routes } from '@/routes';
-import { metricsMiddleware } from '@/routes/middleware/metrics';
 // import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
 import { Hono } from 'hono';
-import { rateLimiter } from 'hono-rate-limiter';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { HTTPException } from 'hono/http-exception';
@@ -17,9 +10,16 @@ import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import { timing } from 'hono/timing';
+import { rateLimiter } from 'hono-rate-limiter';
 import { HTTPError } from 'ky';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
+import { auth } from '@/auth/libs';
+import { ENV } from '@/core/constants/env';
+import type { Variables } from '@/core/types/hono';
+import { Logger } from '@/core/utils/logger';
+import { routes } from '@/routes';
+import { metricsMiddleware } from '@/routes/middleware/metrics';
 
 const logger = new Logger('honoApp');
 const app = new Hono<{
@@ -37,7 +37,7 @@ app.use(
   loggerMiddleware(),
   // reqResLogger(),
   rateLimiter({
-    windowMs: 60 * 1_000, // 1 minute
+    windowMs: 60 * 1000, // 1 minute
     limit: 600, // Limit each IP to 600 requests per `window` (here, per 1 minute).
     standardHeaders: 'draft-6', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
     keyGenerator: () => crypto.randomUUID(), // Method to generate custom identifiers for clients (should be based on user id, session id, etc). For now, we use random UUID.
@@ -74,11 +74,11 @@ app.on(['POST', 'GET'], '/api/auth/**', (c) => {
 // });
 
 app.onError(async (error, c) => {
-  const requestId = c.get('requestId');
+  const reqId = c.get('requestId');
 
   if (error instanceof ZodError) {
     const errors = fromZodError(error);
-    logger.error(`ZodError with requestId: ${requestId}`, {
+    logger.error(`ZodError with requestId: ${reqId}`, {
       error: errors.message,
     });
     return c.json(errors, 400);
@@ -86,18 +86,18 @@ app.onError(async (error, c) => {
   if (error instanceof HTTPError) {
     const errors = await error.response.json();
     const response = { message: error.message, error: errors };
-    logger.error(`HTTPError with requestId: ${requestId}`, response);
+    logger.error(`HTTPError with requestId: ${reqId}`, response);
     return c.json(response, 400);
   }
   if (error instanceof HTTPException) {
-    logger.error(`HTTPException with requestId: ${requestId}`, {
+    logger.error(`HTTPException with requestId: ${reqId}`, {
       error: error.message,
     });
     // hono built-in http error
     return error.getResponse();
   }
 
-  logger.error(`UnknownError with requestId: ${requestId}`, {
+  logger.error(`UnknownError with requestId: ${reqId}`, {
     error: error.message,
   });
   return c.json({ ...error, message: error.message }, 500);

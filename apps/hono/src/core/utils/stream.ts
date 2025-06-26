@@ -21,15 +21,13 @@ class MarkdownJoiner {
           output += this.buffer;
           this.clearBuffer();
         }
-      } else {
+      } else if (char === '[' || char === '*') {
         // Check if we should start buffering
-        if (char === '[' || char === '*') {
-          this.buffer = char;
-          this.isBuffering = true;
-        } else {
-          // Pass through character directly
-          output += char;
-        }
+        this.buffer = char;
+        this.isBuffering = true;
+      } else {
+        // Pass through character directly
+        output += char;
       }
     }
 

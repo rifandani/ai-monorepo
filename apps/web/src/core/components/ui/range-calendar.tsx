@@ -36,16 +36,15 @@ function RangeCalendar<T extends DateValue>({
             const id = index + 1;
             return (
               <CalendarGrid
-                // eslint-disable-next-line react/no-array-index-key
+                className="[&_td]:border-collapse [&_td]:px-0 [&_td]:py-0.5"
+                // biome-ignore lint/suspicious/noArrayIndexKey: xxx
                 key={index}
                 offset={id >= 2 ? { months: id - 1 } : undefined}
-                className="[&_td]:border-collapse [&_td]:px-0 [&_td]:py-0.5"
               >
                 <CalendarGridHeader />
                 <CalendarGridBody className="snap-start">
                   {(date) => (
                     <CalendarCell
-                      date={date}
                       className={twMerge([
                         'shrink-0 [--cell-fg:var(--color-primary)] [--cell:color-mix(in_oklab,var(--color-primary)_15%,white_85%)]',
                         'dark:[--cell-fg:color-mix(in_oklab,var(--color-primary)_80%,white_20%)] dark:[--cell:color-mix(in_oklab,var(--color-primary)_30%,black_45%)]',
@@ -57,6 +56,7 @@ function RangeCalendar<T extends DateValue>({
                         date.compare(now) === 0 &&
                           'after:-translate-x-1/2 after:pointer-events-none after:absolute after:start-1/2 after:bottom-1 after:z-10 after:size-[3px] after:rounded-full after:bg-primary selected:after:bg-primary-fg',
                       ])}
+                      date={date}
                     >
                       {({
                         formattedDate,
@@ -95,7 +95,7 @@ function RangeCalendar<T extends DateValue>({
       </div>
 
       {errorMessage && (
-        <Text slot="errorMessage" className="text-danger text-sm">
+        <Text className="text-danger text-sm" slot="errorMessage">
           {errorMessage}
         </Text>
       )}

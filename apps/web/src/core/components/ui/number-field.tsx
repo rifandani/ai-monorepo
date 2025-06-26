@@ -56,7 +56,7 @@ function NumberField({
         {(renderProps) => (
           <>
             {isMobile ? (
-              <StepperButton slot="decrement" className="border-r" />
+              <StepperButton className="border-r" slot="decrement" />
             ) : null}
             <Input
               className="px-13 tabular-nums sm:px-2.5"
@@ -73,9 +73,9 @@ function NumberField({
               ) : (
                 <div className="flex h-full flex-col">
                   <StepperButton
-                    slot="increment"
-                    emblemType="chevron"
                     className="h-5 px-1"
+                    emblemType="chevron"
+                    slot="increment"
                   />
                   <div
                     className={fieldBorderStyles({
@@ -84,9 +84,9 @@ function NumberField({
                     })}
                   />
                   <StepperButton
-                    slot="decrement"
-                    emblemType="chevron"
                     className="h-5 px-1"
+                    emblemType="chevron"
+                    slot="decrement"
                   />
                 </div>
               )}
@@ -115,14 +115,14 @@ function StepperButton({
   const icon =
     emblemType === 'chevron' ? (
       slot === 'increment' ? (
-        <Icon icon="mdi:chevron-up" className="size-4" />
+        <Icon className="size-4" icon="mdi:chevron-up" />
       ) : (
-        <Icon icon="mdi:chevron-down" className="size-4" />
+        <Icon className="size-4" icon="mdi:chevron-down" />
       )
     ) : slot === 'increment' ? (
-      <Icon icon="mdi:plus" className="size-4" />
+      <Icon className="size-4" icon="mdi:plus" />
     ) : (
-      <Icon icon="mdi:minus" className="size-4" />
+      <Icon className="size-4" icon="mdi:minus" />
     );
   return (
     <Button

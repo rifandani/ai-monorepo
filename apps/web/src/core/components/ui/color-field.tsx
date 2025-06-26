@@ -58,8 +58,8 @@ function ColorField({
               {enableColorPicker ? (
                 <ColorPicker
                   className="*:[button]:size-8 *:[button]:rounded-sm *:[button]:ring-0"
-                  onChange={props.onChange}
                   defaultValue={value}
+                  onChange={props.onChange}
                 />
               ) : (
                 <ColorSwatch className="size-6" color={value.toString('hex')} />

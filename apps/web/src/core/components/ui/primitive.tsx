@@ -8,8 +8,8 @@ function composeTailwindRenderProps<T>(
   className: string | ((v: T) => string) | undefined,
   tailwind: string
 ): string | ((v: T) => string) {
-  return composeRenderProps(className, (className) =>
-    twMerge(tailwind, className)
+  return composeRenderProps(className, (_className) =>
+    twMerge(tailwind, _className)
   );
 }
 

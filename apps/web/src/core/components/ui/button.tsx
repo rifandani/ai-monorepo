@@ -102,13 +102,13 @@ function Button({
     <ButtonPrimitive
       ref={ref}
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         buttonStyles({
           ...renderProps,
           intent,
           size,
           shape,
-          className,
+          className: _className,
         })
       )}
     >

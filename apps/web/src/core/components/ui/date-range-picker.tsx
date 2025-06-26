@@ -56,8 +56,8 @@ function DateRangePicker<T extends DateValue>({
       <FieldError>{errorMessage}</FieldError>
       <DatePickerOverlay
         placement={contentPlacement}
-        visibleDuration={visibleDuration}
         range
+        visibleDuration={visibleDuration}
       />
     </DateRangePickerPrimitive>
   );

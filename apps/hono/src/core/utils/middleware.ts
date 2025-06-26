@@ -84,18 +84,18 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
     });
     logger.log('Cache Key: ', cacheKey);
 
-    const cached = getCachedResult(cacheKey) as Awaited<
+    const _cached = getCachedResult(cacheKey) as Awaited<
       ReturnType<LanguageModelV1['doGenerate']>
     > | null;
 
-    if (cached && cached !== null) {
+    if (_cached && _cached !== null) {
       logger.log('Cache Hit');
       return {
-        ...cached,
+        ..._cached,
         response: {
-          ...cached.response,
-          timestamp: cached?.response?.timestamp
-            ? new Date(cached?.response?.timestamp)
+          ..._cached.response,
+          timestamp: _cached?.response?.timestamp
+            ? new Date(_cached?.response?.timestamp)
             : undefined,
         },
       };
@@ -116,13 +116,13 @@ export const cacheMiddleware: LanguageModelV1Middleware = {
     logger.log('Cache Key: ', cacheKey);
 
     // Check if the result is in the cache
-    const cached = getCachedResult(cacheKey);
+    const _cached = getCachedResult(cacheKey);
 
     // If cached, return a simulated ReadableStream that yields the cached result
-    if (cached && cached !== null) {
+    if (_cached && _cached !== null) {
       logger.log('Cache Hit');
       // Format the timestamps in the cached response
-      const formattedChunks = (cached as LanguageModelV1StreamPart[]).map(
+      const formattedChunks = (_cached as LanguageModelV1StreamPart[]).map(
         (p) => {
           if (p.type === 'response-metadata' && p.timestamp) {
             return { ...p, timestamp: new Date(p.timestamp) };
@@ -256,7 +256,7 @@ function getLastUserMessageText({
   const lastMessage = prompt.at(-1);
 
   if (lastMessage?.role !== 'user') {
-    return undefined;
+    return;
   }
 
   return lastMessage.content.length === 0
@@ -317,6 +317,7 @@ function findSources(_: { text: string }): Array<{
  * This middleware is used to add RAG to the model's output.
  */
 export const ragMiddleware: LanguageModelV1Middleware = {
+  // biome-ignore lint/suspicious/useAwait: xxx
   transformParams: async ({ params }) => {
     const lastUserMessageText = getLastUserMessageText({
       prompt: params.prompt,

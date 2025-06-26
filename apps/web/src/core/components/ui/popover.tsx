@@ -9,13 +9,13 @@ import type {
   PopoverProps as PopoverPrimitiveProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   DialogTrigger,
   Modal,
   ModalOverlay,
   OverlayArrow,
   PopoverContext,
   Popover as PopoverPrimitive,
-  composeRenderProps,
   useSlottedContext,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
@@ -57,8 +57,8 @@ function PopoverFooter({ className, ...props }: DialogFooterProps) {
 function PopoverBody({ className, ref, ...props }: DialogBodyProps) {
   return (
     <Dialog.Body
-      ref={ref}
       className={twMerge('sm:px-4 sm:pt-0', className)}
+      ref={ref}
       {...props}
     />
   );
@@ -147,34 +147,33 @@ function PopoverContent({
       isDismissable
     >
       <Modal
-        className={composeRenderProps(className, (className, renderProps) =>
-          drawer({ ...renderProps, isMenu, className })
+        className={composeRenderProps(className, (_className, renderProps) =>
+          drawer({ ...renderProps, isMenu, className: _className })
         )}
       >
-        {/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
-        <Dialog role="dialog" aria-label={props['aria-label'] ?? 'List item'}>
+        <Dialog aria-label={props['aria-label'] ?? 'List item'} role="dialog">
           {children}
         </Dialog>
       </Modal>
     </ModalOverlay>
   ) : (
     <PopoverPrimitive
-      offset={effectiveOffset}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         content({
           ...renderProps,
-          className,
+          className: _className,
         })
       )}
+      offset={effectiveOffset}
       {...props}
     >
       {showArrow && (
         <OverlayArrow className="group">
           <svg
-            width={12}
+            className="group-data-[placement=left]:-rotate-90 block fill-overlay stroke-border group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
             height={12}
             viewBox="0 0 12 12"
-            className="group-data-[placement=left]:-rotate-90 block fill-overlay stroke-border group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
+            width={12}
           >
             <path d="M0 0 L6 6 L12 0" />
           </svg>
@@ -183,8 +182,7 @@ function PopoverContent({
       {isComboBoxTrigger ? (
         children
       ) : (
-        // biome-ignore lint/a11y/useSemanticElements: <explanation>
-        <Dialog role="dialog" aria-label={props['aria-label'] ?? 'List item'}>
+        <Dialog aria-label={props['aria-label'] ?? 'List item'} role="dialog">
           {children}
         </Dialog>
       )}

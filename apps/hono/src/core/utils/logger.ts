@@ -1,4 +1,3 @@
-import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 import {
   type AnyValue,
   type AnyValueMap,
@@ -16,6 +15,7 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 
 const COLOR = {
   RED: '\x1B[31m',
@@ -82,8 +82,6 @@ export class Logger {
       },
     });
 
-    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.log(
       `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`
       // attributes
@@ -105,8 +103,6 @@ export class Logger {
       },
     });
 
-    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.warn(
       `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`
       // attributes
@@ -128,8 +124,6 @@ export class Logger {
       },
     });
 
-    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.error(
       `${severityColor}[${timeFormatted}] ${severityColor}[${this.context}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`
       // attributes

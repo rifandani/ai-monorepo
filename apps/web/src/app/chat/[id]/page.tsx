@@ -15,7 +15,9 @@ export async function generateMetadata(props: {
 
 export default async function ChatDetail({
   params,
-}: { params: Promise<{ id: string }> }) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params; // get the chat ID from the URL
   const messages = await loadChat(id); // load the chat messages
 

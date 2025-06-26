@@ -22,7 +22,6 @@ type PickFunction<T extends noop> = (
  */
 export function useMemoizedFn<T extends noop>(fn: T) {
   if (!isFunction(fn)) {
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.error(
       `useMemoizedFn expected parameter is a function, got ${typeof fn}`
     );

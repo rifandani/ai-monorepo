@@ -28,16 +28,16 @@ export function AppQueryProvider({ children }: { children: React.ReactNode }) {
 
       {/* this will only be rendered in development */}
       <ReactQueryDevtools
-        client={queryClient}
         buttonPosition="bottom-right"
+        client={queryClient}
         initialIsOpen={false}
       />
 
       {showRqDevtools && (
         <React.Suspense fallback={null}>
           <ReactQueryDevtoolsProduction
-            client={queryClient}
             buttonPosition="bottom-right"
+            client={queryClient}
             initialIsOpen={false}
           />
         </React.Suspense>

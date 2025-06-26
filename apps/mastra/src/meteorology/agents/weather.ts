@@ -1,6 +1,3 @@
-import { models } from '@/core/utils/ai';
-import { weatherMemory } from '@/meteorology/memory/weather';
-import { weatherTool } from '@/meteorology/tools/weather';
 import { Agent } from '@mastra/core/agent';
 import {
   AnswerRelevancyMetric,
@@ -14,6 +11,9 @@ import {
   KeywordCoverageMetric,
   ToneConsistencyMetric,
 } from '@mastra/evals/nlp';
+import { models } from '@/core/utils/ai';
+import { weatherMemory } from '@/meteorology/memory/weather';
+import { weatherTool } from '@/meteorology/tools/weather';
 
 export const weatherAgent = new Agent({
   name: 'Weather Agent',

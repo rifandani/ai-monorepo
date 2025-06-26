@@ -53,15 +53,15 @@ function Chart({
   return (
     <ChartContext value={value}>
       <div
-        data-chart={chartId}
-        ref={ref}
         className={twMerge(
           "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-fg [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/80 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
           className
         )}
+        data-chart={chartId}
+        ref={ref}
         {...props}
       >
-        <ChartStyle id={chartId} config={config} />
+        <ChartStyle config={config} id={chartId} />
         <ResponsiveContainer>{children}</ResponsiveContainer>
       </div>
     </ChartContext>
@@ -70,7 +70,7 @@ function Chart({
 
 function ChartStyle({ id, config }: { id: string; config: ChartConfig }) {
   const colorConfig = Object.entries(config).filter(
-    ([_, config]) => config.theme || config.color
+    ([_, _config]) => _config.theme || _config.color
   );
 
   if (!colorConfig.length) {
@@ -79,7 +79,7 @@ function ChartStyle({ id, config }: { id: string; config: ChartConfig }) {
 
   return (
     <style
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: xxx
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
@@ -168,7 +168,7 @@ function ChartTooltipContent({
     labelKey,
   ]);
 
-  if (!active || !payload?.length) {
+  if (!(active && payload?.length)) {
     return null;
   }
 
@@ -176,15 +176,15 @@ function ChartTooltipContent({
 
   return (
     <div
-      ref={ref}
       className={twMerge(
         'grid min-w-[12rem] items-start gap-1.5 rounded-lg border bg-overlay px-3 py-2 text-overlay-fg text-xs shadow-xl',
         className
       )}
+      ref={ref}
     >
       {nestLabel ? null : tooltipLabel}
       <div className="grid gap-1.5">
-        {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation> */}
+        {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx */}
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || 'value'}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
@@ -192,11 +192,11 @@ function ChartTooltipContent({
 
           return (
             <div
-              key={item.dataKey}
               className={twMerge(
                 'flex w-full flex-wrap items-stretch gap-2 *:data-[slot=icon]:size-2.5 *:data-[slot=icon]:text-muted-fg',
                 indicator === 'dot' && 'items-center'
               )}
+              key={item.dataKey}
             >
               {formatter && item?.value !== undefined && item.name ? (
                 formatter(item.value, item.name, item, index, item.payload)
@@ -274,12 +274,12 @@ function ChartLegendContent({
 
   return (
     <div
-      ref={ref}
       className={twMerge(
         'flex items-center justify-center gap-4',
         verticalAlign === 'top' ? 'pb-3' : 'pt-3',
         className
       )}
+      ref={ref}
     >
       {payload.map((item) => {
         const key = `${nameKey || item.dataKey || 'value'}`;
@@ -287,8 +287,8 @@ function ChartLegendContent({
 
         return (
           <div
-            key={item.value}
             className="flex items-center gap-1.5 *:data-[slot=icon]:size-3 *:data-[slot=icon]:text-muted-fg"
+            key={item.value}
           >
             {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />
@@ -314,7 +314,7 @@ function getPayloadConfigFromPayload(
   key: string
 ) {
   if (typeof payload !== 'object' || payload === null) {
-    return undefined;
+    return;
   }
 
   const payloadPayload =

@@ -40,12 +40,12 @@ function DatePickerOverlay({
 }: DatePickerOverlayProps) {
   return (
     <Popover.Content
-      isDismissable={false}
-      showArrow={false}
       className={twJoin(
         'flex min-w-auto max-w-none snap-x justify-center p-4 sm:min-w-[16.5rem] sm:p-2 sm:pt-3',
         visibleDuration?.months === 1 ? 'sm:max-w-2xs' : 'sm:max-w-none'
       )}
+      isDismissable={false}
+      showArrow={false}
       {...props}
     >
       {range ? (
@@ -58,7 +58,7 @@ function DatePickerOverlay({
       )}
       {closeButton && (
         <div className="mx-auto flex w-full max-w-[inherit] justify-center py-2.5 sm:hidden">
-          <Popover.Close shape="circle" className="w-full">
+          <Popover.Close className="w-full" shape="circle">
             Close
           </Popover.Close>
         </div>
@@ -70,14 +70,14 @@ function DatePickerOverlay({
 function DatePickerIcon() {
   return (
     <Button
-      size="square-petite"
-      intent="plain"
       className="mr-1 h-7 w-8 rounded outline-offset-0hover:bg-transparent pressed:bg-transparent **:data-[slot=icon]:text-muted-fg"
+      intent="plain"
+      size="square-petite"
     >
       <Icon
-        icon="mdi:calendar-outline"
         aria-hidden
         className="ml-2 group-open:text-fg"
+        icon="mdi:calendar-outline"
       />
     </Button>
   );

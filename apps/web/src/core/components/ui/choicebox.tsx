@@ -3,9 +3,9 @@
 import type React from 'react';
 import type { GridListItemProps, GridListProps } from 'react-aria-components';
 import {
+  composeRenderProps,
   GridList,
   GridListItem,
-  composeRenderProps,
 } from 'react-aria-components';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
@@ -60,13 +60,13 @@ function Choicebox<T extends object>({
 }: ChoiceboxProps<T>) {
   return (
     <GridList
-      layout={columns === 1 ? 'stack' : 'grid'}
-      selectionMode={selectionMode}
       className={choiceboxStyles({
         columns,
         gap,
         className,
       })}
+      layout={columns === 1 ? 'stack' : 'grid'}
+      selectionMode={selectionMode}
       {...props}
     />
   );
@@ -113,17 +113,17 @@ function ChoiceboxItem({
   const textValue = props.title ?? props.textValue;
   return (
     <GridListItem
-      textValue={textValue}
       data-slot="choicebox-item"
+      textValue={textValue}
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         choiceboxItemStyles({
           ...renderProps,
           init:
             renderProps.isSelected ||
             renderProps.isHovered ||
             renderProps.isFocusVisible,
-          className,
+          className: _className,
         })
       )}
     >
@@ -132,7 +132,7 @@ function ChoiceboxItem({
           <div className="flex gap-x-2.5">
             {Icon && <Icon data-slot="choicebox-icon" />}
             <div className="flex flex-col gap-y-1 pr-8">
-              <Label slot="title" className="text-sm/4" htmlFor={textValue}>
+              <Label className="text-sm/4" htmlFor={textValue} slot="title">
                 {props.title}
               </Label>
               {props.description && (

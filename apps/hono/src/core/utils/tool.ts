@@ -10,10 +10,8 @@ export const logToConsoleTool = tool({
   parameters: z.object({
     message: z.string().describe('The message to log to console'),
   }),
+  // biome-ignore lint/suspicious/useAwait: aaa
   execute: async ({ message }) => {
-    // biome-ignore lint/suspicious/useAwait: aaa
-    // biome-ignore lint/suspicious/noConsoleLog: aaa
-    // biome-ignore lint/suspicious/noConsole: aaa
     console.log('logToConsoleTool: ', message);
 
     return {
@@ -41,7 +39,7 @@ export const getCityAttractionTool = tool({
     city: z.string().describe('The city to get the attractions for'),
   }),
   // assume the tool actually call the city attraction API
-  // biome-ignore lint/suspicious/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: xxx
   execute: async ({ city }: { city: string }) => {
     if (city.toLowerCase().includes('jakarta')) {
       return {

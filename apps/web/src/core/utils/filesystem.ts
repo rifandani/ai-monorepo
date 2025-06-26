@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
-import { readFile, readdir, unlink, writeFile } from 'node:fs/promises';
+import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { type Message, generateId } from 'ai';
+import { generateId, type Message } from 'ai';
 import 'server-only';
 import { logger } from '@workspace/core/utils/logger';
 
@@ -46,7 +46,7 @@ export async function getChatHistory() {
         const messages: Message[] = JSON.parse(fileContent);
         const id = path.basename(file, '.json');
         const content =
-          `${messages[0]?.content.substring(0, 30)}...` || 'Untitled Chat';
+          messages[0]?.content?.substring(0, 30) || 'Untitled Chat';
         return { id, content, createdAt: messages[0]?.createdAt };
       })
     );
@@ -57,7 +57,7 @@ export async function getChatHistory() {
 
     return chatHistories;
   } catch (error) {
-    logger.error(error, '[getChatHistory]: Error reading chat histories');
+    logger.error('[getChatHistory]: Error reading chat histories', error);
     return [];
   }
 }
@@ -103,7 +103,7 @@ export async function deleteChatHistory(id: string): Promise<void> {
       );
       return;
     }
-    logger.error(error, `[deleteChat]: Error deleting chat file: ${filePath}`);
+    logger.error(`[deleteChat]: Error deleting chat file: ${filePath}`, error);
     // Re-throw the error if it's not a "file not found" error or a standard Error
     throw error;
   }

@@ -44,8 +44,8 @@ export async function fileToDataUri(file: File): Promise<string> {
   // Convert Uint8Array to binary string
   let binaryString = '';
   // Avoid potential stack overflow issues with String.fromCharCode.apply for large arrays
-  for (let i = 0; i < uint8Array.length; i++) {
-    binaryString += String.fromCharCode(uint8Array[i]);
+  for (const byte of uint8Array) {
+    binaryString += String.fromCharCode(byte);
   }
   // Encode binary string to base64
   const base64String = btoa(binaryString);

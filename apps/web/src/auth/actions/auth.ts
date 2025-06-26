@@ -1,10 +1,5 @@
 'use server';
 
-import { AUTH_COOKIE_NAME } from '@/auth/constants/auth';
-import { http } from '@/core/services/http';
-import type { ActionResult } from '@/core/utils/action';
-import { actionClient } from '@/core/utils/action';
-import { repositoryErrorMapper } from '@/core/utils/error';
 import {
   authRepositories,
   authSignInEmailRequestSchema,
@@ -15,6 +10,11 @@ import { parseSetCookieHeader } from 'better-auth/cookies';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { tryit } from 'radashi';
+import { AUTH_COOKIE_NAME } from '@/auth/constants/auth';
+import { http } from '@/core/services/http';
+import type { ActionResult } from '@/core/utils/action';
+import { actionClient } from '@/core/utils/action';
+import { repositoryErrorMapper } from '@/core/utils/error';
 
 /**
  * Server action to handle user login.

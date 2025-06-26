@@ -1,5 +1,3 @@
-import { cacheModel } from '@/evalite/cache-model';
-import { generateSearchQueries } from '@/routes/gemini/agent/deep-research/deep-research';
 import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { createScorer, evalite } from 'evalite';
@@ -7,6 +5,8 @@ import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
 import { z } from 'zod';
+import { cacheModel } from '@/evalite/cache-model';
+import { generateSearchQueries } from '@/routes/gemini/agent/deep-research/deep-research';
 
 type Input = {
   query: string;
@@ -130,6 +130,7 @@ Decide if the queries cover different aspects and angles of the topic and rate t
 // Scorer for query count validation
 const SearchQueryCount = createScorer<Input, string>({
   name: 'SearchQueryCount',
+  // biome-ignore lint/suspicious/useAwait: xxx
   scorer: async ({ input, output }) => {
     const queryCount = output.split('\n').filter((line) => line.trim()).length;
 

@@ -61,15 +61,14 @@ function ContextMenuTrigger({ className, ...props }: ContextMenuTriggerProps) {
     });
   };
   return (
-    // biome-ignore lint/nursery/useAriaPropsSupportedByRole: <explanation>
     <button
+      aria-haspopup="menu"
       className={twMerge(
         'cursor-default focus:outline-hidden disabled:opacity-60 disabled:forced-colors:disabled:text-[GrayText]',
         className
       )}
-      ref={buttonRef}
-      aria-haspopup="menu"
       onContextMenu={onContextMenu}
+      ref={buttonRef}
       {...props}
     />
   );
@@ -92,14 +91,14 @@ function ContextMenuContent<T extends object>(
     useContextMenuTrigger();
   return contextMenuOffset ? (
     <Menu.Content
-      isOpen={!!contextMenuOffset}
-      onOpenChange={() => setContextMenuOffset(null)}
-      triggerRef={buttonRef}
-      shouldFlip={false}
-      placement="bottom left"
-      offset={contextMenuOffset?.offset}
       crossOffset={contextMenuOffset?.crossOffset}
+      isOpen={!!contextMenuOffset}
+      offset={contextMenuOffset?.offset}
       onClose={() => setContextMenuOffset(null)}
+      onOpenChange={() => setContextMenuOffset(null)}
+      placement="bottom left"
+      shouldFlip={false}
+      triggerRef={buttonRef}
       {...props}
     />
   ) : null;

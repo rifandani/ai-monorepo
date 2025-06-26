@@ -1,11 +1,11 @@
-import { cacheModel } from '@/evalite/cache-model';
 import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { createScorer } from 'evalite';
 import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
-import { z } from 'zod';
+import { z } from 'zod/v3';
+import { cacheModel } from '@/evalite/cache-model';
 
 const storage = createStorage({
   driver: fsDriver({

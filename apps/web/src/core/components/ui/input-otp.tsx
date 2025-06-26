@@ -16,18 +16,18 @@ function InputOTP({
 }: InputOTOPProps) {
   return (
     <OTPInput
-      data-1p-ignore
-      ref={ref}
-      // eslint-disable-next-line jsx-a11y/no-autofocus
       autoFocus={autoFocus}
-      containerClassName={twMerge(
-        'flex items-center gap-2 has-disabled:opacity-50',
-        containerClassName
-      )}
       className={twMerge(
         'mt-auto h-[2.5rem] bg-red-500 disabled:cursor-not-allowed',
         className
       )}
+      // eslint-disable-next-line jsx-a11y/no-autofocus
+      containerClassName={twMerge(
+        'flex items-center gap-2 has-disabled:opacity-50',
+        containerClassName
+      )}
+      data-1p-ignore
+      ref={ref}
       {...props}
     />
   );
@@ -37,8 +37,8 @@ type InputOTPGroupProps = React.ComponentProps<'div'>;
 function InputOTPGroup({ className, ref, ...props }: InputOTPGroupProps) {
   return (
     <div
-      ref={ref}
       className={twMerge('flex items-center gap-x-1.5', className)}
+      ref={ref}
       {...props}
     />
   );
@@ -60,12 +60,12 @@ function InputOTPSlot({ index, className, ref, ...props }: InputOTPSlotProps) {
 
   return (
     <div
-      ref={ref}
       className={twMerge(
         'relative flex size-10 items-center justify-center rounded-md border border-input text-sm tabular-nums transition-all',
         isActive && 'z-10 border-ring/70 ring-4 ring-ring/20',
         className
       )}
+      ref={ref}
       {...props}
     >
       {char}
@@ -82,7 +82,7 @@ type InputOTPSeparatorProps = React.ComponentProps<'div'>;
 function InputOTPSeparator({ ref, ...props }: InputOTPSeparatorProps) {
   return (
     <div ref={ref} {...props}>
-      <Icon icon="mdi:circle-medium" className="size-2" />
+      <Icon className="size-2" icon="mdi:circle-medium" />
     </div>
   );
 }

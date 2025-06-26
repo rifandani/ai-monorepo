@@ -1,8 +1,3 @@
-import { cacheModel } from '@/evalite/cache-model';
-import {
-  type SearchResult,
-  searchAndEvaluate,
-} from '@/routes/gemini/agent/deep-research/deep-research';
 import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { createScorer, evalite } from 'evalite';
@@ -10,6 +5,11 @@ import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
 import { z } from 'zod';
+import { cacheModel } from '@/evalite/cache-model';
+import {
+  type SearchResult,
+  searchAndEvaluate,
+} from '@/routes/gemini/agent/deep-research/deep-research';
 
 type Input = {
   query: string;

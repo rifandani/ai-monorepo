@@ -1,10 +1,5 @@
 'use client';
 
-import { ChatField } from '@/core/components/chat-field.client';
-import { ChatMessage } from '@/core/components/chat-message.client';
-import { Button, Note } from '@/core/components/ui';
-import { useChatFieldStore } from '@/core/hooks/use-chat-field';
-import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 import { type Message, useChat } from '@ai-sdk/react';
 import {
   StickToBottom,
@@ -14,6 +9,11 @@ import { logger } from '@workspace/core/utils/logger';
 import { type ChatRequestOptions, createIdGenerator } from 'ai';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
+import { ChatField } from '@/core/components/chat-field.client';
+import { ChatMessage } from '@/core/components/chat-message.client';
+import { Button, Note } from '@/core/components/ui';
+import { useChatFieldStore } from '@/core/hooks/use-chat-field';
+import { getToolsRequiringConfirmation, tools } from '@/core/services/ai';
 
 const toolsWithConfirmation = {
   getWeatherInformation: tools.getWeatherInformation, // no execute function, human in the loop
@@ -22,7 +22,10 @@ const toolsWithConfirmation = {
 export function Chat({
   id,
   initialMessages,
-}: { id?: string; initialMessages?: Message[] } = {}) {
+}: {
+  id?: string;
+  initialMessages?: Message[];
+} = {}) {
   const showSearch = useChatFieldStore((state) => state.showSearch);
   const showDeepResearch = useChatFieldStore((state) => state.showDeepResearch);
   const {
@@ -53,12 +56,11 @@ export function Chat({
     api: '/api/chat',
     maxSteps: 10,
     experimental_throttle: 100, // throttle messages and data updates to 100ms
-    experimental_prepareRequestBody({ messages, id }) {
+    experimental_prepareRequestBody({ messages: _messages, id: _id }) {
       // useful for example, only send the last message, send additional data along with the message, change the structure of the request body
       return {
-        // biome-ignore lint/nursery/useAtIndex: <explanation>
-        message: messages[messages.length - 1],
-        id,
+        message: _messages.at(-1),
+        id: _id,
         searchMode: showSearch,
         deepResearchMode: showDeepResearch,
       };
@@ -73,8 +75,8 @@ export function Chat({
         options,
       });
     },
-    onError(error) {
-      toast.error(error.message);
+    onError(err) {
+      toast.error(err.message);
     },
   });
 
@@ -137,18 +139,18 @@ export function Chat({
 
   return (
     <StickToBottom
-      resize="smooth"
-      initial="smooth"
+      className="relative flex h-[100dvh] w-full flex-col p-5 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
       data-testid="chat-root"
       data-total-messages={messages.length}
-      className="relative flex h-[100dvh] w-full flex-col p-5 data-[total-messages=0]:min-h-dvh data-[total-messages=0]:justify-center data-[total-messages=0]:pt-0"
+      initial="smooth"
+      resize="smooth"
     >
       <StickToBottomContent className="flex flex-col gap-y-5">
         {messages.map((message) => (
           <ChatMessage
+            addToolResult={addToolResult}
             key={message.id}
             message={message}
-            addToolResult={addToolResult}
             onRetry={handleRetry}
           />
         ))}
@@ -159,10 +161,10 @@ export function Chat({
         <span className="mt-2 flex items-center gap-2">
           <Note intent="danger">{error.message}</Note>
           <Button
-            type="button"
             intent="outline"
-            size="small"
             onClick={() => reload()}
+            size="small"
+            type="button"
           >
             Retry
           </Button>
@@ -170,13 +172,13 @@ export function Chat({
       )}
 
       <ChatField
-        isEmptyChat={messages.length === 0}
-        status={status}
-        input={input}
-        setInput={setInput}
-        stop={stop}
         disableSubmit={pendingToolCallConfirmation}
+        input={input}
+        isEmptyChat={messages.length === 0}
         onSubmit={onSubmit}
+        setInput={setInput}
+        status={status}
+        stop={stop}
       />
     </StickToBottom>
   );

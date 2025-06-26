@@ -50,7 +50,7 @@ export function useInterval(
     }
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   useEffect(() => {
     // Skip setup if delay is invalid
     if (!isNumber(delay) || delay < 0) {

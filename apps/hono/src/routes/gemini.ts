@@ -1,6 +1,32 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
+  type GoogleGenerativeAIProviderMetadata,
+  type GoogleGenerativeAIProviderOptions,
+  google,
+} from '@ai-sdk/google';
+import {
+  type CoreMessage,
+  cosineSimilarity,
+  createDataStream,
+  embed,
+  embedMany,
+  type FilePart,
+  generateObject,
+  generateText,
+  type ImagePart,
+  smoothStream,
+  streamObject,
+  streamText,
+} from 'ai';
+import { Hono } from 'hono';
+import { stream } from 'hono/streaming';
+import { endTime, startTime } from 'hono/timing';
+import { describeRoute } from 'hono-openapi';
+import { resolver, validator as zValidator } from 'hono-openapi/zod';
+import { extractText, getDocumentProxy } from 'unpdf';
+import { z } from 'zod';
+import {
   cacheListSchema,
   cacheManager,
   cacheModelId,
@@ -12,6 +38,7 @@ import {
   implementationPlanImplementationSchema,
   implementationPlanSchema,
   mockUserSchema,
+  models,
   promptSchema,
   qualityMetricsSchema,
   reasoningDetailSchema,
@@ -19,7 +46,6 @@ import {
   textSchema,
   usageSchema,
 } from '@/core/api/ai';
-import { models } from '@/core/api/ai';
 import { CACHE_CONTENT_EXPLICIT_CONTENT } from '@/core/constants/cache';
 import type { Variables } from '@/core/types/hono';
 import { Logger } from '@/core/utils/logger';
@@ -31,32 +57,6 @@ import {
   getWeatherTool,
   logToConsoleTool,
 } from '@/core/utils/tool';
-import {
-  type GoogleGenerativeAIProviderMetadata,
-  type GoogleGenerativeAIProviderOptions,
-  google,
-} from '@ai-sdk/google';
-import {
-  type CoreMessage,
-  type FilePart,
-  type ImagePart,
-  cosineSimilarity,
-  createDataStream,
-  embed,
-  embedMany,
-  generateObject,
-  generateText,
-  smoothStream,
-  streamObject,
-  streamText,
-} from 'ai';
-import { Hono } from 'hono';
-import { describeRoute } from 'hono-openapi';
-import { resolver, validator as zValidator } from 'hono-openapi/zod';
-import { stream } from 'hono/streaming';
-import { endTime, startTime } from 'hono/timing';
-import { extractText, getDocumentProxy } from 'unpdf';
-import { z } from 'zod';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
@@ -407,7 +407,7 @@ geminiApp.post(
       prompt: promptSchema,
     })
   ),
-  async (ctx) => {
+  (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     const result = streamText({
@@ -424,7 +424,7 @@ geminiApp.post(
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
     // use the `toDataStream` method to get a data stream
-    return stream(ctx, (stream) => stream.pipe(result.textStream));
+    return stream(ctx, (_stream) => _stream.pipe(result.textStream));
   }
 );
 
@@ -449,7 +449,7 @@ geminiApp.post(
       prompt: promptSchema,
     })
   ),
-  async (ctx) => {
+  (ctx) => {
     const { prompt } = ctx.req.valid('json');
 
     // immediately start streaming the response
@@ -484,8 +484,8 @@ geminiApp.post(
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
-    return stream(ctx, (stream) =>
-      stream.pipe(dataStream.pipeThrough(new TextEncoderStream()))
+    return stream(ctx, (_stream) =>
+      _stream.pipe(dataStream.pipeThrough(new TextEncoderStream()))
     );
   }
 );
@@ -539,12 +539,12 @@ geminiApp.post(
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
-    return stream(ctx, (stream) => {
-      return stream.pipe(result.textStream);
+    return stream(ctx, (_stream) => {
+      return _stream.pipe(result.textStream);
       // or use fullStream to get different types of events, including partial objects, errors, and finish events
       // for await (const objectPart of result.partialObjectStream) {
-      //   await stream.write(JSON.stringify(objectPart));
-      //   // await stream.writeln('');
+      //   await _stream.write(JSON.stringify(objectPart));
+      //   // await _stream.writeln('');
       // }
     });
   }
@@ -1699,7 +1699,7 @@ geminiApp.post(
     }));
 
     return ctx.json({
-      vector: vector,
+      vector,
       usage: result.usage,
     });
   }
@@ -1773,12 +1773,12 @@ geminiApp.post(
     const embeddingResults = await Promise.allSettled(embeddingPromises);
 
     let allEmbeddings: number[][] = [];
-    embeddingResults.forEach((result, batchIndex) => {
-      if (result.status === 'fulfilled') {
-        allEmbeddings = allEmbeddings.concat(result.value.embeddings);
+    embeddingResults.forEach((_result, batchIndex) => {
+      if (_result.status === 'fulfilled') {
+        allEmbeddings = allEmbeddings.concat(_result.value.embeddings);
       } else {
         logger.error(`Embedding batch ${batchIndex} failed`, {
-          error: result.reason,
+          error: _result.reason,
         });
       }
     });
@@ -1895,8 +1895,8 @@ geminiApp.post(
     ctx.header('X-Vercel-AI-Data-Stream', 'v1');
     ctx.header('Content-Type', 'text/plain; charset=utf-8');
 
-    return stream(ctx, async (stream) =>
-      stream.pipe(result.toDataStream({ sendReasoning: true }))
+    return stream(ctx, async (_stream) =>
+      _stream.pipe(result.toDataStream({ sendReasoning: true }))
     );
 
     // return stream(ctx, async (stream) => {
@@ -1911,8 +1911,6 @@ geminiApp.post(
     //           break;
     //         }
     //         const chunkText = decoder.decode(value, { stream: true });
-    //         // biome-ignore lint/suspicious/noConsoleLog: Logging stream output
-    //         // biome-ignore lint/suspicious/noConsole: Logging stream output
     //         console.log('Stream chunk:', chunkText);
     //         await stream.write(value);
     //       }

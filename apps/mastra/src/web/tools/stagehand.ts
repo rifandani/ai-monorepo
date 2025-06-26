@@ -1,8 +1,8 @@
-import { ENV } from '@/core/utils/env';
-import { OtelLogger } from '@/core/utils/logger';
 import { Stagehand } from '@browserbasehq/stagehand';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import { ENV } from '@/core/utils/env';
+import { OtelLogger } from '@/core/utils/logger';
 
 const logger = new OtelLogger({ name: 'mastra', level: 'info' });
 
@@ -36,7 +36,7 @@ class StagehandSessionManager {
 
     try {
       // Initialize if not already initialized
-      if (!this.stagehand || !this.initialized) {
+      if (!(this.stagehand && this.initialized)) {
         logger.info('Creating new Stagehand instance');
         this.stagehand = new Stagehand({
           // apiKey: process.env.BROWSERBASE_API_KEY!,
@@ -109,7 +109,7 @@ class StagehandSessionManager {
    * Close the Stagehand session if it's been idle for too long
    */
   private async checkAndCleanupSession(): Promise<void> {
-    if (!this.stagehand || !this.initialized) {
+    if (!(this.stagehand && this.initialized)) {
       return;
     }
 
@@ -243,7 +243,7 @@ const performWebAction = async (url?: string, action?: string) => {
       success: true,
       message: `Successfully performed: ${action}`,
     };
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: xxx
   } catch (error: any) {
     throw new Error(`Stagehand action failed: ${error.message}`);
   }
@@ -299,7 +299,7 @@ const performWebObservation = async (url?: string, instruction?: string) => {
       });
       throw pageError;
     }
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: xxx
   } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Full stack trace for observation error:', error);
@@ -310,7 +310,7 @@ const performWebObservation = async (url?: string, instruction?: string) => {
 const performWebExtraction = async (
   url?: string,
   instruction?: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   schemaObj?: Record<string, any>,
   useTextExtract?: boolean
 ) => {
@@ -363,7 +363,7 @@ const performWebExtraction = async (
       });
       throw pageError;
     }
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: xxx
   } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error('Full stack trace for extraction error:', error);
@@ -401,7 +401,7 @@ export const stagehandNavigateTool = createTool({
         title,
         currentUrl,
       };
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: xxx
     } catch (error: any) {
       return {
         success: false,

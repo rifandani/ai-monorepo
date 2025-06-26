@@ -11,12 +11,12 @@ import type {
   ValidationResult,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   FieldError as FieldErrorPrimitive,
   Group,
   Input as InputPrimitive,
   Label as LabelPrimitive,
   Text,
-  composeRenderProps,
 } from 'react-aria-components';
 import { tv } from 'tailwind-variants';
 import { composeTailwindRenderProps, focusStyles } from './primitive';
@@ -55,10 +55,10 @@ function Description({ ref, className, ...props }: DescriptionProps) {
     <Text
       ref={ref}
       {...props}
-      slot="description"
       className={description({
         className: isWarning ? 'text-warning' : className,
       })}
+      slot="description"
     />
   );
 }
@@ -104,10 +104,10 @@ function FieldGroup({ className, ...props }: GroupProps) {
   return (
     <Group
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         fieldGroupStyles({
           ...renderProps,
-          className,
+          className: _className,
         })
       )}
     />

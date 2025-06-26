@@ -10,11 +10,11 @@ import type {
   TabsProps as TabsPrimitiveProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   TabList as TabListPrimitive,
   TabPanel as TabPanelPrimitive,
   Tab as TabPrimitive,
   Tabs as TabsPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -36,10 +36,10 @@ interface TabsProps extends TabsPrimitiveProps {
 function Tabs({ className, ref, ...props }: TabsProps) {
   return (
     <TabsPrimitive
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         tabsStyles({
           ...renderProps,
-          className,
+          className: _className,
         })
       )}
       ref={ref}
@@ -72,8 +72,8 @@ function TabList<T extends object>({
       <TabListPrimitive
         ref={ref}
         {...props}
-        className={composeRenderProps(className, (className, renderProps) =>
-          tabListStyles({ ...renderProps, className })
+        className={composeRenderProps(className, (_className, renderProps) =>
+          tabListStyles({ ...renderProps, className: _className })
         )}
       />
     </LayoutGroup>
@@ -120,7 +120,6 @@ function Tab({ children, ref, ...props }: TabProps) {
           {children as React.ReactNode}
           {isSelected && (
             <motion.span
-              data-slot="selected-indicator"
               className={twMerge(
                 'absolute rounded bg-fg',
                 // horizontal
@@ -128,6 +127,7 @@ function Tab({ children, ref, ...props }: TabProps) {
                 // vertical
                 'group-data-[orientation=vertical]/tabs:left-0 group-data-[orientation=vertical]/tabs:h-[calc(100%-10%)] group-data-[orientation=vertical]/tabs:w-0.5 group-data-[orientation=vertical]/tabs:transform'
               )}
+              data-slot="selected-indicator"
               layoutId="current-selected"
               transition={{ type: 'spring', stiffness: 500, damping: 40 }}
             />
@@ -145,11 +145,11 @@ function TabPanel({ className, ref, ...props }: TabPanelProps) {
   return (
     <TabPanelPrimitive
       {...props}
-      ref={ref}
       className={composeTailwindRenderProps(
         className,
         'flex-1 text-fg text-sm data-focus-visible:outline-hidden'
       )}
+      ref={ref}
     />
   );
 }

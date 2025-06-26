@@ -1,4 +1,3 @@
-import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 import { LogLevel, MastraLogger } from '@mastra/core/logger';
 import {
   type AnyValueMap,
@@ -17,6 +16,7 @@ import {
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { logger } from '@workspace/core/utils/logger';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
 
 export class OtelLogger extends MastraLogger {
   logger: ApiLogsLogger;
@@ -114,7 +114,7 @@ export class OtelLogger extends MastraLogger {
     }
   }
 
-  // biome-ignore lint/suspicious/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: xxx
   async getLogs(
     _transportId: string,
     _params?: {
@@ -135,7 +135,7 @@ export class OtelLogger extends MastraLogger {
     };
   }
 
-  // biome-ignore lint/suspicious/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: xxx
   async getLogsByRunId(_args: {
     transportId: string;
     runId: string;

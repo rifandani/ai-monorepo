@@ -91,7 +91,7 @@ function PureSpreadsheetEditor({ content, saveContent }: SheetEditorProps) {
   }, [initialRows]);
 
   const handleRowsChange = useCallback(
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: xxx
     (newRows: any[]) => {
       setLocalRows(newRows);
 
@@ -112,19 +112,19 @@ function PureSpreadsheetEditor({ content, saveContent }: SheetEditorProps) {
         resolvedTheme === 'dark' ? 'rdg-dark' : 'rdg-light'
       )}
       columns={columns}
-      rows={localRows}
+      defaultColumnOptions={{
+        resizable: true,
+        sortable: true,
+      }}
       enableVirtualization
-      onRowsChange={handleRowsChange}
       onCellClick={(args) => {
         if (args.column.key !== 'rowNumber') {
           args.selectCell(true);
         }
       }}
+      onRowsChange={handleRowsChange}
+      rows={localRows}
       style={{ height: '100%' }}
-      defaultColumnOptions={{
-        resizable: true,
-        sortable: true,
-      }}
     />
   );
 }

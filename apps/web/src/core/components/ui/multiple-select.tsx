@@ -192,7 +192,6 @@ function MultipleSelect<T extends SelectedKey>({
       {props.label && <Label className="mb-1">{props.label}</Label>}
       <div className={props.isDisabled ? 'opacity-50' : ''}>
         <div
-          ref={triggerRef}
           className={twMerge(
             [
               'relative flex min-h-10 flex-row flex-wrap items-center rounded-lg border px-1 shadow-xs transition',
@@ -203,22 +202,23 @@ function MultipleSelect<T extends SelectedKey>({
             ],
             className
           )}
+          ref={triggerRef}
         >
           <TagGroup
-            shape={props.shape}
-            intent={props.intent}
             aria-label="Selected items"
             id={tagGroupIdentifier}
+            intent={props.intent}
             onRemove={onRemove}
+            shape={props.shape}
           >
             <TagList
-              items={selectedItems.items}
               className={twMerge(
                 selectedItems.items.length !== 0 && 'px-1 py-1.5',
                 '[&_.jdt3lr2x]:last:-mr-1 gap-1.5 outline-hidden',
                 props.shape === 'square' &&
                   '[&_.jdt3lr2x]:rounded-[calc(var(--radius-lg)-4px)]'
               )}
+              items={selectedItems.items}
             >
               {props.tag}
             </TagList>
@@ -228,11 +228,11 @@ function MultipleSelect<T extends SelectedKey>({
             allowsEmptyCollection
             aria-label="Available items"
             className="group peer flex flex-1"
-            items={accessibleList.items}
-            selectedKey={fieldState.selectedKey}
             inputValue={fieldState.inputValue}
-            onSelectionChange={onSelectionChange}
+            items={accessibleList.items}
             onInputChange={onInputChange}
+            onSelectionChange={onSelectionChange}
+            selectedKey={fieldState.selectedKey}
           >
             <div
               className={twMerge(
@@ -241,7 +241,6 @@ function MultipleSelect<T extends SelectedKey>({
               )}
             >
               <Input
-                placeholder={props.placeholder}
                 className="ml-1 flex-1 px-0.5 py-1 shadow-none ring-0"
                 onBlur={() => {
                   setFieldState({
@@ -251,28 +250,29 @@ function MultipleSelect<T extends SelectedKey>({
                   accessibleList.setFilterText('');
                 }}
                 onKeyDownCapture={onKeyDownCapture}
+                placeholder={props.placeholder}
               />
 
               <VisuallyHidden>
                 <Button
-                  slot="remove"
-                  type="button"
                   aria-label="Remove"
                   intent="plain"
-                  size="square-petite"
                   ref={triggerButtonRef}
+                  size="square-petite"
+                  slot="remove"
+                  type="button"
                 >
                   <Icon icon="mdi:chevron-down" />
                 </Button>
               </VisuallyHidden>
             </div>
             <PopoverContent
-              respectScreen={false}
-              isNonModal
               className="max-w-none"
+              isNonModal
+              respectScreen={false}
               style={{ width: `${width}px` }}
-              triggerRef={triggerRef}
               trigger="ComboBox"
+              triggerRef={triggerRef}
             >
               <ListBox
                 renderEmptyState={() =>
@@ -300,18 +300,18 @@ function MultipleSelect<T extends SelectedKey>({
             </PopoverContent>
           </ComboBox>
           <div
-            className="relative ml-auto flex items-center justify-center px-1"
             aria-hidden
+            className="relative ml-auto flex items-center justify-center px-1"
           >
             <button
-              type="button"
               className="-mr-2 grid size-8 place-content-center rounded-sm text-muted-fg hover:text-fg focus:text-fg"
               onClick={() => triggerButtonRef.current?.click()}
               tabIndex={-1}
+              type="button"
             >
               <Icon
-                icon="mdi:chevron-down"
                 className="size-4 peer/[data-open]:rotate-180"
+                icon="mdi:chevron-down"
               />
             </button>
           </div>
@@ -320,7 +320,7 @@ function MultipleSelect<T extends SelectedKey>({
       {props.description && <Description>{props.description}</Description>}
       <FieldError>{errorMessage}</FieldError>
       {name && (
-        <input hidden name={name} value={selectedKeys.join(',')} readOnly />
+        <input hidden name={name} readOnly value={selectedKeys.join(',')} />
       )}
     </div>
   );

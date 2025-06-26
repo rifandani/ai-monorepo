@@ -1,3 +1,6 @@
+import { Scalar } from '@scalar/hono-api-reference';
+import type { Hono } from 'hono';
+import { openAPISpecs } from 'hono-openapi';
 import type { Variables } from '@/core/types/hono';
 import { geminiApp } from '@/routes/gemini';
 import { agentDeepResearchApp } from '@/routes/gemini/agent/deep-research/deep-research';
@@ -7,9 +10,6 @@ import { mcpApp } from '@/routes/mcp';
 import { mcpClientApp } from '@/routes/mcp-client';
 import { ollamaApp } from '@/routes/ollama';
 import { agentVentureCapitalApp } from '@/routes/venture-capital';
-import { Scalar } from '@scalar/hono-api-reference';
-import type { Hono } from 'hono';
-import { openAPISpecs } from 'hono-openapi';
 
 export function routes(
   app: Hono<{

@@ -47,7 +47,7 @@ export function useMultipleRefs<T>(initialValue: T) {
     next() {
       return {
         done: false,
-        // biome-ignore lint/correctness/useHookAtTopLevel: <explanation>
+        // biome-ignore lint/correctness/useHookAtTopLevel: xxx
         value: useRef(initialValue),
       };
     },

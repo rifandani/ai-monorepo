@@ -74,11 +74,13 @@ function BreadcrumbsItem({
 
 function Separator({
   separator = 'chevron',
-}: { separator?: BreadcrumbsItemProps['separator'] }) {
+}: {
+  separator?: BreadcrumbsItemProps['separator'];
+}) {
   return (
     <span className="*:shrink-0 *:text-muted-fg *:data-[slot=icon]:size-3.5">
       {separator === 'chevron' && (
-        <Icon icon="lucide:chevron-right" className="size-3.5" />
+        <Icon className="size-3.5" icon="lucide:chevron-right" />
       )}
       {separator === 'slash' && <span className="text-muted-fg">/</span>}
     </span>

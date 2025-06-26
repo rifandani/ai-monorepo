@@ -27,10 +27,10 @@ function FileTrigger({
   return (
     <FileTriggerPrimitive ref={ref} {...props}>
       <Button
-        isDisabled={props.isDisabled}
         intent={intent}
-        size={size}
+        isDisabled={props.isDisabled}
         shape={shape}
+        size={size}
       >
         {withIcon &&
           (props.defaultCamera ? (

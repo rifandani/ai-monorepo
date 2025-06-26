@@ -20,6 +20,7 @@ import type {
   SeparatorProps as SidebarSeparatorProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   Disclosure,
   DisclosureGroup,
   DisclosurePanel,
@@ -29,7 +30,6 @@ import {
   Separator,
   Text,
   Button as Trigger,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -85,7 +85,7 @@ function SidebarProvider({
   const [internalOpenState, setInternalOpenState] = useState(defaultOpen);
   const open = openProp ?? internalOpenState;
   const setOpen = useCallback(
-    (value: boolean | ((value: boolean) => boolean)) => {
+    (value: boolean | ((_value: boolean) => boolean)) => {
       const openState = typeof value === 'function' ? value(open) : value;
 
       if (setOpenProp) {
@@ -94,14 +94,16 @@ function SidebarProvider({
         setInternalOpenState(openState);
       }
 
-      // biome-ignore lint/nursery/noDocumentCookie: <explanation>
+      // biome-ignore lint/suspicious/noDocumentCookie: xxx
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
     [setOpenProp, open]
   );
 
   const toggleSidebar = useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
+    return isMobile
+      ? setOpenMobile((_open) => !_open)
+      : setOpen((_open) => !_open);
   }, [isMobile, setOpen]);
 
   useEffect(() => {
@@ -225,12 +227,12 @@ function Sidebar({
   if (collapsible === 'none') {
     return (
       <div
-        data-sidebar-intent={intent}
-        data-sidebar-collapsible="none"
         className={twMerge(
           'flex h-full w-(--sidebar-width) flex-col border-r bg-sidebar text-sidebar-fg',
           className
         )}
+        data-sidebar-collapsible="none"
+        data-sidebar-intent={intent}
         {...props}
       />
     );
@@ -244,12 +246,12 @@ function Sidebar({
         {...props}
       >
         <Sheet.Content
-          closeButton={closeButton}
           aria-label="Sidebar"
-          data-sidebar-intent="default"
           classNames={{
             content: 'w-(--sidebar-width-mobile) [&>button]:hidden',
           }}
+          closeButton={closeButton}
+          data-sidebar-intent="default"
           isFloat={intent === 'float'}
           side={side}
         >
@@ -261,11 +263,11 @@ function Sidebar({
 
   return (
     <div
-      data-sidebar-state={state}
+      className="group/sidebar-container peer hidden text-sidebar-fg md:block"
       data-sidebar-collapsible={state === 'collapsed' ? collapsible : ''}
       data-sidebar-intent={intent}
       data-sidebar-side={side}
-      className="group/sidebar-container peer hidden text-sidebar-fg md:block"
+      data-sidebar-state={state}
       {...props}
     >
       <div aria-hidden="true" className={gap({ intent })} />
@@ -278,12 +280,12 @@ function Sidebar({
         {...props}
       >
         <div
-          data-sidebar="default"
           className={twJoin(
             'flex h-full w-full flex-col text-sidebar-fg',
             'group-data-[sidebar-intent=inset]/sidebar-container:bg-sidebar dark:group-data-[sidebar-intent=inset]/sidebar-container:bg-bg',
             'group-data-[sidebar-intent=float]/sidebar-container:rounded-lg group-data-[sidebar-intent=float]/sidebar-container:border group-data-[sidebar-intent=float]/sidebar-container:border-(--sidebar-border) group-data-[sidebar-intent=float]/sidebar-container:bg-sidebar group-data-[sidebar-intent=float]/sidebar-container:shadow-xs'
           )}
+          data-sidebar="default"
         >
           {props.children}
         </div>
@@ -307,13 +309,13 @@ function SidebarHeader({
   ref,
   ...props
 }: React.ComponentProps<'div'>) {
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: xxx
   const { state } = use(SidebarContext)!;
   return (
     <div
-      ref={ref}
-      data-sidebar-header="true"
       className={header({ collapsed: state === 'collapsed', className })}
+      data-sidebar-header="true"
+      ref={ref}
       {...props}
     />
   );
@@ -349,8 +351,8 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<'div'>) {
   const collapsed = state === 'collapsed' && !isMobile;
   return (
     <div
-      data-sidebar-footer="true"
       className={footer({ collapsed, className })}
+      data-sidebar-footer="true"
       {...props}
     />
   );
@@ -360,12 +362,12 @@ function SidebarContent({ className, ...props }: React.ComponentProps<'div'>) {
   const { state } = useSidebar();
   return (
     <div
-      data-sidebar-content="true"
       className={twMerge(
         'flex min-h-0 flex-1 scroll-mb-96 flex-col overflow-auto *:data-sidebar-section:border-l-0',
         state === 'collapsed' && 'items-center',
         className
       )}
+      data-sidebar-content="true"
       {...props}
     />
   );
@@ -379,12 +381,12 @@ function SidebarSectionGroup({
   const collapsed = state === 'collapsed' && !isMobile;
   return (
     <section
-      data-sidebar-section-group="true"
       className={twMerge(
         'flex w-full flex-col gap-y-6',
         collapsed && 'items-center justify-center',
         className
       )}
+      data-sidebar-section-group="true"
       {...props}
     />
   );
@@ -397,11 +399,11 @@ function SidebarSection({
   const { state } = useSidebar();
   return (
     <div
-      data-sidebar-section="true"
       className={twMerge(
         'col-span-full flex flex-col gap-y-0.5 in-data-[sidebar-intent=fleet]:px-0 px-2 **:data-sidebar-section:**:gap-y-0 **:data-sidebar-section:pr-0',
         className
       )}
+      data-sidebar-section="true"
       {...props}
     >
       {state !== 'collapsed' && 'title' in props && (
@@ -469,8 +471,6 @@ function SidebarItem({
   const isCollapsed = state === 'collapsed' && !isMobile;
   const link = (
     <Link
-      ref={ref}
-      data-sidebar-item="true"
       aria-current={isCurrent ? 'page' : undefined}
       className={composeRenderProps(className, (cls, renderProps) =>
         sidebarItemStyles({
@@ -484,6 +484,8 @@ function SidebarItem({
           className: cls,
         })
       )}
+      data-sidebar-item="true"
+      ref={ref}
       {...props}
     >
       {(values) => (
@@ -495,10 +497,10 @@ function SidebarItem({
           {badge &&
             (state !== 'collapsed' ? (
               <Badge
-                shape="square"
-                intent="primary"
-                data-slot="sidebar-badge"
                 className="-translate-y-1/2 absolute inset-ring-1 inset-ring-primary/20 inset-y-1/2 right-1.5 h-5.5 w-auto text-[10px] transition-colors group-data-current:inset-ring-transparent"
+                data-slot="sidebar-badge"
+                intent="primary"
+                shape="square"
               >
                 {badge}
               </Badge>
@@ -519,8 +521,8 @@ function SidebarItem({
       <Tooltip.Content
         className="**:data-[slot=icon]:hidden **:data-[slot=sidebar-label-mask]:hidden"
         intent="inverse"
-        showArrow={false}
         placement="right"
+        showArrow={false}
       >
         {tooltip}
       </Tooltip.Content>
@@ -549,14 +551,14 @@ function SidebarLink({ className, ref, ...props }: SidebarLinkProps) {
   const collapsed = state === 'collapsed' && !isMobile;
   return (
     <Link
-      ref={ref}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         sidebarLink({
           ...renderProps,
           collapsed,
-          className,
+          className: _className,
         })
       )}
+      ref={ref}
       {...props}
     />
   );
@@ -569,13 +571,13 @@ function SidebarInset({
 }: React.ComponentProps<'main'>) {
   return (
     <main
-      ref={ref}
       className={twMerge(
         'relative flex min-h-svh w-full flex-1 flex-col peer-data-[sidebar-intent=inset]:border peer-data-[sidebar-intent=inset]:border-(--sidebar-border)',
         'bg-bg peer-data-[sidebar-intent=inset]:overflow-hidden dark:peer-data-[sidebar-intent=inset]:bg-sidebar',
         'peer-data-[sidebar-intent=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[sidebar-state=collapsed]:peer-data-[sidebar-intent=inset]:ml-2 md:peer-data-[sidebar-intent=inset]:m-2 md:peer-data-[sidebar-intent=inset]:ml-0 md:peer-data-[sidebar-intent=inset]:rounded-xl md:peer-data-[sidebar-intent=inset]:shadow-xs',
         className
       )}
+      ref={ref}
       {...props}
     />
   );
@@ -589,12 +591,12 @@ function SidebarDisclosureGroup({
 }: SidebarDisclosureGroupProps) {
   return (
     <DisclosureGroup
-      data-sidebar-disclosure-group="true"
       allowsMultipleExpanded={allowsMultipleExpanded}
       className={composeTailwindRenderProps(
         className,
         'col-span-full flex flex-col gap-y-6'
       )}
+      data-sidebar-disclosure-group="true"
       {...props}
     />
   );
@@ -611,8 +613,6 @@ function SidebarDisclosure({
   const { state } = useSidebar();
   return (
     <Disclosure
-      ref={ref}
-      data-sidebar-disclosure="true"
       className={composeTailwindRenderProps(
         className,
         twMerge(
@@ -620,6 +620,8 @@ function SidebarDisclosure({
           state !== 'collapsed' && 'col-span-full'
         )
       )}
+      data-sidebar-disclosure="true"
+      ref={ref}
       {...props}
     />
   );
@@ -657,9 +659,7 @@ function SidebarDisclosureTrigger({
   return (
     <Heading level={3}>
       <Trigger
-        ref={ref}
-        slot="trigger"
-        className={composeRenderProps(className, (className, renderProps) =>
+        className={composeRenderProps(className, (_className, renderProps) =>
           sidebarDisclosureTrigger({
             ...renderProps,
             collapsed,
@@ -667,9 +667,11 @@ function SidebarDisclosureTrigger({
               renderProps.isPressed ||
               renderProps.isFocusVisible ||
               renderProps.isHovered,
-            className,
+            className: _className,
           })
         )}
+        ref={ref}
+        slot="trigger"
         {...props}
       >
         {(values) => (
@@ -679,9 +681,9 @@ function SidebarDisclosureTrigger({
               : props.children}
             {state !== 'collapsed' && (
               <Icon
-                icon="mdi:chevron-down"
-                data-slot="chevron"
                 className="z-10 ml-auto size-3.5 transition-transform group-aria-expanded:rotate-180"
+                data-slot="chevron"
+                icon="mdi:chevron-down"
               />
             )}
           </>
@@ -696,8 +698,8 @@ function SidebarDisclosurePanel(
 ) {
   return (
     <DisclosurePanel
-      data-sidebar-disclosure-panel="true"
       className="col-span-full grid grid-cols-[auto_1fr] gap-y-0.5"
+      data-sidebar-disclosure-panel="true"
       {...props}
     />
   );
@@ -706,11 +708,11 @@ function SidebarDisclosurePanel(
 function SidebarSeparator({ className, ...props }: SidebarSeparatorProps) {
   return (
     <Separator
-      orientation="horizontal"
       className={twMerge(
         'col-span-full mx-auto my-2.5 h-px w-[calc(var(--sidebar-width)-theme(spacing.6))] bg-border',
         className
       )}
+      orientation="horizontal"
       {...props}
     />
   );
@@ -727,17 +729,17 @@ function SidebarTrigger({
       aria-label={props['aria-label'] || 'Toggle Sidebar'}
       data-sidebar-trigger="true"
       intent={props.intent || 'plain'}
-      size={props.size || 'square-petite'}
       onPress={(event) => {
         onPress?.(event);
         toggleSidebar();
       }}
+      size={props.size || 'square-petite'}
       {...props}
     >
       {children || (
         <>
-          <Icon icon="tabler:layout-sidebar" className="hidden md:inline" />
-          <Icon icon="mdi:menu" className="inline md:hidden" />
+          <Icon className="hidden md:inline" icon="tabler:layout-sidebar" />
+          <Icon className="inline md:hidden" icon="mdi:menu" />
           <span className="sr-only">Toggle Sidebar</span>
         </>
       )}
@@ -754,12 +756,7 @@ function SidebarRail({
 
   return (
     <button
-      ref={ref}
-      data-sidebar="rail"
       aria-label="Toggle Sidebar"
-      title="Toggle Sidebar"
-      tabIndex={-1}
-      onClick={toggleSidebar}
       className={twMerge(
         '-translate-x-1/2 group-data-[sidebar-side=left]/sidebar-container:-right-4 absolute inset-y-0 z-20 hidden w-4 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-transparent group-data-[sidebar-side=right]/sidebar-container:left-0 sm:flex',
         'in-data-[sidebar-side=left]:cursor-w-resize in-data-[sidebar-side=right]:cursor-e-resize',
@@ -768,6 +765,11 @@ function SidebarRail({
         '[[data-sidebar-side=left][data-sidebar-collapsible=hidden]_&]:-right-2 [[data-sidebar-side=right][data-sidebar-collapsible=hidden]_&]:-left-2',
         className
       )}
+      data-sidebar="rail"
+      onClick={toggleSidebar}
+      ref={ref}
+      tabIndex={-1}
+      title="Toggle Sidebar"
       {...props}
     />
   );
@@ -781,13 +783,13 @@ function SidebarLabel({ className, ref, ...props }: SidebarLabelProps) {
   if (!collapsed) {
     return (
       <Text
-        tabIndex={-1}
-        ref={ref}
-        slot="label"
         className={twMerge(
           'col-start-2 overflow-hidden whitespace-nowrap',
           className
         )}
+        ref={ref}
+        slot="label"
+        tabIndex={-1}
         {...props}
       >
         {props.children}

@@ -4,10 +4,10 @@ import type React from 'react';
 import type { TooltipProps as TooltipPrimitiveProps } from 'react-aria-components';
 import {
   Button,
+  composeRenderProps,
   OverlayArrow,
   Tooltip as TooltipPrimitive,
   TooltipTrigger as TooltipTriggerPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
@@ -61,7 +61,6 @@ function TooltipContent({
   return (
     <TooltipPrimitive
       {...props}
-      offset={offset}
       className={composeRenderProps(props.className, (className, renderProps) =>
         tooltipStyles({
           ...renderProps,
@@ -69,14 +68,15 @@ function TooltipContent({
           className,
         })
       )}
+      offset={offset}
     >
       {showArrow && (
         <OverlayArrow>
           <svg
-            width={12}
+            className="arx group-data-[placement=left]:-rotate-90 group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
             height={12}
             viewBox="0 0 12 12"
-            className="arx group-data-[placement=left]:-rotate-90 group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
+            width={12}
           >
             <path d="M0 0 L6 6 L12 0" />
           </svg>

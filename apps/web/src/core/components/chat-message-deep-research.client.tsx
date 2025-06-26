@@ -1,15 +1,15 @@
 'use client';
 
+import { Icon } from '@iconify/react';
+import type { JSONValue, ToolInvocation } from 'ai';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { Markdown } from '@/core/components/markdown.client';
 import { Badge } from '@/core/components/ui/badge';
 import { Modal } from '@/core/components/ui/modal';
 import { ScrollArea } from '@/core/components/ui/scroll-area';
 import type { DeepResearchAnnotation, Research } from '@/core/schemas/ai';
 import { formatElapsedTime } from '@/core/utils/time';
-import { Icon } from '@iconify/react';
-import type { JSONValue, ToolInvocation } from 'ai';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 function useElapsedTime(state: ToolInvocation['state']) {
   const [startTime] = useState(Date.now());
@@ -28,11 +28,7 @@ function useElapsedTime(state: ToolInvocation['state']) {
   return elapsedTime;
 }
 
-function DeepResearchStatus({
-  updates,
-}: {
-  updates: string[];
-}) {
+function DeepResearchStatus({ updates }: { updates: string[] }) {
   if (updates.length === 0) {
     return null;
   }
@@ -43,15 +39,15 @@ function DeepResearchStatus({
     <div className="relative mt-6 rounded-md bg-zinc-100 px-4 py-2">
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentUpdate}
-          initial={{ opacity: 0, y: 20, rotateX: -90 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          className="flex h-full w-full flex-col"
           exit={{ opacity: 0, y: -20, rotateX: 90 }}
+          initial={{ opacity: 0, y: 20, rotateX: -90 }}
+          key={currentUpdate}
           transition={{
             duration: 0.3,
             ease: [0.645, 0.045, 0.355, 1.0],
           }}
-          className="flex h-full w-full flex-col"
         >
           <p className="line-clamp-2 font-mono text-sm text-zinc-950 tracking-tight">
             {currentUpdate}
@@ -96,17 +92,17 @@ export function ChatMessageDeepResearch({
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         className="mb-4 w-full rounded-2xl border border-zinc-200"
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.5 }}
       >
         <div className="p-6">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Icon
-                icon="mdi:file-document-outline"
                 className="h-6 w-6 text-zinc-500"
+                icon="mdi:file-document-outline"
               />
               <h2 className="font-semibold text-xl">Deep Research</h2>
             </div>
@@ -125,14 +121,14 @@ export function ChatMessageDeepResearch({
               </motion.div>
             </Modal.Trigger>
             <Modal.Content
-              size="4xl"
               classNames={{ content: 'h-[85vh] overflow-y-auto' }}
+              size="4xl"
             >
               <Modal.Header>
                 <Modal.Title className="flex items-center gap-2 pt-2 font-medium text-2xl tracking-tight">
                   <Icon
-                    icon="mdi:file-document-outline"
                     className="h-5 w-5 text-zinc-400"
+                    icon="mdi:file-document-outline"
                   />
                   {report.title}
                 </Modal.Title>
@@ -148,20 +144,20 @@ export function ChatMessageDeepResearch({
           {research.sources && research.sources.length > 0 && (
             <Modal>
               <Modal.Trigger className="cursor-pointer text-sm text-zinc-500 transition-colors hover:text-zinc-600">
-                <Badge shape="circle" className="flex items-center gap-2">
+                <Badge className="flex items-center gap-2" shape="circle">
                   <Icon icon="lucide:link" />
                   {Array.from(new Set(research.sources)).length} sources found
                 </Badge>
               </Modal.Trigger>
               <Modal.Content
-                size="4xl"
                 classNames={{ content: 'max-h-[75vh]' }}
+                size="4xl"
               >
                 <Modal.Header>
                   <Modal.Title className="flex items-center gap-2 font-medium text-xl tracking-tight">
                     <Icon
-                      icon="mdi:link-variant"
                       className="h-5 w-5 text-zinc-500"
+                      icon="mdi:link-variant"
                     />
                     Sources
                   </Modal.Title>
@@ -175,17 +171,18 @@ export function ChatMessageDeepResearch({
                       {Array.from(new Set(research.sources)).map(
                         (source, index) => (
                           <motion.div
-                            key={index}
-                            initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ duration: 0.3, delay: index * 0.05 }}
                             className="mb-4 rounded-lg border border-zinc-200 p-4"
+                            initial={{ opacity: 0 }}
+                            // biome-ignore lint/suspicious/noArrayIndexKey: xxx
+                            key={index}
+                            transition={{ duration: 0.3, delay: index * 0.05 }}
                           >
                             <a
-                              href={source.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
                               className="font-medium transition-opacity hover:opacity-75"
+                              href={source.url}
+                              rel="noopener noreferrer"
+                              target="_blank"
                             >
                               <div className="mb-2 flex items-center gap-2">
                                 {/* <img
@@ -217,17 +214,17 @@ export function ChatMessageDeepResearch({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
       className="w-full rounded-2xl border border-zinc-200"
+      initial={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
     >
       <div className="p-6">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Icon
-              icon="mdi:file-document-outline"
               className="h-6 w-6 text-zinc-400"
+              icon="mdi:file-document-outline"
             />
             <h2 className="font-normal text-2xl">Deep Research</h2>
           </div>
@@ -241,10 +238,10 @@ export function ChatMessageDeepResearch({
 
           {sourceUpdates && sourceUpdates.length > 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
               className="space-y-2"
+              initial={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="text-sm text-zinc-500">
                 Sources found so far: {sourceUpdates.length}

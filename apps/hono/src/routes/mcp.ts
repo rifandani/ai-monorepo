@@ -1,4 +1,3 @@
-import type { Variables } from '@/core/types/hono';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type {
@@ -10,6 +9,7 @@ import { toFetchResponse, toReqRes } from 'fetch-to-node';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { z } from 'zod';
+import type { Variables } from '@/core/types/hono';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
@@ -79,7 +79,7 @@ const getServer = () => {
     {
       name: z.string().describe('Name to include in greeting'),
     },
-    // biome-ignore lint/suspicious/useAwait: <explanation>
+    // biome-ignore lint/suspicious/useAwait: xxx
     async ({ name }): Promise<GetPromptResult> => {
       return {
         messages: [
@@ -100,7 +100,7 @@ const getServer = () => {
     'greeting-resource',
     'https://example.com/greetings/default',
     { mimeType: 'text/plain' },
-    // biome-ignore lint/suspicious/useAwait: <explanation>
+    // biome-ignore lint/suspicious/useAwait: xxx
     async (): Promise<ReadResourceResult> => {
       return {
         contents: [
@@ -242,7 +242,7 @@ mcpApp.post(
         {
           jsonrpc: '2.0',
           error: {
-            code: -32603,
+            code: -32_603,
             message: 'Internal server error',
           },
           id: null,
@@ -259,7 +259,7 @@ mcpApp.get('/', (c) => {
     {
       jsonrpc: '2.0',
       error: {
-        code: -32000,
+        code: -32_000,
         message: 'Method not allowed.',
       },
       id: null,
@@ -274,7 +274,7 @@ mcpApp.delete('/', (c) => {
     {
       jsonrpc: '2.0',
       error: {
-        code: -32000,
+        code: -32_000,
         message: 'Method not allowed.',
       },
       id: null,

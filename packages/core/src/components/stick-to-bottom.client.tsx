@@ -14,8 +14,8 @@ import {
 } from '@workspace/core/hooks/use-stick-to-bottom';
 import * as React from 'react';
 import {
-  type ReactNode,
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -65,6 +65,7 @@ export function StickToBottom({
 }: StickToBottomProps): ReactNode {
   const customTargetScrollTop = useRef<GetTargetScrollTop | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   const targetScrollTop = React.useCallback<GetTargetScrollTop>(
     (target, elements) => {
       const get = context?.targetScrollTop ?? currentTargetScrollTop;
@@ -104,8 +105,8 @@ export function StickToBottom({
       get targetScrollTop() {
         return customTargetScrollTop.current;
       },
-      set targetScrollTop(targetScrollTop: GetTargetScrollTop | null) {
-        customTargetScrollTop.current = targetScrollTop;
+      set targetScrollTop(_targetScrollTop: GetTargetScrollTop | null) {
+        customTargetScrollTop.current = _targetScrollTop;
       },
     }),
     [

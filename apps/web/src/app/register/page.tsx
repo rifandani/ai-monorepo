@@ -1,7 +1,7 @@
+import { Icon } from '@iconify/react';
 import { RegisterForm } from '@/auth/components/register-form.client';
 import { Link } from '@/core/components/ui';
 import { createMetadata } from '@/core/utils/seo';
-import { Icon } from '@iconify/react';
 
 export const metadata = createMetadata({
   title: 'Register',
@@ -30,9 +30,9 @@ export default function RegisterPage() {
       <section className="hidden w-1/2 shadow-2xl md:block">
         <span className="relative h-screen w-full md:flex md:items-center md:justify-center">
           <Icon
-            icon="logos:nextjs-icon"
-            className="size-60 object-cover"
             aria-label="cool nextjs logo"
+            className="size-60 object-cover"
+            icon="logos:nextjs-icon"
           />
         </span>
       </section>

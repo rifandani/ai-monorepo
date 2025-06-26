@@ -7,7 +7,7 @@
   "author": "Tri Rizeki Rifandani",
   "license": "MIT",
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --project tsconfig.typecheck.json",
     "dev": "cp .env.dev .env.local && next dev --port 3002",
     "dev:prod": "cp .env.prod .env.local && next dev --port 3002",
     "dev:turbo": "cp .env.dev .env.local && next dev --turbopack --port 3002",
@@ -23,6 +23,7 @@
     "@hookform/resolvers": "5.1.1",
     "@internationalized/date": "3.8.2",
     "@modelcontextprotocol/sdk": "1.12.3",
+    "@next-safe-action/adapter-react-hook-form": "2.0.0",
     "@next/bundle-analyzer": "15.3.3",
     "@nosecone/next": "1.0.0-beta.8",
     "@radix-ui/react-scroll-area": "1.2.9",

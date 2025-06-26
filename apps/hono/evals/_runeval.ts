@@ -5,8 +5,8 @@
  */
 
 import path from 'node:path';
-import promptfoo from 'promptfoo';
 import type { EvaluateOptions, EvaluateTestSuite } from 'promptfoo';
+import promptfoo from 'promptfoo';
 
 const options: EvaluateOptions = {
   maxConcurrency: 5,

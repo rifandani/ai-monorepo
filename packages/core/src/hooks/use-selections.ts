@@ -118,7 +118,7 @@ export function useSelections<T>(items: T[], defaultSelected: T[] = []) {
    * Check if partially items are selected
    */
   const partiallySelected = useMemo(
-    () => !noneSelected && !allSelected,
+    () => !(noneSelected || allSelected),
     [noneSelected, allSelected]
   );
 

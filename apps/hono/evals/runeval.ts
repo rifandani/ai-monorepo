@@ -21,7 +21,7 @@ async function runSingleEval(configFileName: string): Promise<void> {
   const fs = await import('node:fs/promises');
   try {
     await fs.access(configPath);
-  } catch (error) {
+  } catch {
     throw new Error(`Config file not found: ${configPath}`);
   }
 
@@ -84,7 +84,7 @@ async function showAvailableConfigs(): Promise<void> {
     for (const file of yamlFiles) {
       console.error(`  ${file.replace('.yaml', '')}`);
     }
-  } catch (dirError) {
+  } catch {
     console.error('Could not read configs directory');
   }
 }
@@ -92,6 +92,7 @@ async function showAvailableConfigs(): Promise<void> {
 /**
  * Run multiple evals sequentially.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
 async function runEvals() {
   const configFileNames = process.argv.slice(2);
 

@@ -14,8 +14,8 @@ function ScrollArea({
 }) {
   return (
     <ScrollAreaPrimitive.Root
-      ref={ref}
       className={twMerge('overflow-hidden', className)}
+      ref={ref}
       {...props}
     >
       {children}
@@ -39,8 +39,8 @@ function ScrollViewport({
 }) {
   return (
     <ScrollAreaPrimitive.Viewport
-      ref={ref}
       className={twMerge('size-full rounded-[inherit]', className)}
+      ref={ref}
       {...props}
     >
       {children}
@@ -62,14 +62,14 @@ function ScrollBar({
 }) {
   return (
     <ScrollAreaPrimitive.Scrollbar
-      ref={ref}
-      orientation={orientation}
       className={twMerge(
         'flex select-none data-[state=hidden]:animate-fd-fade-out',
         orientation === 'vertical' && 'h-full w-1.5',
         orientation === 'horizontal' && 'h-1.5 flex-col',
         className
       )}
+      orientation={orientation}
+      ref={ref}
       {...props}
     >
       <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-fd-border" />

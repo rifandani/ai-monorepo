@@ -169,17 +169,18 @@ export const useStickToBottom = (
   const [isAtBottom, updateIsAtBottom] = useState(options.initial !== false);
   const [isNearBottom, setIsNearBottom] = useState(false);
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: xxx
   const optionsRef = useRef<StickToBottomOptions>(null!);
   optionsRef.current = options;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   const isSelecting = useCallback(() => {
     if (!mouseDown) {
       return false;
     }
 
     const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) {
+    if (!selection?.rangeCount) {
       return false;
     }
 
@@ -190,14 +191,16 @@ export const useStickToBottom = (
     );
   }, []);
 
-  const setIsAtBottom = useCallback((isAtBottom: boolean) => {
-    state.isAtBottom = isAtBottom;
-    updateIsAtBottom(isAtBottom);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
+  const setIsAtBottom = useCallback((_isAtBottom: boolean) => {
+    state.isAtBottom = _isAtBottom;
+    updateIsAtBottom(_isAtBottom);
   }, []);
 
-  const setEscapedFromLock = useCallback((escapedFromLock: boolean) => {
-    state.escapedFromLock = escapedFromLock;
-    updateEscapedFromLock(escapedFromLock);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
+  const setEscapedFromLock = useCallback((_escapedFromLock: boolean) => {
+    state.escapedFromLock = _escapedFromLock;
+    updateEscapedFromLock(_escapedFromLock);
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
@@ -225,7 +228,7 @@ export const useStickToBottom = (
       },
 
       get targetScrollTop() {
-        if (!scrollRef.current || !contentRef.current) {
+        if (!(scrollRef.current && contentRef.current)) {
           return 0;
         }
 
@@ -234,7 +237,7 @@ export const useStickToBottom = (
         );
       },
       get calculatedTargetScrollTop() {
-        if (!scrollRef.current || !contentRef.current) {
+        if (!(scrollRef.current && contentRef.current)) {
           return 0;
         }
 
@@ -307,7 +310,8 @@ export const useStickToBottom = (
         durationElapsed = waitElapsed + (scrollOptions.duration ?? 0);
       }
 
-      const next = async (): Promise<boolean> => {
+      const next = (): Promise<boolean> => {
+        // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
         const promise = new Promise(requestAnimationFrame).then(() => {
           if (!state.isAtBottom) {
             state.animation = undefined;
@@ -384,7 +388,7 @@ export const useStickToBottom = (
           return state.isAtBottom;
         });
 
-        return promise.then((isAtBottom) => {
+        return promise.then((_isAtBottom) => {
           requestAnimationFrame(() => {
             if (!state.animation) {
               state.lastTick = undefined;
@@ -392,7 +396,7 @@ export const useStickToBottom = (
             }
           });
 
-          return isAtBottom;
+          return _isAtBottom;
         });
       };
 
@@ -414,6 +418,7 @@ export const useStickToBottom = (
     setIsAtBottom(false);
   }, [setEscapedFromLock, setIsAtBottom]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   const handleScroll = useCallback(
     ({ target }: Event) => {
       if (target !== scrollRef.current) {
@@ -444,6 +449,8 @@ export const useStickToBottom = (
        *
        * @see https://github.com/WICG/resize-observer/issues/25#issuecomment-248757228
        */
+
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
       setTimeout(() => {
         /**
          * When theres a resize difference ignore the resize event.
@@ -483,6 +490,7 @@ export const useStickToBottom = (
     [setEscapedFromLock, setIsAtBottom, isSelecting, state]
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   const handleWheel = useCallback(
     ({ target, deltaY }: WheelEvent) => {
       let element = target as HTMLElement;
@@ -529,6 +537,7 @@ export const useStickToBottom = (
 
     let previousHeight: number | undefined;
 
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
     state.resizeObserver = new ResizeObserver(([entry]) => {
       const { height } = entry?.contentRect ?? { height: 0 };
       const difference = height - (previousHeight ?? height);
@@ -564,16 +573,14 @@ export const useStickToBottom = (
           duration:
             animation === 'instant' ? undefined : RETAIN_ANIMATION_DURATION_MS,
         });
-      } else {
+      } else if (state.isNearBottom) {
         /**
          * Else if it's a negative resize, check if we're near the bottom
          * if we are want to un-escape from the lock, because the resize
          * could have caused the container to be at the bottom.
          */
-        if (state.isNearBottom) {
-          setEscapedFromLock(false);
-          setIsAtBottom(true);
-        }
+        setEscapedFromLock(false);
+        setIsAtBottom(true);
       }
 
       previousHeight = height;
@@ -622,18 +629,16 @@ export interface StickToBottomInstance {
   state: StickToBottomState;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: xxx
 function useRefCallback<T extends (ref: HTMLElement | null) => any>(
   callback: T,
   deps: DependencyList
 ) {
-  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   const result = useCallback((ref: HTMLElement | null) => {
     result.current = ref;
     return callback(ref);
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  }, deps) as any as MutableRefObject<HTMLElement | null> &
-    RefCallback<HTMLElement>;
+    // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
+  }, deps) as MutableRefObject<HTMLElement | null> & RefCallback<HTMLElement>;
 
   return result;
 }
@@ -667,6 +672,6 @@ function mergeAnimations(...animations: (Animation | boolean | undefined)[]) {
     animationCache.set(key, Object.freeze(result));
   }
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: xxx
   return instant ? 'instant' : animationCache.get(key)!;
 }

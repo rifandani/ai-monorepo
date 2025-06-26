@@ -18,7 +18,7 @@ export interface useCopyToClipboardProps {
  * ```
  */
 export function useCopyToClipboard(
-  { timeout }: useCopyToClipboardProps = { timeout: 1_000 }
+  { timeout }: useCopyToClipboardProps = { timeout: 1000 }
 ) {
   const [isCopied, setIsCopied] = useState(false);
 

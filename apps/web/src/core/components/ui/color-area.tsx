@@ -9,11 +9,11 @@ function ColorArea({ className, ...props }: ColorAreaProps) {
   return (
     <ColorAreaPrimitive
       {...props}
-      data-slot="color-area"
       className={composeTailwindRenderProps(
         className,
         'size-56 shrink-0 rounded-md bg-muted forced-colors:bg-[GrayText]'
       )}
+      data-slot="color-area"
       style={({ defaultStyle, isDisabled }) => ({
         ...defaultStyle,
         background: isDisabled ? undefined : defaultStyle.background,

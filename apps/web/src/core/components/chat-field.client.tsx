@@ -1,13 +1,5 @@
 'use client';
 
-import {
-  Button,
-  FileTrigger,
-  Tooltip,
-  buttonStyles,
-} from '@/core/components/ui';
-import { Textarea } from '@/core/components/ui/textarea';
-import { useChatFieldStore } from '@/core/hooks/use-chat-field';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { Icon } from '@iconify/react';
 import { useStickToBottomContext } from '@workspace/core/components/stick-to-bottom.client';
@@ -15,21 +7,32 @@ import { useAutoResizeTextarea } from '@workspace/core/hooks/use-auto-resize-tex
 import type React from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import {
+  Button,
+  buttonStyles,
+  FileTrigger,
+  Tooltip,
+} from '@/core/components/ui';
+import { Textarea } from '@/core/components/ui/textarea';
+import { useChatFieldStore } from '@/core/hooks/use-chat-field';
 
 function FileDisplay({
   fileName,
   onClear,
-}: { fileName: string; onClear: () => void }) {
+}: {
+  fileName: string;
+  onClear: () => void;
+}) {
   return (
     <div className="group flex w-fit items-center gap-2 rounded-lg border bg-black/5 px-3 py-1 dark:border-white/10 dark:bg-white/5">
-      <Icon icon="lucide:file-up" className="h-4 w-4 dark:text-white" />
+      <Icon className="h-4 w-4 dark:text-white" icon="lucide:file-up" />
       <span className="text-sm dark:text-white">{fileName}</span>
       <button
-        type="button"
-        onClick={onClear}
         className="ml-1 rounded-full p-0.5 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+        onClick={onClear}
+        type="button"
       >
-        <Icon icon="lucide:x" className="h-3 w-3 dark:text-white" />
+        <Icon className="h-3 w-3 dark:text-white" icon="lucide:x" />
       </button>
     </div>
   );
@@ -44,14 +47,14 @@ function ScrollToBottom() {
 
   return (
     <Button
-      type="button"
-      intent="outline"
-      size="square-petite"
-      shape="circle"
       className="-top-10 -translate-x-1/2 absolute left-1/2 z-20"
+      intent="outline"
       onClick={() => scrollToBottom()}
+      shape="circle"
+      size="square-petite"
+      type="button"
     >
-      <Icon icon="lucide:chevron-down" className="h-4 w-4" />
+      <Icon className="h-4 w-4" icon="lucide:chevron-down" />
     </Button>
   );
 }
@@ -99,8 +102,8 @@ export function ChatField({
 
   return (
     <form
-      onSubmit={handleSubmit}
       className="sticky bottom-0 flex flex-col gap-y-2 bg-(--color-bg) py-2"
+      onSubmit={handleSubmit}
     >
       {/* scroll-down button: show when user is not at bottom or empty chat */}
       {!isEmptyChat && <ScrollToBottom />}
@@ -109,8 +112,8 @@ export function ChatField({
         {files &&
           Array.from(files).map((file) => (
             <FileDisplay
-              key={file.name}
               fileName={file.name}
+              key={file.name}
               onClear={() => {
                 const dt = new DataTransfer();
                 for (const f of files) {
@@ -126,30 +129,28 @@ export function ChatField({
 
       <div className="relative flex flex-col">
         <Textarea
-          id="ai-input-04"
-          value={input}
-          placeholder="Ask anything..."
           className="w-full resize-none rounded-lg rounded-b-none border-none bg-black/5 p-3 leading-[1.2] placeholder:text-black/70 focus-visible:ring-0 dark:bg-white/5 dark:text-white dark:placeholder:text-white/70"
-          textAreaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+          id="ai-input-04"
+          onChange={(value) => {
+            setInput(value);
+            adjustHeight();
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               handleSubmit(e);
             }
           }}
-          onChange={(value) => {
-            setInput(value);
-            adjustHeight();
-          }}
+          placeholder="Ask anything..."
+          textAreaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+          value={input}
         />
 
         <div className="h-12 rounded-b-xl bg-black/5 dark:bg-white/5">
           <div className="absolute bottom-3 left-3 flex items-center gap-2">
-            {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: xxx */}
             <label className="cursor-pointer rounded-lg bg-black/5 dark:bg-white/5">
               <FileTrigger
-                allowsMultiple
-                size="small"
                 acceptedFileTypes={[
                   'image/png',
                   'image/jpeg',
@@ -157,6 +158,7 @@ export function ChatField({
                   'image/webp',
                   'application/pdf',
                 ]}
+                allowsMultiple
                 onSelect={(filelist) => {
                   // don't allow input more than 2 files
                   if (filelist && filelist.length > 2) {
@@ -166,6 +168,7 @@ export function ChatField({
 
                   setFiles(filelist);
                 }}
+                size="small"
               >
                 Upload
               </FileTrigger>
@@ -216,8 +219,6 @@ export function ChatField({
 
           <div className="absolute right-3 bottom-3">
             <Button
-              size="square-petite"
-              type={showStopButton ? 'button' : 'submit'}
               isDisabled={isDisabled}
               onClick={() => {
                 if (!showStopButton) {
@@ -226,10 +227,12 @@ export function ChatField({
 
                 stop();
               }}
+              size="square-petite"
+              type={showStopButton ? 'button' : 'submit'}
             >
               <Icon
-                icon={showStopButton ? 'lucide:circle-stop' : 'lucide:send'}
                 className="h-4 w-4"
+                icon={showStopButton ? 'lucide:circle-stop' : 'lucide:send'}
               />
             </Button>
           </div>

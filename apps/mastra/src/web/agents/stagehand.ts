@@ -1,3 +1,4 @@
+import { Agent } from '@mastra/core/agent';
 import { models } from '@/core/utils/ai';
 import { stagehandMemory } from '@/web/memory/stagehand';
 import {
@@ -5,7 +6,6 @@ import {
   stagehandExtractTool,
   stagehandObserveTool,
 } from '@/web/tools/stagehand';
-import { Agent } from '@mastra/core/agent';
 
 export const stagehandAgent = new Agent({
   name: 'Web Assistant',

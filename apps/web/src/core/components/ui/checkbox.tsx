@@ -80,8 +80,8 @@ function Checkbox({ className, ...props }: CheckboxProps) {
   return (
     <CheckboxPrimitive
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
-        checkboxStyles({ ...renderProps, className })
+      className={composeRenderProps(className, (_className, renderProps) =>
+        checkboxStyles({ ...renderProps, className: _className })
       )}
     >
       {({ isSelected, isIndeterminate, ...renderProps }) => (
@@ -106,22 +106,20 @@ function Checkbox({ className, ...props }: CheckboxProps) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <>
-              {props.label ? (
-                <Label
-                  className={twMerge(
-                    props.description && 'font-normal text-sm/4'
-                  )}
-                >
-                  {props.label}
-                </Label>
-              ) : (
-                (props.children as React.ReactNode)
-              )}
-              {props.description && (
-                <Description>{props.description}</Description>
-              )}
-            </>
+            {props.label ? (
+              <Label
+                className={twMerge(
+                  props.description && 'font-normal text-sm/4'
+                )}
+              >
+                {props.label}
+              </Label>
+            ) : (
+              (props.children as React.ReactNode)
+            )}
+            {props.description && (
+              <Description>{props.description}</Description>
+            )}
           </div>
         </div>
       )}

@@ -1,4 +1,3 @@
-import { flattenAttributes } from '@/core/utils/object';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { GoogleAICacheManager } from '@google/generative-ai/server';
 import { SpanKind, trace } from '@opentelemetry/api';
@@ -8,7 +7,8 @@ import {
   ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions';
 import { createProviderRegistry } from 'ai';
-import { z } from 'zod';
+import { z } from 'zod/v3';
+import { flattenAttributes } from '@/core/utils/object';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';

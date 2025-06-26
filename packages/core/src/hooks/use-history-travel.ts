@@ -89,7 +89,7 @@ export default function useHistoryTravel<T>(initialValue?: T, maxLength = 0) {
    * @param params Optional new initial value
    */
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   const reset = (...params: any[]) => {
     const _initial = params.length > 0 ? params[0] : initialValueRef.current;
     initialValueRef.current = _initial;

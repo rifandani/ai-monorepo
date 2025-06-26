@@ -1,10 +1,11 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { Variables } from '@/core/types/hono';
 import { Hono } from 'hono';
 import { describeRoute } from 'hono-openapi';
 import { resolver } from 'hono-openapi/zod';
 import { z } from 'zod';
+import type { Variables } from '@/core/types/hono';
+
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
 

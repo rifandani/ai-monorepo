@@ -1,3 +1,5 @@
+import type { useChat } from '@ai-sdk/react';
+import type { ToolInvocation } from 'ai';
 import { Button } from '@/core/components/ui/button';
 import {
   Disclosure,
@@ -5,8 +7,6 @@ import {
   DisclosureTrigger,
 } from '@/core/components/ui/disclosure';
 import { APPROVAL } from '@/core/services/ai';
-import type { useChat } from '@ai-sdk/react';
-import type { ToolInvocation } from 'ai';
 
 export function ChatMessageConfirmation({
   tool,
@@ -17,8 +17,8 @@ export function ChatMessageConfirmation({
 }) {
   return (
     <div
-      key={`${tool.toolName}-${tool.toolCallId}-content-${tool.args.city}`}
       className="flex flex-col gap-2"
+      key={`${tool.toolName}-${tool.toolCallId}-content-${tool.args.city}`}
     >
       <Disclosure>
         <DisclosureTrigger>

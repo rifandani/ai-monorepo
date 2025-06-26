@@ -1,5 +1,5 @@
 import { performance } from 'node:perf_hooks';
-import { ValueType, metrics } from '@opentelemetry/api';
+import { metrics, ValueType } from '@opentelemetry/api';
 import type { MiddlewareHandler } from 'hono';
 
 // Create a meter instance for recording metrics

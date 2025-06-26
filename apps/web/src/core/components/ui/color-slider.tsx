@@ -3,9 +3,9 @@
 import type { ColorSliderProps as ColorSliderPrimitiveProps } from 'react-aria-components';
 import {
   ColorSlider as ColorSliderPrimitive,
+  composeRenderProps,
   SliderOutput,
   SliderTrack,
-  composeRenderProps,
 } from 'react-aria-components';
 import { tv } from 'tailwind-variants';
 import { ColorThumb } from './color-thumb';
@@ -50,10 +50,10 @@ function ColorSlider({
   return (
     <ColorSliderPrimitive
       {...props}
-      data-slot="color-slider"
-      className={composeRenderProps(className, (className, renderProps) =>
-        colorSliderStyles({ ...renderProps, className })
+      className={composeRenderProps(className, (_className, renderProps) =>
+        colorSliderStyles({ ...renderProps, className: _className })
       )}
+      data-slot="color-slider"
     >
       <div className="flex items-center">
         {label && <Label className="text-sm [grid-area:label]">{label}</Label>}

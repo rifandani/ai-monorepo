@@ -47,15 +47,15 @@ function SearchField({
             {isPending ? (
               <Loader variant="spin" />
             ) : (
-              <Icon icon="mdi:magnify" className="size-4" />
+              <Icon className="size-4" icon="mdi:magnify" />
             )}
             <Input placeholder={placeholder ?? 'Search...'} />
 
             <Button
-              intent="plain"
               className="size-8 pressed:bg-transparent pressed:text-fg text-muted-fg hover:bg-transparent hover:text-fg group-data-empty/search-field:invisible"
+              intent="plain"
             >
-              <Icon icon="mdi:close" className="size-4" />
+              <Icon className="size-4" icon="mdi:close" />
             </Button>
           </FieldGroup>
           {description && <Description>{description}</Description>}

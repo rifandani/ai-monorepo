@@ -6,10 +6,10 @@ import type {
   ModalOverlayProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   DialogTrigger,
   ModalOverlay,
   Modal as ModalPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
@@ -98,7 +98,6 @@ function ModalContent({
 
   return (
     <ModalOverlay
-      isDismissable={isDismissable}
       className={composeRenderProps(
         classNames?.overlay,
         (className, renderProps) =>
@@ -108,10 +107,10 @@ function ModalContent({
             className,
           })
       )}
+      isDismissable={isDismissable}
       {...props}
     >
       <ModalPrimitive
-        isDismissable={isDismissable}
         className={composeRenderProps(
           classNames?.content,
           (className, renderProps) =>
@@ -121,6 +120,7 @@ function ModalContent({
               className,
             })
         )}
+        isDismissable={isDismissable}
         {...props}
       >
         <Dialog role={role}>

@@ -1,10 +1,10 @@
 'use client';
 
-import { buttonStyles } from '@/core/components/ui/button';
-import { Tooltip } from '@/core/components/ui/tooltip';
 import { Icon } from '@iconify/react';
 import { useCopyToClipboard } from '@workspace/core/hooks/use-copy-to-clipboard';
 import { toast } from 'sonner';
+import { buttonStyles } from '@/core/components/ui/button';
+import { Tooltip } from '@/core/components/ui/tooltip';
 
 export function ChatMessageActions({
   text,
@@ -33,8 +33,8 @@ export function ChatMessageActions({
           }}
         >
           <Icon
-            icon={isCopied ? 'lucide:check' : 'lucide:copy'}
             className="h-4 w-4"
+            icon={isCopied ? 'lucide:check' : 'lucide:copy'}
           />
         </Tooltip.Trigger>
         <Tooltip.Content intent="inverse">Copy message</Tooltip.Content>
@@ -49,7 +49,7 @@ export function ChatMessageActions({
           })}
           onClick={onRetry}
         >
-          <Icon icon="lucide:rotate-cw" className="h-4 w-4" />
+          <Icon className="h-4 w-4" icon="lucide:rotate-cw" />
         </Tooltip.Trigger>
         <Tooltip.Content intent="inverse">Retry</Tooltip.Content>
       </Tooltip>

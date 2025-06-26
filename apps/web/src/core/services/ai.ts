@@ -1,3 +1,17 @@
+import { type GoogleGenerativeAIProviderOptions, google } from '@ai-sdk/google';
+import { logger } from '@workspace/core/utils/logger';
+import {
+  convertToCoreMessages,
+  type DataStreamWriter,
+  formatDataStreamPart,
+  generateObject,
+  generateText,
+  type Message,
+  type ToolExecutionOptions,
+  type ToolSet,
+  tool,
+} from 'ai';
+import { z } from 'zod';
 import type {
   Annotation,
   Research,
@@ -5,20 +19,6 @@ import type {
   SpreadsheetAnnotation,
 } from '@/core/schemas/ai';
 import { searchResultSchema } from '@/core/schemas/ai';
-import { type GoogleGenerativeAIProviderOptions, google } from '@ai-sdk/google';
-import { logger } from '@workspace/core/utils/logger';
-import {
-  type DataStreamWriter,
-  type Message,
-  type ToolExecutionOptions,
-  type ToolSet,
-  convertToCoreMessages,
-  formatDataStreamPart,
-  generateObject,
-  generateText,
-  tool,
-} from 'ai';
-import { z } from 'zod';
 
 const flash20 = google('gemini-2.0-flash-001');
 /**
@@ -608,7 +608,7 @@ export const tools = {
     }),
 };
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
+// biome-ignore lint/correctness/noEmptyPattern: xxx
 export function executeGetWeatherInformationTool({}: { city: string }) {
   const weatherOptions = [
     'sunny',
@@ -653,7 +653,7 @@ function isValidToolName<K extends PropertyKey, T extends object>(
 export async function processToolCalls<
   Tools extends ToolSet,
   ExecutableTools extends {
-    // biome-ignore lint/complexity/noBannedTypes: <explanation>
+    // biome-ignore lint/complexity/noBannedTypes: xxx
     [Tool in keyof Tools as Tools[Tool] extends { execute: Function }
       ? never
       : Tool]: Tools[Tool];
@@ -671,7 +671,7 @@ export async function processToolCalls<
     [K in keyof Tools & keyof ExecutableTools]?: (
       args: z.infer<ExecutableTools[K]['parameters']>,
       context: ToolExecutionOptions
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: xxx
     ) => Promise<any>;
   }
 ): Promise<Message[]> {
@@ -680,8 +680,7 @@ export async function processToolCalls<
    * we pull out the last message and map through the message parts to see if the tool requiring confirmation was called
    * and whether it's in a "result" state
    */
-  // biome-ignore lint/nursery/useAtIndex: <explanation>
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.at(-1);
 
   const parts = lastMessage?.parts;
   if (!parts) {
@@ -689,6 +688,7 @@ export async function processToolCalls<
   }
 
   const processedParts = await Promise.all(
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
     parts.map(async (part) => {
       // Only process tool invocations parts
       if (part.type !== 'tool-invocation') {
@@ -706,7 +706,7 @@ export async function processToolCalls<
         return part;
       }
 
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: xxx
       let result: any;
 
       if (toolInvocation.result === APPROVAL.YES) {
@@ -771,10 +771,10 @@ export const toolsWithConfirmation = {
  * @returns The tools that require confirmation
  */
 export function getToolsRequiringConfirmation<T extends ToolSet>(
-  tools: T
+  _tools: T
 ): string[] {
-  return (Object.keys(tools) as (keyof T)[]).filter((key) => {
-    const maybeTool = tools[key];
+  return (Object.keys(_tools) as (keyof T)[]).filter((key) => {
+    const maybeTool = _tools[key];
     return typeof maybeTool?.execute !== 'function';
   }) as string[];
 }

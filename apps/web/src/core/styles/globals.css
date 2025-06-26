@@ -1,14 +1,20 @@
 @import "tailwindcss";
 
+/* biome-ignore lint/nursery/noUnknownAtRule: xxx */
 @plugin 'tailwindcss-animate';
+/* biome-ignore lint/nursery/noUnknownAtRule: xxx */
 @plugin 'tailwindcss-react-aria-components';
 
+/* biome-ignore lint/nursery/noUnknownAtRule: xxx */
 @variant dark (&:is(.dark *));
 
+/* biome-ignore lint/nursery/noUnknownAtRule: xxx */
 @theme {
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: "Geist Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco",
+  --font-sans:
+    "Geist", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    "Geist Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco",
     "Consolas", '"Liberation Mono"', '"Courier New"', "monospace";
 
   --color-border: var(--border);

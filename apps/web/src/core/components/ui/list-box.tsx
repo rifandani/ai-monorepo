@@ -7,9 +7,9 @@ import type {
   ListBoxProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   ListBoxItem as ListBoxItemPrimitive,
   ListBox as ListBoxPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import {
@@ -48,10 +48,10 @@ function ListBoxItem<T extends object>({
     <ListBoxItemPrimitive
       textValue={textValue}
       {...props}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         dropdownItemStyles({
           ...renderProps,
-          className,
+          className: _className,
         })
       )}
     >
@@ -59,20 +59,20 @@ function ListBoxItem<T extends object>({
         <>
           {allowsDragging && (
             <Icon
-              icon="mdi:drag"
               className={twMerge(
                 'size-4 shrink-0 text-muted-fg transition',
                 isFocused && 'text-fg',
                 isDragging && 'text-fg',
                 isSelected && 'text-accent-fg/70'
               )}
+              icon="mdi:drag"
             />
           )}
           {isSelected && (
             <Icon
-              icon="mdi:check"
               className="-mx-0.5 mr-2"
               data-slot="checked-icon"
+              icon="mdi:check"
             />
           )}
           {typeof children === 'string' ? (

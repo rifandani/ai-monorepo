@@ -19,9 +19,9 @@ import {
   CalendarHeaderCell,
   Calendar as CalendarPrimitive,
   CalendarStateContext,
+  composeRenderProps,
   Heading,
   Text,
-  composeRenderProps,
   useLocale,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
@@ -49,10 +49,9 @@ function Calendar<T extends DateValue>({
         <CalendarGridBody>
           {(date) => (
             <CalendarCell
-              date={date}
               className={composeRenderProps(
                 className,
-                (className, { isSelected, isDisabled }) =>
+                (_className, { isSelected, isDisabled }) =>
                   twMerge(
                     'relative flex size-10 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:size-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0',
                     isSelected &&
@@ -60,15 +59,16 @@ function Calendar<T extends DateValue>({
                     isDisabled && 'text-muted-fg forced-colors:text-[GrayText]',
                     date.compare(now) === 0 &&
                       'after:-translate-x-1/2 after:pointer-events-none after:absolute after:start-1/2 after:bottom-1 after:z-10 after:size-[3px] after:rounded-full after:bg-primary selected:after:bg-primary-fg data-focus-visible:after:bg-primary-fg',
-                    className
+                    _className
                   )
               )}
+              date={date}
             />
           )}
         </CalendarGridBody>
       </CalendarGrid>
       {errorMessage && (
-        <Text slot="errorMessage" className="text-danger text-sm/6">
+        <Text className="text-danger text-sm/6" slot="errorMessage">
           {errorMessage}
         </Text>
       )}
@@ -82,16 +82,16 @@ function CalendarHeader({
   ...props
 }: React.ComponentProps<'header'> & { isRange?: boolean }) {
   const { direction } = useLocale();
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: xxx
   const state = use(CalendarStateContext)!;
 
   return (
     <header
-      data-slot="calendar-header"
       className={twMerge(
         'flex w-full justify-center gap-1.5 pt-1 pr-1 pb-5 pl-1.5 sm:pb-4',
         className
       )}
+      data-slot="calendar-header"
       {...props}
     >
       {!isRange && (
@@ -109,29 +109,29 @@ function CalendarHeader({
       />
       <div className="flex items-center gap-1">
         <Button
-          size="square-petite"
           className="size-8 **:data-[slot=icon]:text-fg sm:size-7"
-          shape="circle"
           intent="plain"
+          shape="circle"
+          size="square-petite"
           slot="previous"
         >
           {direction === 'rtl' ? (
-            <Icon icon="mdi:chevron-right" className="size-4" />
+            <Icon className="size-4" icon="mdi:chevron-right" />
           ) : (
-            <Icon icon="mdi:chevron-left" className="size-4" />
+            <Icon className="size-4" icon="mdi:chevron-left" />
           )}
         </Button>
         <Button
-          size="square-petite"
           className="size-8 **:data-[slot=icon]:text-fg sm:size-7"
-          shape="circle"
           intent="plain"
+          shape="circle"
+          size="square-petite"
           slot="next"
         >
           {direction === 'rtl' ? (
-            <Icon icon="mdi:chevron-right" className="size-4" />
+            <Icon className="size-4" icon="mdi:chevron-right" />
           ) : (
-            <Icon icon="mdi:chevron-left" className="size-4" />
+            <Icon className="size-4" icon="mdi:chevron-left" />
           )}
         </Button>
       </div>
@@ -156,15 +156,15 @@ function SelectMonth({ state }: { state: CalendarState }) {
   }
   return (
     <Select
-      className="[popover-width:8rem]"
       aria-label="Select month"
+      className="[popover-width:8rem]"
+      onSelectionChange={(value) => {
+        state.setFocusedDate(state.focusedDate.set({ month: Number(value) }));
+      }}
       selectedKey={
         state.focusedDate.month.toString() ??
         (new Date().getMonth() + 1).toString()
       }
-      onSelectionChange={(value) => {
-        state.setFocusedDate(state.focusedDate.set({ month: Number(value) }));
-      }}
     >
       <Select.Trigger className="h-8 w-22 text-xs focus:ring-3 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate group-data-open:ring-3" />
       <Select.List
@@ -174,8 +174,9 @@ function SelectMonth({ state }: { state: CalendarState }) {
         {months.map((month, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <Select.Option
-            key={index}
             id={(index + 1).toString()}
+            // biome-ignore lint/suspicious/noArrayIndexKey: xxx
+            key={index}
             textValue={month}
           >
             <Select.Label>{month}</Select.Label>
@@ -203,11 +204,11 @@ function SelectYear({ state }: { state: CalendarState }) {
   return (
     <Select
       aria-label="Select year"
-      selectedKey={20}
       onSelectionChange={(value) => {
         // @ts-expect-error from justd
         state.setFocusedDate(years[Number(value)]?.value);
       }}
+      selectedKey={20}
     >
       <Select.Trigger className="h-8 text-xs focus:ring-3 group-data-open:ring-3" />
       <Select.List
@@ -215,8 +216,8 @@ function SelectYear({ state }: { state: CalendarState }) {
         popoverClassName="w-34 max-w-34 min-w-34"
       >
         {years.map((year, i) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <Select.Option key={i} id={i} textValue={year.formatted}>
+          // biome-ignore lint/suspicious/noArrayIndexKey: xxx
+          <Select.Option id={i} key={i} textValue={year.formatted}>
             <Select.Label>{year.formatted}</Select.Label>
           </Select.Option>
         ))}

@@ -5,10 +5,10 @@ import type React from 'react';
 import type { TreeItemProps, TreeProps } from 'react-aria-components';
 import {
   Button,
+  composeRenderProps,
   TreeItemContent as TreeItemContentPrimitive,
   TreeItem as TreeItemPrimitive,
   Tree as TreePrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twJoin } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -54,10 +54,10 @@ const itemStyles = tv({
 function TreeItem<T extends object>({ className, ...props }: TreeItemProps<T>) {
   return (
     <TreeItemPrimitive
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         itemStyles({
           ...renderProps,
-          className,
+          className: _className,
         })
       )}
       {...props}
@@ -82,7 +82,7 @@ function TreeItemContent(
 function TreeIndicator() {
   return (
     <Button className="relative shrink-0" slot="chevron">
-      <Icon icon="mdi:chevron-right" className="size-5" />
+      <Icon className="size-5" icon="mdi:chevron-right" />
     </Button>
   );
 }

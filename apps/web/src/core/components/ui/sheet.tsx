@@ -1,20 +1,19 @@
 'use client';
 
+import type React from 'react';
 import type {
   DialogProps,
   DialogTriggerProps,
   ModalOverlayProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   DialogTrigger,
   Modal,
   ModalOverlay,
-  composeRenderProps,
 } from 'react-aria-components';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
-
-import type React from 'react';
 import { Dialog } from './dialog';
 
 const overlayStyles = tv({
@@ -116,7 +115,6 @@ function SheetContent({
   const _isDismissable = role === 'alertdialog' ? false : isDismissable;
   return (
     <ModalOverlay
-      isDismissable={_isDismissable}
       className={composeRenderProps(
         classNames?.overlay,
         (className, renderProps) => {
@@ -127,6 +125,7 @@ function SheetContent({
           });
         }
       )}
+      isDismissable={_isDismissable}
       {...props}
     >
       <Modal
@@ -144,19 +143,17 @@ function SheetContent({
       >
         {(values) => (
           <Dialog
-            role={role}
             aria-label={props['aria-label'] ?? undefined}
             className="h-full"
+            role={role}
           >
-            <>
-              {typeof children === 'function' ? children(values) : children}
-              {closeButton && (
-                <Dialog.CloseIndicator
-                  className="top-2.5 right-2.5"
-                  isDismissable={_isDismissable}
-                />
-              )}
-            </>
+            {typeof children === 'function' ? children(values) : children}
+            {closeButton && (
+              <Dialog.CloseIndicator
+                className="top-2.5 right-2.5"
+                isDismissable={_isDismissable}
+              />
+            )}
           </Dialog>
         )}
       </Modal>

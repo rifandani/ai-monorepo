@@ -23,11 +23,11 @@ function Dialog({
 }: React.ComponentProps<typeof DialogPrimitive>) {
   return (
     <DialogPrimitive
-      role={role}
       className={twMerge(
         'peer/dialog group/dialog relative flex max-h-[inherit] flex-col overflow-hidden outline-hidden [scrollbar-width:thin] [&::-webkit-scrollbar]:size-0.5',
         className
       )}
+      role={role}
       {...props}
     />
   );
@@ -66,12 +66,12 @@ function Header({ className, ...props }: DialogHeaderProps) {
 
   return (
     <div
-      data-slot="dialog-header"
-      ref={headerRef}
       className={twMerge(
         'relative flex flex-col gap-0.5 p-4 sm:gap-1 sm:p-6 [&[data-slot=dialog-header]:has(+[data-slot=dialog-footer])]:pb-0',
         className
       )}
+      data-slot="dialog-header"
+      ref={headerRef}
     >
       {props.title && <Title>{props.title}</Title>}
       {props.description && <Description>{props.description}</Description>}
@@ -91,9 +91,6 @@ interface DialogTitleProps extends Omit<HeadingProps, 'level'> {
 function Title({ level = 2, className, ref, ...props }: DialogTitleProps) {
   return (
     <Heading
-      slot="title"
-      level={level}
-      ref={ref}
       className={twMerge(
         twJoin(
           'flex flex-1 items-center text-fg',
@@ -104,6 +101,9 @@ function Title({ level = 2, className, ref, ...props }: DialogTitleProps) {
         ),
         className
       )}
+      level={level}
+      ref={ref}
+      slot="title"
       {...props}
     />
   );
@@ -113,9 +113,9 @@ type DialogDescriptionProps = React.ComponentProps<'div'>;
 function Description({ className, ref, ...props }: DialogDescriptionProps) {
   return (
     <Text
-      slot="description"
       className={twMerge('text-muted-fg text-sm', className)}
       ref={ref}
+      slot="description"
       {...props}
     />
   );
@@ -125,12 +125,12 @@ type DialogBodyProps = React.ComponentProps<'div'>;
 function Body({ className, ref, ...props }: DialogBodyProps) {
   return (
     <div
-      data-slot="dialog-body"
-      ref={ref}
       className={twMerge(
         'isolate flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding)-var(--dialog-header-height,0px)-var(--dialog-footer-height,0px))] flex-1 flex-col overflow-auto px-4 py-1 sm:px-6',
         className
       )}
+      data-slot="dialog-body"
+      ref={ref}
       {...props}
     />
   );
@@ -164,12 +164,12 @@ function Footer({ className, ...props }: DialogFooterProps) {
   }, []);
   return (
     <div
-      ref={footerRef}
-      data-slot="dialog-footer"
       className={twMerge(
         'isolate mt-auto flex flex-col-reverse justify-between gap-3 p-4 pt-3 sm:flex-row sm:p-6 sm:pt-5',
         className
       )}
+      data-slot="dialog-footer"
+      ref={footerRef}
       {...props}
     />
   );
@@ -178,10 +178,10 @@ function Footer({ className, ...props }: DialogFooterProps) {
 function Close({ className, intent = 'outline', ref, ...props }: ButtonProps) {
   return (
     <Button
-      slot="close"
       className={className}
-      ref={ref}
       intent={intent}
+      ref={ref}
+      slot="close"
       {...props}
     />
   );
@@ -206,13 +206,13 @@ function CloseIndicator({ className, ...props }: CloseButtonIndicatorProps) {
       ref={buttonRef}
       {...(isMobile ? { autoFocus: true } : {})}
       aria-label="Close"
-      slot="close"
       className={composeTailwindRenderProps(
         className,
         'close absolute top-1 right-1 z-50 grid size-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden data-focus-visible:ring-1 data-focus-visible:ring-primary sm:top-2 sm:right-2 sm:size-7 sm:rounded-md'
       )}
+      slot="close"
     >
-      <Icon icon="mdi:close" className="size-4" />
+      <Icon className="size-4" icon="mdi:close" />
     </ButtonPrimitive>
   ) : null;
 }

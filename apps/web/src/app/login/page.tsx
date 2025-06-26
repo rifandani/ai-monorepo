@@ -1,8 +1,8 @@
+import { Icon } from '@iconify/react';
+import { useTranslations } from 'next-intl';
 import { LoginForm } from '@/auth/components/login-form.client';
 import { Link } from '@/core/components/ui';
 import { createMetadata } from '@/core/utils/seo';
-import { Icon } from '@iconify/react';
-import { useTranslations } from 'next-intl';
 
 export const metadata = createMetadata({
   title: 'Login',
@@ -39,9 +39,9 @@ export default function LoginPage() {
       <section className="hidden w-1/2 shadow-2xl md:block">
         <span className="relative h-screen w-full md:flex md:items-center md:justify-center">
           <Icon
-            icon="logos:nextjs-icon"
-            className="size-60 object-cover"
             aria-label="cool nextjs logo"
+            className="size-60 object-cover"
+            icon="logos:nextjs-icon"
           />
         </span>
       </section>

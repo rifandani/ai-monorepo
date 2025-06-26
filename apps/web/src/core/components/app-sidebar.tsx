@@ -1,5 +1,10 @@
 'use client';
 
+import { Icon } from '@iconify/react';
+import { useParams } from 'next/navigation';
+import { useAction } from 'next-safe-action/hooks';
+import type React from 'react';
+import { twMerge } from 'tailwind-merge';
 import { deleteChatAction } from '@/core/actions/chat';
 import { Avatar } from '@/core/components/ui/avatar';
 import { Link } from '@/core/components/ui/link';
@@ -17,11 +22,6 @@ import {
   SidebarSectionGroup,
   useSidebar,
 } from '@/core/components/ui/sidebar';
-import { Icon } from '@iconify/react';
-import { useAction } from 'next-safe-action/hooks';
-import { useParams } from 'next/navigation';
-import type React from 'react';
-import { twMerge } from 'tailwind-merge';
 
 interface ChatHistoryItem {
   id: string;
@@ -47,7 +47,7 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
           className="flex items-center gap-x-2 group-data-[collapsible=dock]:size-10 group-data-[collapsible=dock]:justify-center"
           href="/"
         >
-          <Icon icon="arcticons:openai-chatgpt" className="size-5" />
+          <Icon className="size-5" icon="arcticons:openai-chatgpt" />
           <SidebarLabel className="font-medium">ChatGPT</SidebarLabel>
         </Link>
       </SidebarHeader>
@@ -55,8 +55,8 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
       <SidebarContent>
         <SidebarSectionGroup>
           <SidebarSection>
-            <SidebarItem href="/chat" className="gap-2">
-              <Icon icon="lucide:plus" className="size-4" />
+            <SidebarItem className="gap-2" href="/chat">
+              <Icon className="size-4" icon="lucide:plus" />
               <SidebarLabel>New Chat</SidebarLabel>
             </SidebarItem>
           </SidebarSection>
@@ -64,7 +64,7 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
           <SidebarSection title="History">
             {/* Map over the chatHistory prop */}
             {chatHistory.map((chat) => (
-              <SidebarItem key={chat.id} isCurrent={params.id === chat.id}>
+              <SidebarItem isCurrent={params.id === chat.id} key={chat.id}>
                 {({ isCollapsed }) => (
                   <>
                     {/* Update href to link to the chat page */}
@@ -78,8 +78,8 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
                         </Menu.Trigger>
                         <Menu.Content offset={0} placement="right top">
                           <Menu.Item
-                            isDisabled={isDeleting}
                             className="gap-2"
+                            isDisabled={isDeleting}
                             onAction={() => {
                               // TODO: implement share after we setup auth
                             }}
@@ -88,8 +88,8 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
                             Share
                           </Menu.Item>
                           <Menu.Item
-                            isDisabled={isDeleting}
                             className="gap-2"
+                            isDisabled={isDeleting}
                             onAction={() => {
                               // TODO: implement rename
                             }}
@@ -98,8 +98,8 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
                             Rename
                           </Menu.Item>
                           <Menu.Item
-                            isDisabled={isDeleting}
                             className="gap-2"
+                            isDisabled={isDeleting}
                             onAction={() => {
                               // TODO: implement archive
                             }}
@@ -108,9 +108,9 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
                             Archive
                           </Menu.Item>
                           <Menu.Item
+                            className="gap-2"
                             isDanger
                             isDisabled={isDeleting}
-                            className="gap-2"
                             onAction={() =>
                               deleteChat({
                                 id: chat.id,
@@ -134,7 +134,7 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
 
       <SidebarFooter>
         <Menu>
-          <Menu.Trigger className="group" aria-label="Profile">
+          <Menu.Trigger aria-label="Profile" className="group">
             <Avatar src="/images/boy.png" />
             <div className="in-data-[sidebar-collapsible=dock]:hidden text-sm">
               <SidebarLabel>Kurt Cobain</SidebarLabel>
@@ -143,18 +143,18 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
               </span>
             </div>
             <Icon
-              icon="lucide:chevron-down"
-              data-slot="chevron"
               className="absolute right-3 size-4 transition-transform group-pressed:rotate-180"
+              data-slot="chevron"
+              icon="lucide:chevron-down"
             />
           </Menu.Trigger>
           <Menu.Content
-            placement="bottom right"
             className={twMerge(
               state === 'expanded'
                 ? 'sm:min-w-(--trigger-width)'
                 : 'sm:min-w-60'
             )}
+            placement="bottom right"
           >
             <Menu.Section>
               <Menu.Header separator>
@@ -165,12 +165,12 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
               </Menu.Header>
             </Menu.Section>
 
-            <Menu.Item href="/" className="gap-2">
+            <Menu.Item className="gap-2" href="/">
               <Icon icon="lucide:home" />
               Home
             </Menu.Item>
             <Menu.Separator />
-            <Menu.Item href="#logout" className="gap-2">
+            <Menu.Item className="gap-2" href="#logout">
               <Icon icon="lucide:log-out" />
               Logout
             </Menu.Item>

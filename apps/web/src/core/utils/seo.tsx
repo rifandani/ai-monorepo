@@ -95,9 +95,9 @@ interface JsonLdProps {
 export function JsonLd({ code }: JsonLdProps) {
   return (
     <script
-      type="application/ld+json"
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: xxx
       dangerouslySetInnerHTML={{ __html: JSON.stringify(code) }}
+      type="application/ld+json"
     />
   );
 }

@@ -83,14 +83,14 @@ function ComboBoxList<T extends object>({
 }: ComboBoxListProps<T>) {
   return (
     <PopoverContent
-      showArrow={false}
-      respectScreen={false}
-      isNonModal
       className={composeTailwindRenderProps(
         popoverClassName,
         'sm:min-w-(--trigger-width)'
       )}
+      isNonModal
       placement={props.placement}
+      respectScreen={false}
+      showArrow={false}
     >
       <ListBox
         className={composeTailwindRenderProps(className, 'border-0')}
@@ -108,9 +108,9 @@ function ComboBoxInput(props: InputProps) {
   return (
     <FieldGroup className="relative pl-0">
       <Input {...props} placeholder={props?.placeholder} />
-      <Button size="square-petite" intent="plain" className={chevronButton()}>
+      <Button className={chevronButton()} intent="plain" size="square-petite">
         {!context?.inputValue && (
-          <Icon icon="mdi:chevron-down" className={chevronIcon()} />
+          <Icon className={chevronIcon()} icon="mdi:chevron-down" />
         )}
       </Button>
       {context?.inputValue && <ComboBoxClearButton />}
@@ -123,15 +123,15 @@ function ComboBoxClearButton() {
 
   return (
     <ButtonPrimitive
-      className={clearButton()}
-      slot={null}
       aria-label="Clear"
+      className={clearButton()}
       onPress={() => {
         state?.setSelectedKey(null);
         state?.open();
       }}
+      slot={null}
     >
-      <Icon icon="mdi:close" className="size-4 animate-in" />
+      <Icon className="size-4 animate-in" icon="mdi:close" />
     </ButtonPrimitive>
   );
 }

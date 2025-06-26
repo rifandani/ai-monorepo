@@ -1,9 +1,9 @@
+import { getTranslations } from 'next-intl/server';
 import { LanguageToggle } from '@/core/components/language-toggle.client';
 import { ProfileMenu } from '@/core/components/profile-menu.client';
 import { ThemeToggle } from '@/core/components/theme-toggle.client';
 import { homeWelcomeFlag } from '@/core/utils/feature-flag';
 import { createMetadata } from '@/core/utils/seo';
-import { getTranslations } from 'next-intl/server';
 
 export const metadata = createMetadata({
   title: 'Home',

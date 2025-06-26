@@ -1,3 +1,4 @@
+// biome-ignore lint/nursery/useJsonImportAttribute: xxx
 import type en from './messages/en.json';
 import type { formats } from './src/core/utils/i18n';
 
@@ -20,7 +21,7 @@ declare global {
   }
 }
 
-// biome-ignore lint/style/noNamespace: <explanation>
+// biome-ignore lint/style/noNamespace: xxx
 declare namespace NodeJS {
   export interface ProcessEnv {
     /**

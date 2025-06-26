@@ -1,7 +1,7 @@
+import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { AUTH_COOKIE_NAME } from '@/auth/constants/auth';
 import { Link } from '@/core/components/ui';
-import { getTranslations } from 'next-intl/server';
-import { cookies } from 'next/headers';
 
 export default async function NotFound() {
   const t = await getTranslations();
@@ -21,9 +21,9 @@ export default async function NotFound() {
         {/* Quick Actions */}
         <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
-            intent="primary"
-            href={session ? '/' : '/login'}
             className="flex items-center"
+            href={session ? '/' : '/login'}
+            intent="primary"
           >
             {t('core.backTo', {
               target: session ? t('home.title') : 'Login',

@@ -25,53 +25,48 @@ function formatTime(date: Date) {
 }
 
 export const logger = {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   debug(message: string, ...attributes: any[]) {
     const severity = 'DEBUG';
     const severityColor = LEVEL_COLORS[severity as keyof typeof LEVEL_COLORS];
     const timeFormatted = formatTime(new Date());
 
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.debug(
       `${severityColor}[${timeFormatted}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
       ...attributes
     );
   },
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   log(message: string, ...attributes: any[]) {
     const severity = 'INFO';
     const severityColor = LEVEL_COLORS[severity as keyof typeof LEVEL_COLORS];
     const timeFormatted = formatTime(new Date());
 
-    // biome-ignore lint/suspicious/noConsole: <explanation>
-    // biome-ignore lint/suspicious/noConsoleLog: <explanation>
     console.log(
       `${severityColor}[${timeFormatted}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
       ...attributes
     );
   },
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   warn(message: string, ...attributes: any[]) {
     const severity = 'WARN';
     const severityColor = LEVEL_COLORS[severity as keyof typeof LEVEL_COLORS];
     const timeFormatted = formatTime(new Date());
 
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.warn(
       `${severityColor}[${timeFormatted}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
       ...attributes
     );
   },
 
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: xxx
   error(message: string, ...attributes: any[]) {
     const severity = 'ERROR';
     const severityColor = LEVEL_COLORS[severity as keyof typeof LEVEL_COLORS];
     const timeFormatted = formatTime(new Date());
 
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.error(
       `${severityColor}[${timeFormatted}] ${severityColor}${severity}: ${COLOR.WHITE}${message}`,
       ...attributes

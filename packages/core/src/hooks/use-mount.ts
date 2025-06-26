@@ -6,13 +6,12 @@ import { useEffect } from 'react';
  */
 export function useMount(fn: () => void) {
   if (!isFunction(fn)) {
-    // biome-ignore lint/suspicious/noConsole: <explanation>
     console.error(
       `useMount: parameter \`fn\` expected to be a function, but got "${typeof fn}".`
     );
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: xxx
   useEffect(() => {
     fn();
   }, []);

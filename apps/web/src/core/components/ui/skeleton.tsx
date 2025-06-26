@@ -8,13 +8,13 @@ interface SkeletonProps extends React.ComponentProps<'div'> {
 function Skeleton({ ref, soft = false, className, ...props }: SkeletonProps) {
   return (
     <div
-      data-slot="skeleton"
-      ref={ref}
       className={twMerge(
         'shrink-0 animate-pulse rounded-lg',
         soft ? 'bg-muted' : 'bg-secondary',
         className
       )}
+      data-slot="skeleton"
+      ref={ref}
       {...props}
     />
   );

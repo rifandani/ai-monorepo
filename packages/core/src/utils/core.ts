@@ -1,5 +1,4 @@
 import type { RequireAtLeastOne, UnknownRecord } from 'type-fest';
-import { z } from 'zod';
 
 /**
  * Clamps a value to a specified range.
@@ -200,7 +199,7 @@ export function objectToFormData<T extends UnknownRecord>(
     );
   }
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
   function appendFormData(_obj: T, _rootName_?: string) {
     let _rootName = _rootName_;
 
@@ -215,7 +214,7 @@ export function objectToFormData<T extends UnknownRecord>(
         }
       } else if (typeof _obj === 'object' && _obj) {
         for (const key in _obj) {
-          if (Object.prototype.hasOwnProperty.call(_obj, key)) {
+          if (Object.hasOwn(_obj, key)) {
             if (_rootName === '') {
               // @ts-expect-error i'm not typescript wizard
               appendFormData(_obj[key], key);
@@ -291,7 +290,7 @@ export function objectToFormDataArrayWithComma<T extends UnknownRecord>(
     );
   }
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
   function appendFormData(_obj: T, _rootName_?: string) {
     let _rootName = _rootName_;
 
@@ -304,7 +303,7 @@ export function objectToFormDataArrayWithComma<T extends UnknownRecord>(
         formData.append(_rootName, _obj.join(','));
       } else if (typeof _obj === 'object' && _obj) {
         for (const key in _obj) {
-          if (Object.prototype.hasOwnProperty.call(_obj, key)) {
+          if (Object.hasOwn(_obj, key)) {
             if (_rootName === '') {
               // @ts-expect-error i'm not typescript wizard
               appendFormData(_obj[key], key);
@@ -348,7 +347,7 @@ export function objectToFormDataArrayWithComma<T extends UnknownRecord>(
  * // => 'not found'
  * ```
  */
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: xxx
 export function deepReadObject<T = any>(
   obj: Record<string, unknown>,
   path: string,
@@ -357,61 +356,10 @@ export function deepReadObject<T = any>(
   const value = path
     .trim()
     .split('.')
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: xxx
     .reduce<any>((a, b) => (a ? a[b] : undefined), obj);
 
   return value !== undefined ? value : (defaultValue as T);
-}
-
-/**
- * get default values from zod schema, similar to `yupSchema.getDefault()`
- *
- * If all of your schema keys have default values, then you can just do `schema.parse({})` to read the defaults
- *
- * @note doesn't work with `refine` or `superRefine` in nested `object`
- */
-export function getSchemaDefaults<T extends z.ZodTypeAny>(
-  // biome-ignore lint/suspicious/noExplicitAny: intended
-  schema: z.AnyZodObject | z.ZodEffects<any>
-): z.infer<T> {
-  // Check if it's a ZodEffect
-  if (schema instanceof z.ZodEffects) {
-    // Check if it's a recursive ZodEffect
-    if (schema.innerType() instanceof z.ZodEffects) {
-      return getSchemaDefaults(schema.innerType());
-    }
-    // return schema inner shape as a fresh zodObject
-    return getSchemaDefaults(z.ZodObject.create(schema.innerType().shape));
-  }
-
-  function getDefaultValue(schema: z.ZodTypeAny): unknown {
-    if (schema instanceof z.ZodDefault) {
-      return schema._def.defaultValue();
-    }
-    // return an empty array if it is
-    if (schema instanceof z.ZodArray) {
-      return [];
-    }
-    // return an empty string if it is
-    if (schema instanceof z.ZodString) {
-      return '';
-    }
-    // return an content of object recursivly
-    if (schema instanceof z.ZodObject) {
-      return getSchemaDefaults(schema);
-    }
-    // return undefined if it is not a zod type
-    if (!('innerType' in schema._def)) {
-      return undefined;
-    }
-    return getDefaultValue(schema._def.innerType);
-  }
-
-  return Object.fromEntries(
-    Object.entries(schema.shape).map(([key, value]) => {
-      return [key, getDefaultValue(value as z.ZodTypeAny)];
-    })
-  );
 }
 
 /**

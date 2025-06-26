@@ -1,3 +1,10 @@
+import { logger } from '@workspace/core/utils/logger';
+import { Hono } from 'hono';
+import { streamText } from 'hono/streaming';
+import { describeRoute } from 'hono-openapi';
+import { resolver, validator as zValidator } from 'hono-openapi/zod';
+import ollama, { type Message } from 'ollama';
+import { z } from 'zod';
 import {
   embeddingsSchema,
   modelSchema,
@@ -5,13 +12,6 @@ import {
   textSchema,
 } from '@/core/api/ai';
 import type { Variables } from '@/core/types/hono';
-import { logger } from '@workspace/core/utils/logger';
-import { Hono } from 'hono';
-import { describeRoute } from 'hono-openapi';
-import { resolver, validator as zValidator } from 'hono-openapi/zod';
-import { streamText } from 'hono/streaming';
-import ollama, { type Message } from 'ollama';
-import { z } from 'zod';
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';
 

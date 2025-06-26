@@ -1,22 +1,22 @@
-import { db } from '@/core/db';
-import { imagesTable, selectImagesTableSchema } from '@/core/db/schema';
 import { google } from '@ai-sdk/google';
 import { zValidator } from '@hono/zod-validator';
 import { embed } from 'ai';
 import {
-  type SQL,
   cosineDistance,
   desc,
   getTableColumns,
   gt,
   or,
+  type SQL,
   sql,
 } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { describeRoute } from 'hono-openapi';
 import type { Variables } from 'hono/types';
+import { describeRoute } from 'hono-openapi';
 import { unique } from 'radashi';
 import { z } from 'zod/v4';
+import { db } from '@/core/db';
+import { imagesTable, selectImagesTableSchema } from '@/core/db/schema';
 
 // For extending the Zod schema with OpenAPI properties
 import 'zod-openapi/extend';

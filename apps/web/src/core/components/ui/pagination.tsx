@@ -22,11 +22,11 @@ function Pagination({ className, ref, ...props }: PaginationProps) {
   return (
     <nav
       aria-label="pagination"
-      ref={ref}
       className={twMerge(
         'mx-auto flex w-full justify-center gap-[5px]',
         className
       )}
+      ref={ref}
       {...props}
     />
   );
@@ -59,14 +59,14 @@ function PaginationList<T extends object>({
 }: PaginationListProps<T>) {
   return (
     <ListBox
-      ref={ref}
-      orientation="horizontal"
       aria-label={props['aria-label'] || 'Pagination'}
-      layout="grid"
       className={composeTailwindRenderProps(
         className,
         'flex flex-row items-center gap-[5px]'
       )}
+      layout="grid"
+      orientation="horizontal"
+      ref={ref}
       {...props}
     />
   );
@@ -158,8 +158,8 @@ function PaginationItem({
           ...props,
         },
         <Separator
-          orientation="vertical"
           className="h-5 w-[1.5px] shrink-0 rotate-[14deg] bg-secondary-fg/40"
+          orientation="vertical"
         />
       );
     case 'ellipsis':
@@ -179,29 +179,29 @@ function PaginationItem({
             className
           )}
         >
-          <Icon icon="mdi:dots-horizontal" className="size-4" />
+          <Icon className="size-4" icon="mdi:dots-horizontal" />
         </span>
       );
     case 'previous':
       return renderPaginationIndicator(
-        <Icon icon="mdi:chevron-left" className="size-4" />
+        <Icon className="size-4" icon="mdi:chevron-left" />
       );
     case 'next':
       return renderPaginationIndicator(
-        <Icon icon="mdi:chevron-right" className="size-4" />
+        <Icon className="size-4" icon="mdi:chevron-right" />
       );
     case 'first':
       return renderPaginationIndicator(
-        <Icon icon="tdesign:previous" className="size-4" />
+        <Icon className="size-4" icon="tdesign:previous" />
       );
     case 'last':
       return renderPaginationIndicator(
-        <Icon icon="tdesign:next" className="size-4" />
+        <Icon className="size-4" icon="tdesign:next" />
       );
     default:
       return renderListItem(
         {
-          textValue: textValue,
+          textValue,
           'aria-current': isCurrent ? 'page' : undefined,
           isDisabled: isCurrent,
           className: buttonStyles({

@@ -19,9 +19,10 @@ export class WordInclusionMetric extends Metric {
     this.referenceWords = new Set(words);
   }
 
+  // biome-ignore lint/suspicious/useAwait: xxx
   async measure(input: string, output: string): Promise<WordInclusionResult> {
     // Handle empty strings case
-    if (!input && !output) {
+    if (!(input || output)) {
       return {
         score: 1,
         info: {

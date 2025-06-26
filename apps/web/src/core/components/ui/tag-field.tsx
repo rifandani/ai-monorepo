@@ -83,7 +83,8 @@ function TagField({
       if (
         formattedName &&
         !list.items.some(
-          ({ name }) => name.toLowerCase() === formattedName.toLowerCase()
+          ({ name: _name }) =>
+            _name.toLowerCase() === formattedName.toLowerCase()
         )
       ) {
         const tag = {
@@ -121,7 +122,7 @@ function TagField({
       return;
     }
 
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: xxx
     const endKey = list.items.at(-1)!;
 
     if (endKey !== null) {
@@ -149,15 +150,14 @@ function TagField({
         className={twJoin('flex flex-col', props.isDisabled && 'opacity-50')}
       >
         <TagGroup
-          intent={props.intent}
-          shape={props.shape}
           aria-label="List item inserted"
+          intent={props.intent}
           onRemove={onRemove}
+          shape={props.shape}
         >
           <div className={tagFieldsStyles({ appearance })}>
             <div className="flex flex-1 flex-wrap items-center">
               <TagList
-                items={list.items}
                 className={twJoin(
                   list.items.length !== 0
                     ? appearance === 'outline' && 'gap-1.5 px-1 py-1.5'
@@ -166,19 +166,20 @@ function TagField({
                     '[&_.jdt3lr2x]:rounded-[calc(var(--radius-lg)-4px)]',
                   '[&_.jdt3lr2x]:last:-mr-1 outline-hidden [&_.jdt3lr2x]:cursor-default'
                 )}
+                items={list.items}
               >
                 {(item) => <Tag>{item.name}</Tag>}
               </TagList>
               <TextField
-                isDisabled={props.isDisabled}
                 aria-label={
                   props?.label ?? (props['aria-label'] || props.placeholder)
                 }
-                isInvalid={isInvalid}
-                onKeyDown={onKeyDown}
-                onChange={setInputValue}
-                value={inputValue}
                 className="flex-1"
+                isDisabled={props.isDisabled}
+                isInvalid={isInvalid}
+                onChange={setInputValue}
+                onKeyDown={onKeyDown}
+                value={inputValue}
                 {...props}
               >
                 <Input
@@ -197,8 +198,8 @@ function TagField({
           <input
             hidden
             name={name}
-            value={list.items.map((i) => i.name).join(',')}
             readOnly
+            value={list.items.map((i) => i.name).join(',')}
           />
         )}
       </Group>

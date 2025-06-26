@@ -9,10 +9,10 @@ import type {
 } from 'react-aria-components';
 import {
   Button,
+  composeRenderProps,
   TagGroup as TagGroupPrimitive,
   TagList as TagListPrimitive,
   Tag as TagPrimitive,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -101,8 +101,8 @@ interface TagGroupProps extends TagGroupPrimitiveProps {
 function TagGroup({ children, ref, className, ...props }: TagGroupProps) {
   return (
     <TagGroupPrimitive
-      ref={ref}
       className={twMerge('flex flex-col flex-wrap', className)}
+      ref={ref}
       {...props}
     >
       <TagGroupContext
@@ -174,10 +174,10 @@ function Tag({ className, intent, shape, ...props }: TagProps) {
             {props.children as React.ReactNode}
             {allowsRemoving && (
               <Button
-                slot="remove"
                 className="-mr-0.5 grid size-3.5 place-content-center rounded outline-hidden [&>[data-slot=icon]]:size-3 [&>[data-slot=icon]]:shrink-0"
+                slot="remove"
               >
-                <Icon icon="mdi:close" className="size-4" />
+                <Icon className="size-4" icon="mdi:close" />
               </Button>
             )}
           </>

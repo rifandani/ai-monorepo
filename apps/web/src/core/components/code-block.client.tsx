@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/core/components/ui/button';
 import { Icon } from '@iconify/react';
 import { useCopyToClipboard } from '@workspace/core/hooks/use-copy-to-clipboard';
 import { saveFile } from '@workspace/core/utils/dom';
@@ -9,6 +8,7 @@ import { type FC, memo, useCallback } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { toast } from 'sonner';
+import { Button } from '@/core/components/ui/button';
 
 interface Props {
   language: string;
@@ -73,28 +73,28 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
         <span className="text-xs lowercase">{language}</span>
         <div className="flex items-center space-x-1">
           <Button
-            type="button"
-            intent="plain"
             appearance="plain"
-            size="square-petite"
             className="focus-visible:ring-1"
+            intent="plain"
             onClick={handleDownload}
+            size="square-petite"
+            type="button"
           >
-            <Icon icon="lucide:download" className="h-4 w-4" />
+            <Icon className="h-4 w-4" icon="lucide:download" />
             <span className="sr-only">Download</span>
           </Button>
           <Button
-            type="button"
-            intent="plain"
             appearance="plain"
-            size="square-petite"
             className="text-xs focus-visible:ring-1 focus-visible:ring-offset-0"
+            intent="plain"
             onClick={handleCopy}
+            size="square-petite"
+            type="button"
           >
             {isCopied ? (
-              <Icon icon="lucide:check" className="h-4 w-4" />
+              <Icon className="h-4 w-4" icon="lucide:check" />
             ) : (
-              <Icon icon="lucide:copy" className="h-4 w-4" />
+              <Icon className="h-4 w-4" icon="lucide:copy" />
             )}
             <span className="sr-only">Copy code</span>
           </Button>
@@ -102,25 +102,25 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
       </div>
 
       <SyntaxHighlighter
-        language={language}
-        style={materialDark}
-        PreTag="div"
-        showLineNumbers
-        customStyle={{
-          margin: 0,
-          width: '100%',
-          background: 'transparent',
-          padding: '1.5rem 1rem',
-        }}
-        lineNumberStyle={{
-          userSelect: 'none',
-        }}
         codeTagProps={{
           style: {
             fontSize: '0.9rem',
             fontFamily: 'var(--font-mono)',
           },
         }}
+        customStyle={{
+          margin: 0,
+          width: '100%',
+          background: 'transparent',
+          padding: '1.5rem 1rem',
+        }}
+        language={language}
+        lineNumberStyle={{
+          userSelect: 'none',
+        }}
+        PreTag="div"
+        showLineNumbers
+        style={materialDark}
       >
         {value}
       </SyntaxHighlighter>

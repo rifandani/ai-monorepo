@@ -1,10 +1,10 @@
 'use server';
 
-import { actionClient } from '@/core/utils/action';
-import { deleteChatHistory } from '@/core/utils/filesystem';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { actionClient } from '@/core/utils/action';
+import { deleteChatHistory } from '@/core/utils/filesystem';
 
 /**
  * Deletes a chat history

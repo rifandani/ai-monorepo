@@ -1,7 +1,7 @@
-import { models } from '@/core/utils/ai';
 import { Agent } from '@mastra/core/agent';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
+import { models } from '@/core/utils/ai';
 
 const agent = new Agent({
   name: 'Weather Agent',

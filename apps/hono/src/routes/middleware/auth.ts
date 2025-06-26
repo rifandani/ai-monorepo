@@ -1,5 +1,5 @@
-import { auth } from '@/auth/libs';
 import type { MiddlewareHandler } from 'hono';
+import { auth } from '@/auth/libs';
 
 /**
  * a middleware to save the session and user in a context and also add validations for every route.

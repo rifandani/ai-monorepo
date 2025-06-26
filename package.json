@@ -3,21 +3,22 @@
   "version": "1.0.0",
   "author": "Tri Rizeki Rifandani",
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "2.0.5",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@types/node": "22.15.31",
     "@workspace/typescript-config": "workspace:*",
-    "bumpp": "10.1.1",
     "husky": "9.1.7",
     "npm-run-all2": "8.0.4",
     "rimraf": "6.0.1",
     "tsx": "4.20.3",
     "typescript": "5.8.3",
-    "ultracite": "4.2.10"
+    "ultracite": "5.0.20"
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   },
   "description": "AI Monorepo",
   "engines": {
@@ -30,8 +31,9 @@
     "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
     "compose:up": "docker compose up --build",
     "format": "ultracite format",
+    "format:unsafe": "ultracite format --unsafe",
     "lint": "ultracite lint",
-    "lint-typecheck": "run-p lint hono:typecheck web:typecheck",
+    "lint-typecheck": "run-p lint hono:typecheck web:typecheck mastra:typecheck",
     "hono": "bun --elide-lines=0 --filter @workspace/hono",
     "web": "bun --elide-lines=0 --filter @workspace/web",
     "mastra": "bun --elide-lines=0 --filter @workspace/mastra",
@@ -50,5 +52,8 @@
     "protobufjs",
     "sharp"
   ],
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

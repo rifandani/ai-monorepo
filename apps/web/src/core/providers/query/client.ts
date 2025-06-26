@@ -1,7 +1,7 @@
 import {
-  QueryClient,
   defaultShouldDehydrateQuery,
   isServer,
+  QueryClient,
 } from '@tanstack/react-query';
 
 function makeQueryClient() {
@@ -9,7 +9,7 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         // gcTime: 1_000 * 60 * 5, // 5 mins. Defaults to 5 mins
-        staleTime: 1_000 * 30, // 30 secs. Defaults to 0
+        staleTime: 1000 * 30, // 30 secs. Defaults to 0
       },
       dehydrate: {
         // include pending queries in dehydration

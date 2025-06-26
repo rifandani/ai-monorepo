@@ -7,9 +7,9 @@ import type {
   ToggleButtonProps,
 } from 'react-aria-components';
 import {
+  composeRenderProps,
   ToggleButton,
   ToggleButtonGroup,
-  composeRenderProps,
 } from 'react-aria-components';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
@@ -95,16 +95,16 @@ function ToggleGroup({
       value={{ intent, gap, orientation, size, isDisabled: props.isDisabled }}
     >
       <ToggleButtonGroup
-        ref={ref}
-        orientation={orientation}
-        className={composeRenderProps(className, (className, renderProps) =>
+        className={composeRenderProps(className, (_className, renderProps) =>
           toggleGroupStyles({
             ...renderProps,
             gap,
             orientation,
-            className,
+            className: _className,
           })
         )}
+        orientation={orientation}
+        ref={ref}
         {...props}
       />
     </ToggleGroupContext>
@@ -180,9 +180,7 @@ function Toggle({ className, intent, ref, ...props }: ToggleProps) {
   } = use(ToggleGroupContext);
   return (
     <ToggleButton
-      ref={ref}
-      isDisabled={props.isDisabled ?? isGroupDisabled}
-      className={composeRenderProps(className, (className, renderProps) =>
+      className={composeRenderProps(className, (_className, renderProps) =>
         toggleStyles({
           ...renderProps,
           intent: intent ?? groupIntent,
@@ -190,9 +188,11 @@ function Toggle({ className, intent, ref, ...props }: ToggleProps) {
           orientation,
           shape: props.shape,
           noGap: gap === 0,
-          className,
+          className: _className,
         })
       )}
+      isDisabled={props.isDisabled ?? isGroupDisabled}
+      ref={ref}
       {...props}
     />
   );

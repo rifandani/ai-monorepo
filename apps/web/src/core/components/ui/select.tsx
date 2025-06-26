@@ -11,9 +11,9 @@ import type {
 } from 'react-aria-components';
 import {
   Button,
+  composeRenderProps,
   Select as SelectPrimitive,
   SelectValue,
-  composeRenderProps,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
@@ -96,10 +96,10 @@ function SelectList<T extends object>({
 }: SelectListProps<T>) {
   return (
     <PopoverContent
-      showArrow={false}
-      respectScreen={false}
       className={twMerge(clsx('sm:min-w-(--trigger-width)', popoverClassName))}
       placement={props.placement}
+      respectScreen={false}
+      showArrow={false}
     >
       <ListBox
         className={twMerge(clsx('border-0 shadow-none', className))}
@@ -120,6 +120,7 @@ interface SelectTriggerProps extends React.ComponentProps<typeof Button> {
 function SelectTrigger({ className, ...props }: SelectTriggerProps) {
   return (
     <Button
+      // biome-ignore lint/nursery/noShadow: xxx
       className={composeRenderProps(className, (className, renderProps) =>
         selectTriggerStyles({
           ...renderProps,
@@ -129,13 +130,13 @@ function SelectTrigger({ className, ...props }: SelectTriggerProps) {
     >
       {props.prefix && <span className="-mr-1">{props.prefix}</span>}
       <SelectValue
-        data-slot="select-value"
         className="*:data-[slot=icon]:-mx-0.5 *:data-[slot=avatar]:-mx-0.5 *:data-[slot=avatar]:*:-mx-0.5 grid flex-1 grid-cols-[auto_1fr] items-center text-base data-placeholder:text-muted-fg *:data-[slot=avatar]:*:mr-2 *:data-[slot=avatar]:mr-2 *:data-[slot=icon]:mr-2 sm:text-sm [&_[slot=description]]:hidden"
+        data-slot="select-value"
       />
       <Icon
-        icon="mdi:chevron-down"
         aria-hidden
         className="size-4 shrink-0 text-muted-fg duration-300 group-disabled:opacity-50 group-data-open:rotate-180 group-data-open:text-fg forced-colors:text-[ButtonText] forced-colors:group-disabled:text-[GrayText]"
+        icon="mdi:chevron-down"
       />
     </Button>
   );

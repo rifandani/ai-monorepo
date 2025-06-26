@@ -6,7 +6,7 @@ export type LocaleDict = Record<LocaleDictLanguage, Record<string, string>>;
 export type Translations = typeof enLocale;
 export type InterpolateInner<
   S extends string,
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
+  // biome-ignore lint/complexity/noBannedTypes: xxx
   U extends object = {},
 > = S extends `${string}{${infer V}}${infer Rest}`
   ? InterpolateInner<Rest, U & { [key in V]: string }>

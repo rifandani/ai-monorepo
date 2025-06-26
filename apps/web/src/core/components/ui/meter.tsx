@@ -29,9 +29,9 @@ function Meter({ label, className, ...props }: MeterProps) {
             >
               {percentage >= 80 && (
                 <Icon
-                  icon="mdi:alert-circle-outline"
                   aria-label="Alert"
                   className="inline-block size-4 fill-danger/20 align-text-bottom text-danger"
+                  icon="mdi:alert-circle-outline"
                 />
               )}
               {` ${valueText}`}
@@ -39,12 +39,12 @@ function Meter({ label, className, ...props }: MeterProps) {
           </div>
           <div className="-outline-offset-1 relative h-2 rounded-full bg-muted outline outline-transparent">
             <motion.div
-              className="absolute top-0 left-0 h-full rounded-full forced-colors:bg-[Highlight]"
-              initial={{ width: '0%', backgroundColor: getColor(0) }}
               animate={{
                 width: `${percentage}%`,
                 backgroundColor: getColor(percentage),
               }}
+              className="absolute top-0 left-0 h-full rounded-full forced-colors:bg-[Highlight]"
+              initial={{ width: '0%', backgroundColor: getColor(0) }}
               transition={{ duration: 0.5 }}
             />
           </div>
