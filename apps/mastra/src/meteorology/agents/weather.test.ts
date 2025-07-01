@@ -54,7 +54,7 @@ describe('Weather Agent Evaluations', () => {
     expect(result.score).toBeLessThanOrEqual(0.25);
   });
 
-  it('should evaluates how strictly an LLMs output follows a set of given prompt instructions', async () => {
+  it('should evaluates how strictly an LLMs output follows a set of given prompt instructions, but with no location provided', async () => {
     const result = await evaluate(
       weatherAgent,
       'What is the weather?',
@@ -71,10 +71,10 @@ describe('Weather Agent Evaluations', () => {
     expect(result.score).toBeGreaterThanOrEqual(0.7);
   });
 
-  it('should evaluates how strictly an LLMs output follows a set of given prompt instructions', async () => {
+  it('should evaluates how strictly an LLMs output follows a set of given prompt instructions, but with multiple locations provided', async () => {
     const result = await evaluate(
       weatherAgent,
-      'Can you give me weather information for multiple cities?',
+      'Give me weather information for Balikpapan and Jakarta',
       weatherAgent.evals.promptAlignment
     );
 

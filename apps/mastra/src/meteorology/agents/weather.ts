@@ -60,13 +60,11 @@ export const weatherAgent = new Agent({
     promptAlignment: new PromptAlignmentMetric(models.flash20, {
       scale: 1,
       instructions: [
-        'Ask for location if none is provided in the query',
-        'Include temperature information when providing weather data',
-        'Include humidity information when available',
-        'Include wind speed information when available',
-        'Keep response concise but informative',
-        'Use proper location names for weather queries',
-        'Provide current weather conditions when requested',
+        'Always ask for a location if none is provided',
+        "If the location name isn't in English, please translate it",
+        'If giving a location with multiple parts (e.g. "New York, NY"), use the most relevant part (e.g. "New York")',
+        'Include relevant details like humidity, wind conditions, and precipitation',
+        'Keep responses concise but informative',
       ],
     }),
 

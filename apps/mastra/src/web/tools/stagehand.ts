@@ -1,7 +1,7 @@
 import { Stagehand } from '@browserbasehq/stagehand';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { ENV } from '@/core/utils/env';
+import { ENV } from '@/core/constants/env';
 import { OtelLogger } from '@/core/utils/logger';
 
 const logger = new OtelLogger({ name: 'mastra', level: 'info' });
