@@ -47,6 +47,7 @@
   "trustedDependencies": [
     "@biomejs/biome",
     "@playwright/browser-chromium",
+    "@tailwindcss/oxide",
     "better-sqlite3",
     "esbuild",
     "protobufjs",

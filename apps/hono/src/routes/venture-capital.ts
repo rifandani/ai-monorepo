@@ -1,13 +1,8 @@
+import { createRoute, type OpenAPIHono, z } from '@hono/zod-openapi';
 import { generateObject, generateText, tool } from 'ai';
-import { Hono } from 'hono';
-import type { Variables } from 'hono/types';
-import { describeRoute } from 'hono-openapi';
-import { resolver, validator } from 'hono-openapi/zod';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 import { models, textSchema, usageSchema } from '@/core/api/ai';
-
-// For extending the Zod schema with OpenAPI properties
-import 'zod-openapi/extend';
+import type { Variables } from '@/core/types/hono';
 
 async function getCompanyInfo(company: string) {
   const { object } = await generateObject({
@@ -18,10 +13,10 @@ async function getCompanyInfo(company: string) {
 - what do they sell / what products do they offer
  
 <company>${company}</company>`,
-    schema: z.object({
-      description: z.string().describe('The description of the company'),
-      products: z
-        .array(z.string())
+    schema: z3.object({
+      description: z3.string().describe('The description of the company'),
+      products: z3
+        .array(z3.string())
         .describe('The products offered by the company'),
     }),
   });
@@ -38,16 +33,16 @@ async function getCompetitors(company: string, num = 2) {
         - for each competitor, provide a brief description of their product, a link to their website, and an explanation of why they are similar.
  
         <company>${company}</company>`,
-    schema: z.object({
-      competitors: z
+    schema: z3.object({
+      competitors: z3
         .array(
-          z.object({
-            name: z.string().describe('The name of the competitor'),
-            description: z
+          z3.object({
+            name: z3.string().describe('The name of the competitor'),
+            description: z3
               .string()
               .describe('The description of the competitor'),
-            website: z.string().describe('The website of the competitor'),
-            similarity: z
+            website: z3.string().describe('The website of the competitor'),
+            similarity: z3
               .string()
               .describe(
                 'The similarity between the company and the competitor'
@@ -68,9 +63,9 @@ async function getFounderLatest3Tweets(founder: string) {
     system:
       'You are an expert researcher and analyst who is looking for latest 3 tweets from twitter (X) profile',
     prompt: `Please provide a brief summary of the following person's latest 3 tweets. <person_name>${founder}</person_name>.`,
-    schema: z.object({
-      tweets: z
-        .array(z.string().describe('The tweet from the person'))
+    schema: z3.object({
+      tweets: z3
+        .array(z3.string().describe('The tweet from the person'))
         .nullable()
         .describe(
           'The latest 3 tweets from the person, or null if tweets or twitter (X) profile are not found'
@@ -87,8 +82,8 @@ async function getFounderLinkedinProfile(founder: string) {
     system:
       "You are an expert researcher and analyst who is looking for founder's background from their linkedin profile",
     prompt: `Please provide a brief summary of the following person's background from their linkedin profile. <person_name>${founder}</person_name>.`,
-    schema: z.object({
-      background: z
+    schema: z3.object({
+      background: z3
         .string()
         .nullable()
         .describe(
@@ -106,8 +101,8 @@ async function getFounderPersonalWebsite(founder: string) {
     system:
       "You are an expert researcher and analyst who is looking for founder's background from their personal website",
     prompt: `Please provide a brief summary of the following person's background from their personal website. <person_name>${founder}</person_name>.`,
-    schema: z.object({
-      background: z
+    schema: z3.object({
+      background: z3
         .string()
         .nullable()
         .describe(
@@ -151,26 +146,26 @@ async function getCompanyFinancialInformation(company: string) {
     model: models.flash20search,
     system: 'You are an expert researcher and analyst',
     prompt: `Tell me about the funding, valuation, investors, and financials information of this company in detail and nothing else. <company>${company}</company>`,
-    schema: z.object({
-      fundingHistory: z
+    schema: z3.object({
+      fundingHistory: z3
         .string()
         .nullable()
         .describe(
           'The funding history of the company, or null if funding history is not found'
         ),
-      valuation: z
+      valuation: z3
         .string()
         .nullable()
         .describe(
           'The current valuation of the company, or null if valuation is not found'
         ),
-      investors: z
-        .array(z.string().describe('The investor of the company'))
+      investors: z3
+        .array(z3.string().describe('The investor of the company'))
         .nullable()
         .describe(
           'The collection of investors of the company, or null if investors are not found'
         ),
-      financials: z
+      financials: z3
         .string()
         .nullable()
         .describe(
@@ -191,130 +186,141 @@ async function generateInvestmentPitch(company: string, research: string) {
 
   return text;
 }
-export const agentVentureCapitalApp = new Hono<{
-  Variables: Variables;
-}>(); // .basePath('/api/v1');
 
-agentVentureCapitalApp.post(
-  '/',
-  describeRoute({
-    description: 'Generate an investment pitch for a company',
-    responses: {
-      200: {
-        description: 'The investment pitch',
-        content: {
-          'application/json': {
-            schema: resolver(
-              z.object({
-                text: textSchema,
-                usage: usageSchema,
-              })
-            ),
+export function ventureCapitalRoutes(
+  app: OpenAPIHono<{
+    Variables: Variables;
+  }>
+) {
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/gemini/agent/venture-capital',
+      summary: 'Agent: Venture Capital',
+      description:
+        'An agent that specialized in generating investment pitch to invest in a company',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: z.object({
+                prompt: z
+                  .string()
+                  .describe(
+                    'The prompt for the investment pitch to invest in a company'
+                  )
+                  .openapi({
+                    example:
+                      'Please write an investment pitch for investing in the NVIDIA',
+                  }),
+              }),
+            },
           },
         },
       },
-    },
-  }),
-  validator(
-    'json',
-    z.object({
-      prompt: z
-        .string()
-        .describe('The prompt for the investment pitch to invest in a company')
-        .openapi({
-          example:
-            'Please write an investment pitch for investing in the NVIDIA',
-        }),
-    })
-  ),
-  async (c) => {
-    const { prompt } = c.req.valid('json');
-
-    const { text, usage } = await generateText({
-      model: models.flash25,
-      prompt,
-      maxSteps: 10,
-      tools: {
-        getCompanyInfo: tool({
-          description: 'Get information about a company',
-          parameters: z.object({
-            companyName: z.string(),
-          }),
-          execute: async ({ companyName }) => {
-            return await getCompanyInfo(companyName);
+      responses: {
+        200: {
+          description: 'An investment pitch for a company',
+          content: {
+            'application/json': {
+              schema: z.object({
+                text: textSchema,
+                usage: usageSchema,
+              }),
+            },
           },
-        }),
-        getCompetitors: tool({
-          description: 'Get competitors of a company',
-          parameters: z.object({
-            companyName: z.string(),
-          }),
-          execute: async ({ companyName }) => {
-            return await getCompetitors(companyName);
-          },
-        }),
-        getFounderInfo: tool({
-          description:
-            'Get information (tweets, personal website, linkedin profile) about a founder of a company',
-          parameters: z.object({
-            founderName: z.string(),
-          }),
-          execute: async ({ founderName }) => {
-            return await getFounderInfo(founderName);
-          },
-        }),
-        assessFounderMarketFit: tool({
-          description:
-            'Assess the market fit of the founder of a company based on the company info',
-          parameters: z.object({
-            founderName: z.string(),
-            companyInfo: z.string(),
-          }),
-          execute: async ({ founderName, companyInfo }) => {
-            return await assessFounderMarketFit({ founderName, companyInfo });
-          },
-        }),
-        getCompanyFinancialInformation: tool({
-          description:
-            'Get financial information about a company, including funding history, valuation, investors, and financials',
-          parameters: z.object({
-            companyName: z.string(),
-          }),
-          execute: async ({ companyName }) => {
-            return await getCompanyFinancialInformation(companyName);
-          },
-        }),
-        generateInvestmentPitch: tool({
-          description:
-            'Generate an investment pitch for a company based on the company info, competitors, founder info, and financial information',
-          parameters: z.object({
-            companyName: z.string(),
-            competitors: z.array(z.string()).min(1),
-            founderInfo: z.string(),
-            companyInfo: z.string(),
-            companyFinancialInformation: z.string(),
-          }),
-          execute: async ({
-            companyName,
-            competitors,
-            companyInfo,
-            founderInfo,
-            companyFinancialInformation,
-          }) => {
-            return await generateInvestmentPitch(
-              companyName,
-              JSON.stringify({
-                competitors,
-                companyInfo,
-                founderInfo,
-                companyFinancialInformation,
-              })
-            );
-          },
-        }),
+        },
       },
-    });
+    }),
+    async (c) => {
+      const { prompt } = c.req.valid('json');
 
-    return c.json({ text, usage });
-  }
-);
+      const { text, usage } = await generateText({
+        model: models.flash25,
+        prompt,
+        maxSteps: 10,
+        tools: {
+          getCompanyInfo: tool({
+            description: 'Get information about a company',
+            parameters: z3.object({
+              companyName: z3.string(),
+            }),
+            execute: async ({ companyName }) => {
+              return await getCompanyInfo(companyName);
+            },
+          }),
+          getCompetitors: tool({
+            description: 'Get competitors of a company',
+            parameters: z3.object({
+              companyName: z3.string(),
+            }),
+            execute: async ({ companyName }) => {
+              return await getCompetitors(companyName);
+            },
+          }),
+          getFounderInfo: tool({
+            description:
+              'Get information (tweets, personal website, linkedin profile) about a founder of a company',
+            parameters: z3.object({
+              founderName: z3.string(),
+            }),
+            execute: async ({ founderName }) => {
+              return await getFounderInfo(founderName);
+            },
+          }),
+          assessFounderMarketFit: tool({
+            description:
+              'Assess the market fit of the founder of a company based on the company info',
+            parameters: z3.object({
+              founderName: z3.string(),
+              companyInfo: z3.string(),
+            }),
+            execute: async ({ founderName, companyInfo }) => {
+              return await assessFounderMarketFit({ founderName, companyInfo });
+            },
+          }),
+          getCompanyFinancialInformation: tool({
+            description:
+              'Get financial information about a company, including funding history, valuation, investors, and financials',
+            parameters: z3.object({
+              companyName: z3.string(),
+            }),
+            execute: async ({ companyName }) => {
+              return await getCompanyFinancialInformation(companyName);
+            },
+          }),
+          generateInvestmentPitch: tool({
+            description:
+              'Generate an investment pitch for a company based on the company info, competitors, founder info, and financial information',
+            parameters: z3.object({
+              companyName: z3.string(),
+              competitors: z3.array(z3.string()).min(1),
+              founderInfo: z3.string(),
+              companyInfo: z3.string(),
+              companyFinancialInformation: z3.string(),
+            }),
+            execute: async ({
+              companyName,
+              competitors,
+              companyInfo,
+              founderInfo,
+              companyFinancialInformation,
+            }) => {
+              return await generateInvestmentPitch(
+                companyName,
+                JSON.stringify({
+                  competitors,
+                  companyInfo,
+                  founderInfo,
+                  companyFinancialInformation,
+                })
+              );
+            },
+          }),
+        },
+      });
+
+      return c.json({ text, usage });
+    }
+  );
+}

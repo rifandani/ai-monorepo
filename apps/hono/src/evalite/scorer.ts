@@ -4,7 +4,7 @@ import { createScorer } from 'evalite';
 import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
-import { z } from 'zod/v3';
+import { z as z3 } from 'zod/v3';
 import { cacheModel } from '@/evalite/cache-model';
 
 const storage = createStorage({
@@ -48,9 +48,9 @@ export const Factuality = createScorer<string, string, string>({
       (D) There is a disagreement between the submitted answer and the expert answer.
       (E) The answers differ, but these differences don't matter from the perspective of factuality.
     `,
-      schema: z.object({
-        answer: z.enum(['A', 'B', 'C', 'D', 'E']).describe('Your selection.'),
-        rationale: z
+      schema: z3.object({
+        answer: z3.enum(['A', 'B', 'C', 'D', 'E']).describe('Your selection.'),
+        rationale: z3
           .string()
           .describe('Why you chose this answer. Be very detailed.'),
       }),

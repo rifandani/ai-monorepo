@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { experimental_createMCPClient, generateText } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 
 // pro-exp is no longer free
 const flash20 = google('gemini-2.0-flash-001'); // stable
@@ -24,8 +24,8 @@ async function main() {
     const tools = await mcpClient.tools({
       schemas: {
         convert_to_markdown: {
-          parameters: z.object({
-            uri: z
+          parameters: z3.object({
+            uri: z3
               .string()
               .describe(
                 'The URI in which to convert the resource described by an http:, https:, file: or data: into markdown'

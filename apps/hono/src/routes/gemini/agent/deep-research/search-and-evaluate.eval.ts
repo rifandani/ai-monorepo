@@ -4,7 +4,7 @@ import { createScorer, evalite } from 'evalite';
 import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 import { cacheModel } from '@/evalite/cache-model';
 import {
   type SearchResult,
@@ -47,8 +47,8 @@ Decide the relevance quality and rate accordingly:
 - good_relevance: Mostly relevant with some useful information
 - fair_relevance: Somewhat relevant but could be better aligned
 - poor_relevance: Low relevance or off-topic results`,
-      schema: z.object({
-        rating: z
+      schema: z3.object({
+        rating: z3
           .enum([
             'excellent_relevance',
             'good_relevance',
@@ -56,7 +56,7 @@ Decide the relevance quality and rate accordingly:
             'poor_relevance',
           ])
           .describe('Your relevance rating selection.'),
-        rationale: z
+        rationale: z3
           .string()
           .describe('Why you chose this rating. Be very detailed.'),
       }),
@@ -105,8 +105,8 @@ Decide the content quality and rate accordingly:
 - good_content: Solid content with good depth
 - fair_content: Adequate content but could be more detailed
 - poor_content: Shallow, incomplete, or low-quality content`,
-      schema: z.object({
-        rating: z
+      schema: z3.object({
+        rating: z3
           .enum([
             'excellent_content',
             'good_content',
@@ -114,7 +114,7 @@ Decide the content quality and rate accordingly:
             'poor_content',
           ])
           .describe('Your content quality rating selection.'),
-        rationale: z
+        rationale: z3
           .string()
           .describe('Why you chose this rating. Be very detailed.'),
       }),
@@ -178,8 +178,8 @@ Rate the duplicate avoidance:
 - good_avoidance: Minimal duplicates, mostly unique content
 - fair_avoidance: Some duplicates but acceptable
 - poor_avoidance: Many duplicates or redundant content`,
-      schema: z.object({
-        rating: z
+      schema: z3.object({
+        rating: z3
           .enum([
             'excellent_avoidance',
             'good_avoidance',
@@ -187,10 +187,10 @@ Rate the duplicate avoidance:
             'poor_avoidance',
           ])
           .describe('Your duplicate avoidance rating.'),
-        rationale: z
+        rationale: z3
           .string()
           .describe('Why you chose this rating. Be very detailed.'),
-        semantic_duplicates_found: z
+        semantic_duplicates_found: z3
           .number()
           .describe('Number of semantic duplicates found'),
       }),

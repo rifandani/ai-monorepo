@@ -1,3 +1,4 @@
+import { createRoute, type OpenAPIHono } from '@hono/zod-openapi';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type {
@@ -5,14 +6,10 @@ import type {
   GetPromptResult,
   ReadResourceResult,
 } from '@modelcontextprotocol/sdk/types.js';
+import { logger } from '@workspace/core/utils/logger';
 import { toFetchResponse, toReqRes } from 'fetch-to-node';
-import { Hono } from 'hono';
-import { describeRoute } from 'hono-openapi';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 import type { Variables } from '@/core/types/hono';
-
-// For extending the Zod schema with OpenAPI properties
-import 'zod-openapi/extend';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2';
 
@@ -54,10 +51,6 @@ function formatPokemonData(pokemon: Pokemon) {
   ].join('\n');
 }
 
-export const mcpApp = new Hono<{
-  Variables: Variables;
-}>(); // .basePath('/api/v1');
-
 /**
  * @link read more for deployment to CF https://github.dev/mhart/mcp-hono-stateless
  */
@@ -77,7 +70,7 @@ const getServer = () => {
     'greeting-template',
     'A simple greeting prompt template',
     {
-      name: z.string().describe('Name to include in greeting'),
+      name: z3.string().describe('Name to include in greeting'),
     },
     // biome-ignore lint/suspicious/useAwait: xxx
     async ({ name }): Promise<GetPromptResult> => {
@@ -118,11 +111,11 @@ const getServer = () => {
     'start-notification-stream',
     'Starts sending periodic notifications for testing resumability',
     {
-      interval: z
+      interval: z3
         .number()
         .describe('Interval in milliseconds between notifications')
         .default(100),
-      count: z
+      count: z3
         .number()
         .describe('Number of notifications to send (0 for 100)')
         .default(10),
@@ -167,7 +160,7 @@ const getServer = () => {
     'get-pokemon',
     'Get Pokemon details by name',
     {
-      name: z.string().describe('The name of the Pokemon to get'),
+      name: z3.string().describe('The name of the Pokemon to get'),
     },
     async ({ name }) => {
       const path = `/pokemon/${name.toLowerCase()}`;
@@ -198,87 +191,95 @@ const getServer = () => {
   return server;
 };
 
-mcpApp.post(
-  '/',
-  describeRoute({
-    description:
-      'Streamable HTTP MCP. By default, the server will start an SSE stream, instead of returning JSON responses.',
-    responses: {
-      200: {
-        description: 'Successful streamable HTTP MCP',
-      },
-    },
-  }),
-  async (c) => {
-    // Node.js-compatible request and response objects for WinterTC (fetch-like) runtimes, such as Cloudflare Workers, Bun, Deno and Fastly Compute.
-    const { req, res } = toReqRes(c.req.raw);
-
-    const server = getServer();
-
-    try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined, // for oauth
-        // eventStore, // enable resumability
-      });
-
-      await server.connect(transport);
-
-      // should be after connect and before handleRequest -> Client error: DOMException [AbortError]: This operation was aborted
-      // transport.onmessage = (message) => {
-      //   console.log('Message', message);
-      // };
-      await transport.handleRequest(req, res, await c.req.json());
-
-      res.on('close', () => {
-        console.log('Request closed');
-        transport.close();
-        server.close();
-      });
-
-      return toFetchResponse(res);
-    } catch (e) {
-      console.error(e);
-      return c.json(
-        {
-          jsonrpc: '2.0',
-          error: {
-            code: -32_603,
-            message: 'Internal server error',
-          },
-          id: null,
+export function mcpRoutes(
+  app: OpenAPIHono<{
+    Variables: Variables;
+  }>
+) {
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/mcp',
+      summary: 'MCP: Streamable HTTP',
+      description:
+        'By default, the server will start an SSE stream, instead of returning JSON responses.',
+      responses: {
+        200: {
+          description: 'Successful streamable HTTP MCP',
         },
-        { status: 500 }
-      );
+      },
+    }),
+    async (c) => {
+      // Node.js-compatible request and response objects for WinterTC (fetch-like) runtimes, such as Cloudflare Workers, Bun, Deno and Fastly Compute.
+      const { req, res } = toReqRes(c.req.raw);
+
+      const server = getServer();
+
+      try {
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined, // for oauth
+          // eventStore, // enable resumability
+        });
+
+        await server.connect(transport);
+
+        // should be after connect and before handleRequest -> Client error: DOMException [AbortError]: This operation was aborted
+        // transport.onmessage = (message) => {
+        //   console.log('Message', message);
+        // };
+        await transport.handleRequest(req, res, await c.req.json());
+
+        res.on('close', () => {
+          console.log('Request closed');
+          transport.close();
+          server.close();
+        });
+
+        return toFetchResponse(res);
+      } catch (e) {
+        console.error(e);
+        return c.json(
+          {
+            jsonrpc: '2.0',
+            error: {
+              code: -32_603,
+              message: 'Internal server error',
+            },
+            id: null,
+          },
+          { status: 500 }
+        );
+      }
     }
-  }
-);
-
-mcpApp.get('/', (c) => {
-  console.log('Received GET MCP request');
-  return c.json(
-    {
-      jsonrpc: '2.0',
-      error: {
-        code: -32_000,
-        message: 'Method not allowed.',
-      },
-      id: null,
-    },
-    { status: 405 }
   );
-});
 
-mcpApp.delete('/', (c) => {
-  console.log('Received DELETE MCP request');
-  return c.json(
-    {
-      jsonrpc: '2.0',
-      error: {
-        code: -32_000,
-        message: 'Method not allowed.',
+  app.get('/mcp', (c) => {
+    logger.log('Received GET MCP request');
+    return c.json(
+      {
+        jsonrpc: '2.0',
+        error: {
+          code: -32_000,
+          message: 'Method not allowed.',
+        },
+        id: null,
       },
-      id: null,
-    },
-    { status: 405 }
-  );
-});
+      { status: 405 }
+    );
+  });
+
+  app.delete('/mcp', (c) => {
+    logger.log('Received DELETE MCP request');
+    return c.json(
+      {
+        jsonrpc: '2.0',
+        error: {
+          code: -32_000,
+          message: 'Method not allowed.',
+        },
+        id: null,
+      },
+      { status: 405 }
+    );
+  });
+}

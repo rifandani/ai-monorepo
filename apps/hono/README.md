@@ -4,8 +4,7 @@
 
 - [ ] example of MCP OAUTH
 - [ ] example of [Memories](https://ai-sdk.dev/providers/community-providers/mem0)
-- [ ] replace all `'zod'` occurences with `'zod/v4'` in the codebase. currently `hono-openapi` is not working with zod 4. `hono-openapi` is waiting on `zod-openapi` to support zod 4 in this [issue](https://github.com/samchungy/zod-openapi/issues/432).
-- [ ] consider to use `@hono/zod-openapi` instead. then, we can use it to generate llms text like [scalar did](https://github.com/scalar/scalar/blob/c52765bcc5eea27b5c34d3bfed7df12eec33a42c/integrations/hono/playground/index.ts)
+- [ ] replace all `import { z } from 'zod'` or `import { z as z3 } from 'zod/v3'` occurences with `import { z } from 'zod/v4'` in the codebase. currently `@hono/zod-openapi@beta` works with zod 4, still waiting for [this issue](https://github.com/honojs/middleware/issues/1177) to be resolved.
 
 ## 🌎 How to MCP
 

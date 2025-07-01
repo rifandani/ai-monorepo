@@ -1,5 +1,6 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { GoogleAICacheManager } from '@google/generative-ai/server';
+import { z } from '@hono/zod-openapi';
 import { SpanKind, trace } from '@opentelemetry/api';
 import {
   ATTR_HTTP_REQUEST_HEADER,
@@ -7,12 +8,23 @@ import {
   ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions';
 import { createProviderRegistry } from 'ai';
-import { z } from 'zod/v3';
+import { z as z3 } from 'zod/v3';
 import { flattenAttributes } from '@/core/utils/object';
 
-// For extending the Zod schema with OpenAPI properties
-import 'zod-openapi/extend';
-
+export const multimodalRequestSchema = z.object({
+  prompt: z.string().openapi({
+    example: 'Get as much information from the provided image',
+  }),
+  image: z.file().optional().openapi({
+    description: 'Image to be used for the prompt',
+  }),
+  pdf: z.file().optional().openapi({
+    description: 'PDF to be used for the prompt',
+  }),
+  audio: z.file().optional().openapi({
+    description: 'Audio to be used for the prompt',
+  }),
+});
 export const mockUserSchema = z.object({
   name: z.string().describe('Name of the person').openapi({
     description: 'Name of the person',
@@ -33,6 +45,16 @@ export const mockUserSchema = z.object({
     zip: z.string().describe('Zip code address of the person').openapi({
       description: 'Zip code address of the person',
     }),
+  }),
+});
+export const mockUserSchemaV3 = z3.object({
+  name: z3.string().describe('Name of the person'),
+  age: z3.number().describe('Age of the person'),
+  address: z3.object({
+    street: z3.string().describe('Street address of the person'),
+    city: z3.string().describe('City address of the person'),
+    state: z3.string().describe('State address of the person'),
+    zip: z3.string().describe('Zip code address of the person'),
   }),
 });
 export const gofoodSchema = z.object({
@@ -76,6 +98,25 @@ export const gofoodSchema = z.object({
     }),
   }),
 });
+export const gofoodSchemaV3 = z3.object({
+  orderId: z3.string().describe('Order ID'),
+  username: z3.string().describe('Name of the person'),
+  totalCost: z3.number().describe('Total cost of the order'),
+  items: z3.array(
+    z3.object({
+      name: z3.string().describe('Name of the item ordered'),
+      price: z3.number().describe('Price of the item'),
+    })
+  ),
+  discount: z3.number().describe('Discount of the order'),
+  shippingCost: z3.number().describe('Shipping cost of the order'),
+  deliveryAddress: z3.object({
+    street: z3.string().describe('Street address of the person'),
+    city: z3.string().describe('City address of the person'),
+    state: z3.string().describe('State address of the person'),
+    zip: z3.string().describe('Zip code address of the person'),
+  }),
+});
 export const qualityMetricsSchema = z.object({
   hasCallToAction: z
     .boolean()
@@ -95,6 +136,17 @@ export const qualityMetricsSchema = z.object({
     example: 7,
   }),
 });
+export const qualityMetricsSchemaV3 = z3.object({
+  hasCallToAction: z3
+    .boolean()
+    .describe('Whether the copy has a call to action'),
+  emotionalAppeal: z3
+    .number()
+    .min(1)
+    .max(10)
+    .describe('Emotional appeal of the copy'),
+  clarity: z3.number().min(1).max(10).describe('Clarity of the copy'),
+});
 export const reviewCodeSchema = z.object({
   issues: z.array(z.string().describe('Issues found in the code')),
   riskLevel: z
@@ -102,18 +154,44 @@ export const reviewCodeSchema = z.object({
     .describe('Risk level of the issues'),
   suggestions: z.array(z.string().describe('Suggestions to fix the issues')),
 });
+export const reviewCodeSchemaV3 = z3.object({
+  issues: z3.array(z3.string().describe('Issues found in the code')),
+  riskLevel: z3
+    .enum(['low', 'medium', 'high'])
+    .describe('Risk level of the issues'),
+  suggestions: z3.array(z3.string().describe('Suggestions to fix the issues')),
+});
 export const implementationPlanFileSchema = z.object({
   purpose: z.string().describe('Purpose of the file'),
   filePath: z.string().describe('File path'),
   changeType: z.enum(['create', 'modify', 'delete']).describe('Type of change'),
 });
+export const implementationPlanFileSchemaV3 = z3.object({
+  purpose: z3.string().describe('Purpose of the file'),
+  filePath: z3.string().describe('File path'),
+  changeType: z3
+    .enum(['create', 'modify', 'delete'])
+    .describe('Type of change'),
+});
 export const implementationPlanImplementationSchema = z.object({
   explanation: z.string().describe('Explanation of the implementation changes'),
   code: z.string().describe('Code of the implementation change'),
 });
+export const implementationPlanImplementationSchemaV3 = z3.object({
+  explanation: z3
+    .string()
+    .describe('Explanation of the implementation changes'),
+  code: z3.string().describe('Code of the implementation change'),
+});
 export const implementationPlanSchema = z.object({
   files: z.array(implementationPlanFileSchema),
   estimatedComplexity: z
+    .enum(['low', 'medium', 'high'])
+    .describe('Estimated complexity of the implementation'),
+});
+export const implementationPlanSchemaV3 = z3.object({
+  files: z3.array(implementationPlanFileSchemaV3),
+  estimatedComplexity: z3
     .enum(['low', 'medium', 'high'])
     .describe('Estimated complexity of the implementation'),
 });

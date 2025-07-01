@@ -1,5 +1,5 @@
 import { google } from '@ai-sdk/google';
-import { zValidator } from '@hono/zod-validator';
+import { createRoute, type OpenAPIHono } from '@hono/zod-openapi';
 import { embed } from 'ai';
 import {
   cosineDistance,
@@ -10,16 +10,11 @@ import {
   type SQL,
   sql,
 } from 'drizzle-orm';
-import { Hono } from 'hono';
-import type { Variables } from 'hono/types';
-import { describeRoute } from 'hono-openapi';
 import { unique } from 'radashi';
 import { z } from 'zod/v4';
 import { db } from '@/core/db';
 import { imagesTable, selectImagesTableSchema } from '@/core/db/schema';
-
-// For extending the Zod schema with OpenAPI properties
-import 'zod-openapi/extend';
+import type { Variables } from '@/core/types/hono';
 
 const imageSchema = selectImagesTableSchema.extend({
   similarity: z
@@ -88,112 +83,116 @@ async function findSimilarContent(
   return similarImages;
 }
 
-export const imagesApp = new Hono<{
-  Variables: Variables;
-}>(); // .basePath('/api/v1');
-
-imagesApp.get(
-  '/',
-  describeRoute({
-    description: 'Get images',
-    responses: {
-      200: {
-        description: 'Successful get images',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                error: {
-                  type: 'string',
-                  nullable: true,
-                  description: 'Error message',
-                },
-                data: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      id: { type: 'string' },
-                      title: { type: 'string' },
-                      description: { type: 'string' },
-                      path: { type: 'string' },
-                      embedding: { type: 'array', items: { type: 'number' } },
-                      similarity: { type: 'number' },
-                    },
-                  },
-                },
-              },
+export function imagesRoutes(
+  app: OpenAPIHono<{
+    Variables: Variables;
+  }>
+) {
+  app.openapi(
+    createRoute({
+      method: 'get',
+      path: '/images',
+      summary: 'Images: Get',
+      description: 'Get images from the database',
+      request: {
+        query: z.object({
+          query: z
+            .string()
+            .describe('The query to search for')
+            .openapi({ example: 'cat' }),
+        }),
+      },
+      responses: {
+        200: {
+          description: 'Successful get images',
+          content: {
+            'application/json': {
+              schema: z.object({
+                error: z
+                  .string()
+                  .nullable()
+                  .describe('Error message if any')
+                  .openapi({ example: 'Unexpected error' }),
+                data: z
+                  .array(imageSchema)
+                  .nullable()
+                  .describe('List of matched images')
+                  .openapi({
+                    example: [
+                      {
+                        id: 1,
+                        title: 'Cat',
+                        description: 'A cat',
+                        url: 'https://example.com/cat.jpg',
+                        embedding: [0.1, 0.2, 0.3],
+                        similarity: 0.5,
+                      },
+                    ],
+                  }),
+              }),
             },
           },
         },
       },
-    },
-  }),
-  zValidator(
-    'query',
-    z.object({
-      query: z.string(),
-    })
-  ),
-  async (c) => {
-    const { query } = c.req.valid('query');
+    }),
+    async (c) => {
+      const { query } = c.req.valid('query');
 
-    const imagesWithoutEmbedding = {
-      ...rest,
-      embedding: sql<number[]>`ARRAY[]::integer[]`,
-    };
+      const imagesWithoutEmbedding = {
+        ...rest,
+        embedding: sql<number[]>`ARRAY[]::integer[]`,
+      };
 
-    try {
-      // If no query, return all images
-      if (query === undefined || query.length < 3) {
-        const images = await db
-          .select(imagesWithoutEmbedding)
-          .from(imagesTable)
-          .limit(20);
-        const imagesWithSimilarity: z.infer<typeof imageSchema>[] = images.map(
-          (image) => ({
-            ...image,
-            similarity: 0,
-          })
+      try {
+        // If no query, return all images
+        if (query === undefined || query.length < 3) {
+          const images = await db
+            .select(imagesWithoutEmbedding)
+            .from(imagesTable)
+            .limit(20);
+          const imagesWithSimilarity: z.infer<typeof imageSchema>[] =
+            images.map((image) => ({
+              ...image,
+              similarity: 0,
+            }));
+
+          return c.json({ error: null, data: imagesWithSimilarity });
+        }
+
+        // find the images that match the query
+        const queryMatches = await findImageByQuery(
+          query,
+          imagesWithoutEmbedding
         );
 
-        return c.json({ error: null, data: imagesWithSimilarity });
+        // find the images that are similar to the query
+        const semanticMatches = await findSimilarContent(
+          query,
+          imagesWithoutEmbedding
+        );
+
+        // combine the images that match the query and the images that are similar to the query
+        const imagesWithSimilarity: z.infer<typeof imageSchema>[] = [
+          ...queryMatches,
+          ...semanticMatches,
+        ].map((image) => ({
+          ...image.image,
+          similarity: image.similarity,
+        }));
+        // remove duplicates
+        const allMatches = unique(imagesWithSimilarity, (image) => image.id);
+
+        return c.json({ error: null, data: allMatches });
+      } catch (e) {
+        if (e instanceof Error) {
+          return c.json({ error: e.message, data: null });
+        }
+
+        return c.json({
+          error: 'Unexpected error',
+          data: null,
+        });
       }
-
-      // find the images that match the query
-      const queryMatches = await findImageByQuery(
-        query,
-        imagesWithoutEmbedding
-      );
-
-      // find the images that are similar to the query
-      const semanticMatches = await findSimilarContent(
-        query,
-        imagesWithoutEmbedding
-      );
-
-      // combine the images that match the query and the images that are similar to the query
-      const imagesWithSimilarity: z.infer<typeof imageSchema>[] = [
-        ...queryMatches,
-        ...semanticMatches,
-      ].map((image) => ({
-        ...image.image,
-        similarity: image.similarity,
-      }));
-      // remove duplicates
-      const allMatches = unique(imagesWithSimilarity, (image) => image.id);
-
-      return c.json({ error: null, data: allMatches });
-    } catch (e) {
-      if (e instanceof Error) {
-        return c.json({ error: e.message, data: null });
-      }
-
-      return c.json({
-        error: 'Unexpected error',
-        data: null,
-      });
     }
-  }
-);
+  );
+}

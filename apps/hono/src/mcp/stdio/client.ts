@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { experimental_createMCPClient, generateText } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 
 // pro-exp is no longer free
 const flash20 = google('gemini-2.0-flash-001'); // stable
@@ -34,7 +34,9 @@ async function main() {
     const tools = await mcpClient.tools({
       schemas: {
         'get-pokemon': {
-          parameters: z.object({ name: z.string().describe('Pokemon name') }),
+          parameters: z3.object({
+            name: z3.string().describe('Pokemon name'),
+          }),
         },
       },
     });

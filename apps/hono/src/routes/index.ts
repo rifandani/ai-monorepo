@@ -1,56 +1,75 @@
+import type { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
-import type { Hono } from 'hono';
-import { openAPISpecs } from 'hono-openapi';
+import { createMarkdownFromOpenApi } from '@scalar/openapi-to-markdown';
+import { auth } from '@/auth/libs';
 import type { Variables } from '@/core/types/hono';
-import { geminiApp } from '@/routes/gemini';
-import { agentDeepResearchApp } from '@/routes/gemini/agent/deep-research/deep-research';
-import { imagesApp } from '@/routes/images';
-import { llmsTextApp } from '@/routes/llms-text';
-import { mcpApp } from '@/routes/mcp';
-import { mcpClientApp } from '@/routes/mcp-client';
-import { ollamaApp } from '@/routes/ollama';
-import { agentVentureCapitalApp } from '@/routes/venture-capital';
+import { geminiRoutes } from '@/routes/gemini';
+import { deepResearchRoutes } from '@/routes/gemini/agent/deep-research/deep-research';
+import { imagesRoutes } from '@/routes/images';
+import { llmsDocsRoutes } from '@/routes/llms-docs';
+import { mcpRoutes } from '@/routes/mcp';
+import { mcpClientRoutes } from '@/routes/mcp-client';
+import { ventureCapitalRoutes } from '@/routes/venture-capital';
 
-export function routes(
-  app: Hono<{
+export async function routes(
+  app: OpenAPIHono<{
     Variables: Variables;
   }>
 ) {
-  app.route('/ollama', ollamaApp);
-  app.route('/gemini', geminiApp);
-  app.route('/gemini/agent/venture-capital', agentVentureCapitalApp);
-  app.route('/gemini/agent/deep-research', agentDeepResearchApp);
-  app.route('/mcp', mcpApp);
-  app.route('/mcp-client', mcpClientApp);
-  app.route('/images', imagesApp); // run `compose:up` first
-  app.route('/llms-text', llmsTextApp);
+  geminiRoutes(app);
+  ventureCapitalRoutes(app);
+  deepResearchRoutes(app);
+  mcpRoutes(app);
+  mcpClientRoutes(app);
+  imagesRoutes(app); // run `compose:up` first
+  llmsDocsRoutes(app);
 
-  app.get(
-    '/openapi',
-    openAPISpecs(app, {
-      documentation: {
-        info: {
-          title: 'Hono AI',
-          version: '1.0.0',
-          description: 'API for AI',
-        },
-        servers: [
-          {
-            url: 'http://localhost:3333',
-            description: 'Local server',
-          },
-        ],
+  // betterauth routes
+  app.on(['POST', 'GET'], '/api/auth/**', (c) => {
+    return auth.handler(c.req.raw);
+  });
+
+  // OpenAPI docs
+  app.doc('/openapi', {
+    openapi: '3.1.0',
+    info: {
+      title: 'Hono AI',
+      version: '1.0.0',
+      description: 'API for AI',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3333',
+        description: 'Local server',
       },
-    })
-  );
+    ],
+  });
   app.get(
     '/openapi/docs',
     Scalar({
       theme: 'elysiajs',
-      url: '/openapi',
-      title: 'Hono AI',
       pageTitle: 'Hono AI',
+      sources: [
+        {
+          title: 'Hono AI',
+          url: '/openapi',
+        },
+        // {
+        //   title: 'Scalar Galaxy',
+        //   url: 'https://cdn.jsdelivr.net/npm/@scalar/galaxy/dist/latest.json',
+        // },
+      ],
     })
   );
-  // app.get('/ui', swaggerUI({ url: '/doc' }));
+
+  // markdown for LLMs. this should be placed after generating openapi docs
+  const content = app.getOpenAPI31Document({
+    openapi: '3.1.0',
+    info: { title: 'Example', version: 'v1' },
+  });
+  const markdown = await createMarkdownFromOpenApi(JSON.stringify(content));
+
+  app.get('/llms.txt', (c) => {
+    return c.text(markdown);
+  });
 }

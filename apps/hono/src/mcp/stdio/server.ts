@@ -1,11 +1,12 @@
 // do not put any dependencies here that is not available in @workspace/web, this file also used by @workspace/web
+
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import type {
   GetPromptResult,
   ReadResourceResult,
 } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2';
 
@@ -62,7 +63,7 @@ server.prompt(
   'greeting-prompt',
   'A simple greeting from pikachu',
   {
-    name: z.string().describe('Pokemon name to include in greeting'),
+    name: z3.string().describe('Pokemon name to include in greeting'),
   },
   // biome-ignore lint/suspicious/useAwait: xxx
   async ({ name }): Promise<GetPromptResult> => {
@@ -105,7 +106,7 @@ server.tool(
   'get-pokemon',
   'Get Pokemon details by name',
   {
-    name: z.string(),
+    name: z3.string(),
   },
   async ({ name }) => {
     /**

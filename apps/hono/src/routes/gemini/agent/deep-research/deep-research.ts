@@ -1,50 +1,52 @@
+import { createRoute, type OpenAPIHono, z } from '@hono/zod-openapi';
 import { type AttributeValue, metrics, trace } from '@opentelemetry/api';
 import { generateObject, generateText, tool } from 'ai';
-import { Hono } from 'hono';
-import type { Variables } from 'hono/types';
-import { describeRoute } from 'hono-openapi';
-import { resolver, validator } from 'hono-openapi/zod';
 import { crush } from 'radashi';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 import { models } from '@/core/api/ai';
+import type { Variables } from '@/core/types/hono';
 import { recordSpan } from '@/core/utils/telemetry';
-
-// For extending the Zod schema with OpenAPI properties
-import 'zod-openapi/extend';
 
 const tracer = trace.getTracer('deepResearchEndpoint', '1.0.0');
 const meter = metrics.getMeter('deepResearchEndpoint', '1.0.0');
 const queriesCounter = meter.createCounter('deepResearch.queries');
 const searchResultsCounter = meter.createCounter('deepResearch.searchResults');
 
-const searchResultSchema = z.object({
-  title: z.string().describe('The title of the search result'),
-  content: z.string().describe('The content of the search result'),
-  url: z.string().describe('The url of the search result source'),
+const searchResultSchema = z3.object({
+  title: z3.string().describe('The title of the search result'),
+  content: z3.string().describe('The content of the search result'),
+  url: z3.string().describe('The url of the search result source'),
 });
-export type SearchResult = z.infer<typeof searchResultSchema>;
+export type SearchResult = z3.infer<typeof searchResultSchema>;
 
-const learningSchema = z.object({
-  learning: z.string().describe('The learning from the search result'),
-  followUpQuestions: z
-    .array(z.string())
+const learningSchema = z3.object({
+  learning: z3.string().describe('The learning from the search result'),
+  followUpQuestions: z3
+    .array(z3.string())
     .describe('The follow-up questions from the search result'),
 });
 
-const researchSchema = z.object({
-  query: z.string().optional().describe('The current query to research'),
-  queries: z
-    .array(z.string())
+const researchSchema = z3.object({
+  query: z3.string().optional().describe('The current query to research'),
+  queries: z3
+    .array(z3.string())
     .describe('The current relevant search queries based on query'),
-  searchResults: z
+  searchResults: z3
     .array(searchResultSchema)
     .describe('The accumulated search results'),
-  learnings: z.array(learningSchema).describe('The accumulated learnings'),
-  completedQueries: z
-    .array(z.string())
+  learnings: z3.array(learningSchema).describe('The accumulated learnings'),
+  completedQueries: z3
+    .array(z3.string())
     .describe('The accumulated completed queries'),
 });
-type Research = z.infer<typeof researchSchema>;
+type Research = z3.infer<typeof researchSchema>;
+
+const searchWebParamsSchema = z3.object({
+  query: z3.string().min(1).describe('The query to search the web for'),
+});
+const searchWebSchema = z3.object({
+  results: z3.array(searchResultSchema).describe('The search results'),
+});
 
 const accumulatedResearch: Research = {
   query: undefined,
@@ -220,9 +222,7 @@ export async function searchAndEvaluate(
     tools: {
       searchWeb: tool({
         description: 'Search the web for information about a given query',
-        parameters: z.object({
-          query: z.string().min(1),
-        }),
+        parameters: searchWebParamsSchema,
         async execute({ query: _query }) {
           /**
            * we can't get real `sources` based on the search results using `experimental_output`
@@ -244,9 +244,7 @@ export async function searchAndEvaluate(
             //     results: z.array(searchResultSchema),
             //   }),
             // }),
-            schema: z.object({
-              results: z.array(searchResultSchema),
-            }),
+            schema: searchWebSchema,
             experimental_telemetry: {
               isEnabled: true,
               functionId: 'searchAndEvaluate_searchWeb',
@@ -262,7 +260,7 @@ export async function searchAndEvaluate(
       // LLM as a judge
       evaluate: tool({
         description: 'Evaluate the search results',
-        parameters: z.object({}),
+        parameters: z3.object({}),
         async execute() {
           // biome-ignore lint/style/noNonNullAssertion: xxx
           const pendingResult = pendingSearchResults.pop()!;
@@ -324,8 +322,8 @@ export async function generateSearchQueries(query: string, depth = 1) {
     model: models.flash25,
     // search query should not be too long/detailed to avoid not being able to find results
     prompt: `Generate ${depth} relevant search queries for the following query: ${query}`,
-    schema: z.object({
-      queries: z.array(z.string()).min(depth).max(5),
+    schema: z3.object({
+      queries: z3.array(z3.string()).min(depth).max(5),
     }),
     experimental_telemetry: {
       isEnabled: true,
@@ -337,69 +335,117 @@ export async function generateSearchQueries(query: string, depth = 1) {
   return object.queries;
 }
 
-export const agentDeepResearchApp = new Hono<{
-  Variables: Variables;
-}>(); // .basePath('/api/v1');
-
-agentDeepResearchApp.post(
-  '/',
-  describeRoute({
-    description: 'Generate search queries for a given query',
-    responses: {
-      200: {
-        description: 'The generated search queries',
-        content: {
-          'application/json': {
-            schema: resolver(
-              z.object({
-                research: z.object({
-                  query: z.string(),
-                  queries: z.array(z.string()),
-                  searchResults: z.array(searchResultSchema),
-                  learnings: z.array(learningSchema),
-                  completedQueries: z.array(z.string()),
-                }),
-              })
-            ),
+export function deepResearchRoutes(
+  app: OpenAPIHono<{
+    Variables: Variables;
+  }>
+) {
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/gemini/agent/deep-research',
+      summary: 'Agent: Deep Research',
+      description:
+        'An agent that specialized in generating deep research report',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: z.object({
+                query: z
+                  .string()
+                  .describe('The query to generate search queries for')
+                  .openapi({
+                    example: 'What do you need to be a D1 shotput athlete?',
+                  }),
+                depth: z
+                  .number()
+                  .describe('The depth of the search queries')
+                  .openapi({
+                    example: 1,
+                  }),
+                breadth: z
+                  .number()
+                  .describe('The breadth of the search queries')
+                  .openapi({
+                    example: 2,
+                  }),
+              }),
+            },
           },
         },
       },
-    },
-  }),
-  validator(
-    'json',
-    z.object({
-      query: z
-        .string()
-        .describe('The query to generate search queries for')
-        .openapi({
-          example: 'What do you need to be a D1 shotput athlete?',
-        }),
-      depth: z.number().describe('The depth of the search queries').openapi({
-        example: 1,
-      }),
-      breadth: z
-        .number()
-        .describe('The breadth of the search queries')
-        .openapi({
-          example: 2,
-        }),
-    })
-  ),
-  async (c) => {
-    const { query, depth = 1, breadth = 2 } = c.req.valid('json');
-    return await recordSpan({
-      tracer,
-      name: 'deepResearchEndpoint',
-      attributes: { query, depth, breadth },
-      fn: async (span) => {
-        const research = await deepResearch(query, depth, breadth);
-        const report = await generateReport(research);
-        const response = { research, report };
-
-        span.setAttributes(crush(response) as Record<string, AttributeValue>);
-        return c.json(response);
+      responses: {
+        200: {
+          description: 'Deep research report',
+          content: {
+            'application/json': {
+              schema: z.object({
+                research: z.object({
+                  query: z
+                    .string()
+                    .optional()
+                    .describe('The current query to research'),
+                  queries: z
+                    .array(z.string())
+                    .describe(
+                      'The current relevant search queries based on query'
+                    ),
+                  searchResults: z
+                    .array(
+                      z.object({
+                        title: z
+                          .string()
+                          .describe('The title of the search result'),
+                        content: z
+                          .string()
+                          .describe('The content of the search result'),
+                        url: z
+                          .string()
+                          .describe('The url of the search result source'),
+                      })
+                    )
+                    .describe('The accumulated search results'),
+                  learnings: z
+                    .array(
+                      z.object({
+                        learning: z
+                          .string()
+                          .describe('The learning from the search result'),
+                        followUpQuestions: z
+                          .array(z.string())
+                          .describe(
+                            'The follow-up questions from the search result'
+                          ),
+                      })
+                    )
+                    .describe('The accumulated learnings'),
+                  completedQueries: z
+                    .array(z.string())
+                    .describe('The accumulated completed queries'),
+                }),
+                report: z.string().describe('The deep research report'),
+              }),
+            },
+          },
+        },
       },
-    });
-  }
-);
+    }),
+    async (c) => {
+      const { query, depth = 1, breadth = 2 } = c.req.valid('json');
+      return await recordSpan({
+        tracer,
+        name: 'deepResearchEndpoint',
+        attributes: { query, depth, breadth },
+        fn: async (span) => {
+          const research = await deepResearch(query, depth, breadth);
+          const report = await generateReport(research);
+          const response = { research, report };
+
+          span.setAttributes(crush(response) as Record<string, AttributeValue>);
+          return c.json(response);
+        },
+      });
+    }
+  );
+}

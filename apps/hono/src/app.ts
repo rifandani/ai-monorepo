@@ -1,6 +1,5 @@
-// import { reqResLogger } from '@/routes/middleware/req-res-logger';
 import { otel } from '@hono/otel';
-import { Hono } from 'hono';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { HTTPException } from 'hono/http-exception';
@@ -14,7 +13,6 @@ import { rateLimiter } from 'hono-rate-limiter';
 import { HTTPError } from 'ky';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
-import { auth } from '@/auth/libs';
 import { ENV } from '@/core/constants/env';
 import type { Variables } from '@/core/types/hono';
 import { Logger } from '@/core/utils/logger';
@@ -22,7 +20,7 @@ import { routes } from '@/routes';
 import { metricsMiddleware } from '@/routes/middleware/metrics';
 
 const logger = new Logger('honoApp');
-const app = new Hono<{
+const app = new OpenAPIHono<{
   Variables: Variables;
 }>(); // .basePath('/api/v1');
 
@@ -59,16 +57,13 @@ app.use(
   }),
   csrf(
     // {
-    //   origin: [`localhost:3000`],
+    //   origin: ['localhost:3000'],
     // },
   ),
   secureHeaders()
 );
 
-routes(app);
-app.on(['POST', 'GET'], '/api/auth/**', (c) => {
-  return auth.handler(c.req.raw);
-});
+await routes(app);
 // showRoutes(app, {
 //   colorize: true,
 // });

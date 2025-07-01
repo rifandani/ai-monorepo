@@ -4,7 +4,7 @@ import { createScorer, evalite } from 'evalite';
 import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
-import { z } from 'zod';
+import { z as z3 } from 'zod/v3';
 import { cacheModel } from '@/evalite/cache-model';
 import { generateSearchQueries } from '@/routes/gemini/agent/deep-research/deep-research';
 
@@ -46,8 +46,8 @@ Decide the quality of the queries and rate them accordingly:
 - good_quality: Solid queries with minor issues
 - fair_quality: Adequate but could be improved
 - poor_quality: Low quality, irrelevant, or poorly constructed queries`,
-      schema: z.object({
-        rating: z
+      schema: z3.object({
+        rating: z3
           .enum([
             'excellent_quality',
             'good_quality',
@@ -55,7 +55,7 @@ Decide the quality of the queries and rate them accordingly:
             'poor_quality',
           ])
           .describe('Your rating selection.'),
-        rationale: z
+        rationale: z3
           .string()
           .describe('Why you chose this rating. Be very detailed.'),
       }),
@@ -96,8 +96,8 @@ Decide if the queries cover different aspects and angles of the topic and rate t
 - good_diversity: Queries cover several different aspects with good variety
 - fair_diversity: Queries have some variety but with overlap or missing key aspects
 - poor_diversity: Queries are repetitive or cover very limited scope`,
-      schema: z.object({
-        rating: z
+      schema: z3.object({
+        rating: z3
           .enum([
             'excellent_diversity',
             'good_diversity',
@@ -105,7 +105,7 @@ Decide if the queries cover different aspects and angles of the topic and rate t
             'poor_diversity',
           ])
           .describe('Your rating selection.'),
-        rationale: z
+        rationale: z3
           .string()
           .describe('Why you chose this rating. Be very detailed.'),
       }),
