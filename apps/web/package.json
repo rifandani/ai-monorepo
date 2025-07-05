@@ -82,7 +82,7 @@
     "@hookform/devtools": "4.4.0",
     "@iconify/react": "6.0.0",
     "@tailwindcss/postcss": "4.1.10",
-    "@types/bun": "1.2.16",
+    "@types/bun": "1.2.18",
     "@types/node": "22.15.31",
     "@types/papaparse": "5.3.16",
     "@types/pg": "8.15.4",
