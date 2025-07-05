@@ -51,7 +51,7 @@ class StagehandSessionManager {
         try {
           logger.info('Initializing Stagehand...');
           await this.stagehand.init();
-          logger.info('Stagehand initialized successfully');
+
           this.initialized = true;
           return this.stagehand;
         } catch (initError) {
@@ -272,7 +272,6 @@ const performWebObservation = async (url?: string, instruction?: string) => {
       if (url) {
         logger.info(`Navigating to ${url}`);
         await page.goto(url);
-        logger.info(`Successfully navigated to ${url}`);
       }
 
       // Observe the page
@@ -327,7 +326,6 @@ const performWebExtraction = async (
       if (url) {
         logger.info(`Navigating to ${url}`);
         await page.goto(url);
-        logger.info(`Successfully navigated to ${url}`);
       }
 
       // Extract data

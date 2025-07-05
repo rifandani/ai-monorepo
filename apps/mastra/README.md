@@ -2,12 +2,18 @@
 
 ## 🎯 Todo
 
-- [ ] add evals
 - [ ] add MCP example
 
 ## 🌎 How to MCP
 
-Coming soon...
+We have a MCP server that manages a collection of markdown notes, exposing tools to create and read them, and providing intelligent prompts to assist with note-taking.
+
+Run the dev playground, and then navigate to the “MCP Servers” section:
+
+```bash
+# running in port 4111
+bun mastra dev
+```
 
 ## 📊 How to Observability
 
@@ -44,6 +50,11 @@ There are 2 ways to run evals:
 ### Using Dev Playground
 
 Run the dev playground and talk to an agent. The evals will be available after some conversations.
+
+```bash
+# running in port 4111
+bun mastra dev
+```
 
 ### Using Vitest
 

@@ -2,6 +2,7 @@ import { Mastra } from '@mastra/core/mastra';
 import { PostgresStore } from '@mastra/pg';
 import { ENV } from '@/core/constants/env';
 import { OtelLogger } from '@/core/utils/logger';
+import { notesMcpServer } from '@/mcp/notes/server';
 import { weatherAgent } from '@/meteorology/agents/weather';
 import { weatherWorkflow } from '@/meteorology/workflows/weather';
 import { stagehandAgent } from '@/web/agents/stagehand';
@@ -14,10 +15,11 @@ const storage = new PostgresStore({
 });
 
 export const mastra = new Mastra({
-  workflows: { weatherWorkflow },
-  agents: { stagehandAgent, weatherAgent },
   storage,
   logger, // default is `new ConsoleLogger({ name: 'Mastra', level: 'info' })`
+  workflows: { weatherWorkflow },
+  agents: { stagehandAgent, weatherAgent },
+  mcpServers: { notes: notesMcpServer },
   telemetry: {
     enabled: true,
     serviceName: 'mastra-service',
