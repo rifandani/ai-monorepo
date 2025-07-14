@@ -1,5 +1,6 @@
 import { defineConfig } from 'drizzle-kit';
 
+// config for drizzle-kit
 export default defineConfig({
   out: './drizzle',
   schema: './src/core/db/schema.ts',

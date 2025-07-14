@@ -92,6 +92,9 @@ const sdk = new NodeSDK({
   }),
   instrumentations: [
     getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-pg': {
+        enhancedDatabaseReporting: true,
+      },
       '@opentelemetry/instrumentation-http': {
         ignoreIncomingRequestHook: (request) => {
           return (

@@ -6,6 +6,50 @@
 - [ ] example of [Memories](https://ai-sdk.dev/providers/community-providers/mem0)
 - [ ] replace all `import { z } from 'zod'` or `import { z as z3 } from 'zod/v3'` occurences with `import { z } from 'zod/v4'` in the codebase. currently `@hono/zod-openapi@beta` works with zod 4, still waiting for [this issue](https://github.com/honojs/middleware/issues/1177) to be resolved.
 
+## 💾 How to Database
+
+We use `postgres@17` as RDBMS, `pgvector` as vector extension, `drizzle` as ORM, and `node-postgres` as driver.
+
+Config file for drizzle-kit is in `./drizzle.config.ts`. Entry file for drizzle-orm is in `./src/core/db/index.ts`.
+
+Follow below conventions:
+
+- use `snake_case` for table and column names
+- commit migration files to git
+
+### Database Migrations
+
+You can directly apply changes to your database using the drizzle-kit push command. This is a convenient method for quickly testing new schema designs or modifications in a local development environment, allowing for rapid iterations without the need to manage migration files.
+
+```bash
+# pull the latest schema from the database
+bun hono db:push
+```
+
+Alternatively, you can generate the migrations first, then run the migrations.
+
+```bash
+# generate the migrations
+bun hono db:gen
+
+# run the migrations
+bun hono db:migrate
+```
+
+### Database Seeding
+
+```bash
+# reset and seed the images table
+bun hono db:seed-images
+```
+
+### Database Studio
+
+```bash
+# run the drizzle studio at https://local.drizzle.studio?port=3003
+bun hono db:studio
+```
+
 ## 🌎 How to MCP
 
 We have a simple example of a MCP server and client in the `./src/mcp` directory.
