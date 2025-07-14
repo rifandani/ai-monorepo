@@ -1,3 +1,5 @@
+name: ai-hono
+
 services:
   pgvector_db:
     image: pgvector/pgvector:pg17 # PostgreSQL with pgvector support
@@ -10,7 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - pgvector_db_data:/var/lib/postgresql/data
-      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql # init pgvector extension
     restart: always
 
   redis_cache:

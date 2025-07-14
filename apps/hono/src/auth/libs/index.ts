@@ -7,6 +7,7 @@ import * as schema from '@/core/db/schema';
 
 export const auth = betterAuth({
   appName: 'ai-hono',
+  secret: ENV.BETTER_AUTH_SECRET,
   baseURL: ENV.APP_URL,
   database: drizzleAdapter(db, {
     provider: 'pg',
