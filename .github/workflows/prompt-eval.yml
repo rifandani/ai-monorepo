@@ -5,6 +5,10 @@ on:
     paths:
       - "apps/hono/evals/prompts/**"
 
+env:
+  # The "FORCE_COLOR" variable, when set to 1
+  FORCE_COLOR: "1"
+
 jobs:
   evaluate:
     runs-on: ubuntu-latest
