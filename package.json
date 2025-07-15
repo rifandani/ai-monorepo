@@ -51,7 +51,8 @@
     "better-sqlite3",
     "esbuild",
     "protobufjs",
-    "sharp"
+    "sharp",
+    "vue-demi"
   ],
   "workspaces": [
     "apps/*",

@@ -92,7 +92,7 @@ Do not return any preamble or explanations, return only a pure JSON string surro
 Examples:
 
 question: "What can you tell me about albert Albert Einstein?"
-context: "Albert Einstein (14 March 1879 – 18 April 1955) was a German-born theoretical physicist, widely held to be one of the greatest and most influential scientists of all time. Best known for developing the theory of relativity, he also made important contributions to quantum mechanics, and was thus a central figure in the revolutionary reshaping of the scientific understanding of nature that modern physics accomplished in the first decades of the twentieth century. His mass–energy equivalence formula E = mc2, which arises from relativity theory, has been called "the world's most famous equation". He received the 1921 Nobel Prize in Physics "for his services to theoretical physics, and especially for his discovery of the law of the photoelectric effect", a pivotal step in the development of quantum theory. His work is also known for its influence on the philosophy of science. In a 1999 poll of 130 leading physicists worldwide by the British journal Physics World, Einstein was ranked the greatest physicist of all time. His intellectual achievements and originality have made Einstein synonymous with genius."
+context: "Albert Einstein (14 March 1879 - 18 April 1955) was a German-born theoretical physicist, widely held to be one of the greatest and most influential scientists of all time. Best known for developing the theory of relativity, he also made important contributions to quantum mechanics, and was thus a central figure in the revolutionary reshaping of the scientific understanding of nature that modern physics accomplished in the first decades of the twentieth century. His mass–energy equivalence formula E = mc2, which arises from relativity theory, has been called "the world's most famous equation". He received the 1921 Nobel Prize in Physics "for his services to theoretical physics, and especially for his discovery of the law of the photoelectric effect", a pivotal step in the development of quantum theory. His work is also known for its influence on the philosophy of science. In a 1999 poll of 130 leading physicists worldwide by the British journal Physics World, Einstein was ranked the greatest physicist of all time. His intellectual achievements and originality have made Einstein synonymous with genius."
 answer: "Albert Einstein born in 14 March 1879 was German-born theoretical physicist, widely held to be one of the greatest and most influential scientists of all time. He received the 1921 Nobel Prize in Physics for his services to theoretical physics. He published 4 papers in 1905. Einstein moved to Switzerland in 1895"
 verification: \`\`\`{"reason": "The provided context was indeed useful in arriving at the given answer. The context includes key information about Albert Einstein's life and contributions, which are reflected in the answer.", "verdict": 1}\`\`\`
 
@@ -257,4 +257,38 @@ question: {{question}}
 answer: {{answer}}
 ground_truth: {{ground_truth}}
 extracted_statements:
+`;
+
+/**
+ * Prompt taken from autoevals:
+ * {@link https://github.com/braintrustdata/autoevals/blob/5aa20a0a9eb8fc9e07e9e5722ebf71c68d082f32/templates/factuality.yaml}
+ *
+ * @param question - the question that the expert and submission are answering
+ * @param expert - the expert answer used to evaluate the submission
+ * @param submission - the submission answer to be evaluated
+ * @returns the prompt for the factuality evaluation
+ */
+export const getFactualityPrompt = (
+  question: string,
+  expert: string,
+  submission: string
+) => `
+  You are comparing a submitted answer to an expert answer on a given question. Here is the data:
+  [BEGIN DATA]
+  ************
+  [Question]: ${question}
+  ************
+  [Expert]: ${expert}
+  ************
+  [Submission]: ${submission}
+  ************
+  [END DATA]
+
+  Compare the factual content of the submitted answer with the expert answer. Ignore any differences in style, grammar, or punctuation.
+  The submitted answer may either be a subset or superset of the expert answer, or it may conflict with it. Determine which case applies. Answer the question by selecting one of the following options:
+  (A) The submitted answer is a subset of the expert answer and is fully consistent with it.
+  (B) The submitted answer is a superset of the expert answer and is fully consistent with it.
+  (C) The submitted answer contains all the same details as the expert answer.
+  (D) There is a disagreement between the submitted answer and the expert answer.
+  (E) The answers differ, but these differences don't matter from the perspective of factuality.
 `;

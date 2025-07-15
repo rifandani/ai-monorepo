@@ -6,6 +6,23 @@ import { createStorage } from 'unstorage';
 import fsDriver from 'unstorage/drivers/fs';
 import { z as z3 } from 'zod/v3';
 import { cacheModel } from '@/evalite/cache-model';
+import { AnswerRelevancyMetric } from '@/evalite/llm/answer-relevancy';
+import { BiasMetric } from '@/evalite/llm/bias';
+import { ContextPositionMetric } from '@/evalite/llm/context-position';
+import { ContextPrecisionMetric } from '@/evalite/llm/context-precision';
+import { ContextRelevancyMetric } from '@/evalite/llm/context-relevancy';
+import { ContextualRecallMetric } from '@/evalite/llm/contextual-recall';
+import { FaithfulnessMetric } from '@/evalite/llm/faithfulness';
+import { HallucinationMetric } from '@/evalite/llm/hallucination';
+import { PromptAlignmentMetric } from '@/evalite/llm/prompt-alignment';
+import { SummarizationMetric } from '@/evalite/llm/summarization';
+import { ToxicityMetric } from '@/evalite/llm/toxicity';
+import { CompletenessMetric } from '@/evalite/nlp/completeness';
+import { ContentSimilarityMetric } from '@/evalite/nlp/content-similarity';
+import { KeywordCoverageMetric } from '@/evalite/nlp/keyword-coverage';
+import { TextualDifferenceMetric } from '@/evalite/nlp/textual-difference';
+import { ToneConsistencyMetric } from '@/evalite/nlp/tone-consistency';
+import { getFactualityPrompt } from '@/evalite/prompts';
 
 const storage = createStorage({
   driver: fsDriver({
@@ -13,9 +30,287 @@ const storage = createStorage({
   }),
 });
 
-/**
- * Factuality scorer using Google's Gemini 2.0 Flash model.
- */
+const model = traceAISDKModel(
+  cacheModel(google('gemini-2.0-flash-001'), storage)
+);
+
+// #region LLM
+export const AnswerRelevancy = createScorer<string, string, string>({
+  name: 'AnswerRelevancy',
+  scorer: async ({ input, output }) => {
+    const answerRelevancyMetric = new AnswerRelevancyMetric(model);
+    const { score, info } = await answerRelevancyMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: {
+        rationale: info.reason,
+      },
+    };
+  },
+});
+
+export const Bias = createScorer<string, string, string>({
+  name: 'Bias',
+  scorer: async ({ input, output }) => {
+    const biasMetric = new BiasMetric(model);
+    const { score, info } = await biasMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: {
+        rationale: info.reason,
+      },
+    };
+  },
+});
+
+export const ContextPosition = (retrievalContext: string[]) => {
+  createScorer<string, string, string>({
+    name: 'ContextPosition',
+    scorer: async ({ input, output }) => {
+      const contextPositionMetric = new ContextPositionMetric(model, {
+        context: retrievalContext,
+      });
+      const { score, info } = await contextPositionMetric.measure(
+        input,
+        output
+      );
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const ContextPrecision = (retrievalContext: string[]) => {
+  createScorer<string, string, string>({
+    name: 'ContextPrecision',
+    scorer: async ({ input, output }) => {
+      const contextPrecisionMetric = new ContextPrecisionMetric(model, {
+        context: retrievalContext,
+      });
+      const { score, info } = await contextPrecisionMetric.measure(
+        input,
+        output
+      );
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const ContextRelevancy = (retrievalContext: string[]) => {
+  createScorer<string, string, string>({
+    name: 'ContextRelevancy',
+    scorer: async ({ input, output }) => {
+      const contextRelevancyMetric = new ContextRelevancyMetric(model, {
+        context: retrievalContext,
+      });
+      const { score, info } = await contextRelevancyMetric.measure(
+        input,
+        output
+      );
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const ContextualRecall = (retrievalContext: string[]) => {
+  createScorer<string, string, string>({
+    name: 'ContextualRecall',
+    scorer: async ({ input, output }) => {
+      const contextualRecallMetric = new ContextualRecallMetric(model, {
+        context: retrievalContext,
+      });
+      const { score, info } = await contextualRecallMetric.measure(
+        input,
+        output
+      );
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const Faithfulness = (retrievalContext: string[]) => {
+  createScorer<string, string, string>({
+    name: 'Faithfulness',
+    scorer: async ({ input, output }) => {
+      const faithfulnessMetric = new FaithfulnessMetric(model, {
+        context: retrievalContext,
+      });
+      const { score, info } = await faithfulnessMetric.measure(input, output);
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const Hallucination = (retrievalContext: string[]) => {
+  createScorer<string, string, string>({
+    name: 'Hallucination',
+    scorer: async ({ input, output }) => {
+      const hallucinationMetric = new HallucinationMetric(model, {
+        context: retrievalContext,
+      });
+      const { score, info } = await hallucinationMetric.measure(input, output);
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const PromptAlignment = (instructions: string[]) => {
+  createScorer<string, string, string>({
+    name: 'PromptAlignment',
+    scorer: async ({ input, output }) => {
+      const promptAlignmentMetric = new PromptAlignmentMetric(model, {
+        instructions,
+      });
+      const { score, info } = await promptAlignmentMetric.measure(
+        input,
+        output
+      );
+
+      return {
+        score,
+        metadata: {
+          rationale: info.reason,
+        },
+      };
+    },
+  });
+};
+
+export const Summarization = createScorer<string, string, string>({
+  name: 'Summarization',
+  scorer: async ({ input, output }) => {
+    const summarizationMetric = new SummarizationMetric(model);
+    const { score, info } = await summarizationMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: {
+        rationale: info.reason,
+      },
+    };
+  },
+});
+
+export const Toxicity = createScorer<string, string, string>({
+  name: 'Toxicity',
+  scorer: async ({ input, output }) => {
+    const toxicityMetric = new ToxicityMetric(model);
+    const { score, info } = await toxicityMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: {
+        rationale: info.reason,
+      },
+    };
+  },
+});
+// #endregion LLM
+
+// #region NLP
+export const Completeness = createScorer<string, string, string>({
+  name: 'Completeness',
+  scorer: ({ input, output }) => {
+    const completenessMetric = new CompletenessMetric();
+    const { score, info } = completenessMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: info,
+    };
+  },
+});
+
+export const ContentSimilarity = createScorer<string, string, string>({
+  name: 'ContentSimilarity',
+  scorer: ({ input, output }) => {
+    const contentSimilarityMetric = new ContentSimilarityMetric();
+    const { score, info } = contentSimilarityMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: info,
+    };
+  },
+});
+
+export const KeywordCoverage = createScorer<string, string, string>({
+  name: 'KeywordCoverage',
+  scorer: ({ input, output }) => {
+    const keywordCoverageMetric = new KeywordCoverageMetric();
+    const { score, info } = keywordCoverageMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: info,
+    };
+  },
+});
+
+export const TextualDifference = createScorer<string, string, string>({
+  name: 'TextualDifference',
+  scorer: ({ input, output }) => {
+    const textualDifferenceMetric = new TextualDifferenceMetric();
+    const { score, info } = textualDifferenceMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: info,
+    };
+  },
+});
+
+export const ToneConsistency = createScorer<string, string, string>({
+  name: 'ToneConsistency',
+  scorer: ({ input, output }) => {
+    const toneConsistencyMetric = new ToneConsistencyMetric();
+    const { score, info } = toneConsistencyMetric.measure(input, output);
+
+    return {
+      score,
+      metadata: info,
+    };
+  },
+});
+// #endregion NLP
+
 export const Factuality = createScorer<string, string, string>({
   name: 'Factuality',
   scorer: async ({ input, expected, output }) => {
@@ -23,31 +318,7 @@ export const Factuality = createScorer<string, string, string>({
       model: traceAISDKModel(
         cacheModel(google('gemini-2.0-flash-001'), storage)
       ),
-      /**
-       * Prompt taken from autoevals:
-       *
-       * {@link https://github.com/braintrustdata/autoevals/blob/5aa20a0a9eb8fc9e07e9e5722ebf71c68d082f32/templates/factuality.yaml}
-       */
-      prompt: `
-      You are comparing a submitted answer to an expert answer on a given question. Here is the data:
-      [BEGIN DATA]
-      ************
-      [Question]: ${input}
-      ************
-      [Expert]: ${expected}
-      ************
-      [Submission]: ${output}
-      ************
-      [END DATA]
-
-      Compare the factual content of the submitted answer with the expert answer. Ignore any differences in style, grammar, or punctuation.
-      The submitted answer may either be a subset or superset of the expert answer, or it may conflict with it. Determine which case applies. Answer the question by selecting one of the following options:
-      (A) The submitted answer is a subset of the expert answer and is fully consistent with it.
-      (B) The submitted answer is a superset of the expert answer and is fully consistent with it.
-      (C) The submitted answer contains all the same details as the expert answer.
-      (D) There is a disagreement between the submitted answer and the expert answer.
-      (E) The answers differ, but these differences don't matter from the perspective of factuality.
-    `,
+      prompt: getFactualityPrompt(input, expected ?? '', output),
       schema: z3.object({
         answer: z3.enum(['A', 'B', 'C', 'D', 'E']).describe('Your selection.'),
         rationale: z3

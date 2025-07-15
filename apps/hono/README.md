@@ -58,6 +58,21 @@ bun hono db:seed-images
 bun hono db:studio
 ```
 
+## 🔒 How to Auth
+
+We use `better-auth` for authentication.
+
+```bash
+# everytime we add/remove/change auth schema, generate the new auth schema
+bun hono auth:gen
+
+# generate drizzle migrations
+bun hono db:gen
+
+# run drizzle migrations
+bun hono db:migrate
+```
+
 ## 🌎 How to MCP
 
 We have a simple example of a MCP server and client in the `./src/mcp` directory.
