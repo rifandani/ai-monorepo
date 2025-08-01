@@ -56,7 +56,7 @@
     "@opentelemetry/sdk-node": "0.203.0",
     "@opentelemetry/sdk-trace-node": "2.0.1",
     "@opentelemetry/semantic-conventions": "1.36.0",
-    "@scalar/hono-api-reference": "0.9.10",
+    "@scalar/hono-api-reference": "0.9.13",
     "@scalar/openapi-to-markdown": "0.2.21",
     "@t3-oss/env-core": "0.13.8",
     "@workspace/core": "workspace:*",
