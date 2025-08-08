@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { KeywordCoverageMetric } from './index';
+import { KeywordCoverageMetric } from './index.js';
 
 describe('KeywordCoverageMetric', () => {
   const metric = new KeywordCoverageMetric();

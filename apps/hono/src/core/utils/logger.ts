@@ -15,7 +15,7 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
-import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global.js';
 
 const COLOR = {
   RED: '\x1B[31m',

@@ -1,8 +1,8 @@
 import type { LanguageModel } from 'ai';
-import type { MetricResultWithReason } from '@/evalite/llm/metric';
-import { Metric } from '@/evalite/llm/metric';
-import { ToxicityJudge } from '@/evalite/llm/toxicity/metricJudge';
-import { roundToTwoDecimals } from '@/evalite/llm/utils';
+import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
+import { Metric } from '@/evalite/llm/metric.js';
+import { ToxicityJudge } from '@/evalite/llm/toxicity/metricJudge.js';
+import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface ToxicityMetricOptions {
   scale?: number;

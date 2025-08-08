@@ -169,7 +169,6 @@ export const useStickToBottom = (
   const [isAtBottom, updateIsAtBottom] = useState(options.initial !== false);
   const [isNearBottom, setIsNearBottom] = useState(false);
 
-  // biome-ignore lint/style/noNonNullAssertion: xxx
   const optionsRef = useRef<StickToBottomOptions>(null!);
   optionsRef.current = options;
 
@@ -672,6 +671,5 @@ function mergeAnimations(...animations: (Animation | boolean | undefined)[]) {
     animationCache.set(key, Object.freeze(result));
   }
 
-  // biome-ignore lint/style/noNonNullAssertion: xxx
   return instant ? 'instant' : animationCache.get(key)!;
 }

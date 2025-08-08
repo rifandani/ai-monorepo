@@ -5,7 +5,7 @@ import {
   generateClaimExtractionPrompt,
   generateEvaluatePrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/faithfulness/prompts';
+} from '@/evalite/llm/faithfulness/prompts.js';
 
 export class FaithfulnessJudge {
   private model: LanguageModel;

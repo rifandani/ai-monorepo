@@ -2,8 +2,6 @@
 
 ## 🎯 Todo
 
-- [ ] zod v4
-- [ ] ai sdk v5
 - [ ] replace `SERVICE_NAME` into `ENV.APP_TITLE`
 - [ ] do not use all `@opentelemetry/auto-instrumentations-node`, it will reduce performance up to 80%. Use selectively like `@opentelemetry/instrumentation-dns`, `@opentelemetry/instrumentation-http`, `@opentelemetry/instrumentation-net`, `@opentelemetry/instrumentation-pg`, `@opentelemetry/instrumentation-runtime-node`, `@opentelemetry/instrumentation-undici`.
 - [ ] example of MCP OAUTH
@@ -60,21 +58,6 @@ bun hono db:seed-images
 ```bash
 # run the drizzle studio at https://local.drizzle.studio?port=3003
 bun hono db:studio
-```
-
-## 🔒 How to Auth
-
-We use `better-auth` for authentication.
-
-```bash
-# everytime we add/remove/change auth schema, generate the new auth schema
-bun hono auth:gen
-
-# generate drizzle migrations
-bun hono db:gen
-
-# run drizzle migrations
-bun hono db:migrate
 ```
 
 ## 🌎 How to MCP

@@ -1,8 +1,8 @@
 import { createRoute, type OpenAPIHono, z } from '@hono/zod-openapi';
 import { generateObject, generateText, tool } from 'ai';
 import { z as z3 } from 'zod/v3';
-import { models, textSchema, usageSchema } from '@/core/api/ai';
-import type { Variables } from '@/core/types/hono';
+import { models, textSchema, usageSchema } from '@/core/api/ai.js';
+import type { Variables } from '@/core/types/hono.js';
 
 async function getCompanyInfo(company: string) {
   const { object } = await generateObject({

@@ -4,7 +4,7 @@ import {
   CONTEXT_RELEVANCY_AGENT_INSTRUCTIONS,
   generateEvaluatePrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/context-relevancy/prompts';
+} from '@/evalite/llm/context-relevancy/prompts.js';
 
 export class ContextRelevancyJudge {
   private model: LanguageModel;

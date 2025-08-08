@@ -5,12 +5,12 @@
 - [ ] performance issue in mermaid rendering
 - [ ] performance issue in chat field input
 - [ ] formatting styles in markdown sometimes not rendered correctly in ordered list
-- [ ] sometimes response text includes ````markdown```` block (look into `fwgamx3VLYjuB1jy.json` chat log), we need to parse it as regular markdown instead of code block. Or adjust system prompt to avoid this
+- [ ] sometimes response text includes ````markdown```` block, we need to parse it as regular markdown instead of code block. Or adjust system prompt to avoid this
 
 ## 🎯 Todo
 
-- [ ] zod v4
 - [ ] ai sdk v5
+- [ ] follow up with `fe-monorepo` latest version
 - [ ] implement share in chat history
 - [ ] implement rename in chat history
 - [ ] implement archive in chat history

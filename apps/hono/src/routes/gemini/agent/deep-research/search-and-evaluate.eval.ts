@@ -3,13 +3,13 @@ import { generateObject } from 'ai';
 import { createScorer, evalite } from 'evalite';
 import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
-import fsDriver from 'unstorage/drivers/fs';
+import fsDriver from 'unstorage/drivers/fs-lite';
 import { z as z3 } from 'zod/v3';
-import { cacheModel } from '@/evalite/cache-model';
+import { cacheModel } from '@/evalite/cache-model.js';
 import {
   type SearchResult,
   searchAndEvaluate,
-} from '@/routes/gemini/agent/deep-research/deep-research';
+} from '@/routes/gemini/agent/deep-research/deep-research.js';
 
 type Input = {
   query: string;
@@ -17,6 +17,7 @@ type Input = {
 };
 
 const storage = createStorage({
+  // @ts-expect-error This expression is not callable. Type 'typeof import("/Users/rizeki.rifandani/Desktop/dev/nodejs/ai-monorepo/node_modules/unstorage/drivers/fs-lite")' has no call signatures.
   driver: fsDriver({
     base: '.evalite',
   }),

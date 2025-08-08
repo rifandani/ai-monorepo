@@ -12,9 +12,9 @@ import {
 } from 'drizzle-orm';
 import { unique } from 'radashi';
 import { z } from 'zod/v4';
-import { db } from '@/core/db';
-import { imagesTable, selectImagesTableSchema } from '@/core/db/schema';
-import type { Variables } from '@/core/types/hono';
+import type { Variables } from '@/core/types/hono.js';
+import { db } from '@/db/index.js';
+import { imagesTable, selectImagesTableSchema } from '@/db/schema.js';
 
 const imageSchema = selectImagesTableSchema.extend({
   similarity: z

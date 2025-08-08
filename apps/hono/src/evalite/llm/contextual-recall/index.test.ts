@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it } from 'vitest';
-import { isCloserTo, type TestCaseWithContext } from '@/evalite/llm/utils';
-import { ContextualRecallMetric } from './index';
+import { isCloserTo, type TestCaseWithContext } from '@/evalite/llm/utils.js';
+import { ContextualRecallMetric } from './index.js';
 
 const testCases: TestCaseWithContext[] = [
   {
@@ -64,7 +64,7 @@ describe(
   'ContextualRecallMetric',
   () => {
     it('should succeed when context is relevant', async () => {
-      const testCase = testCases[0];
+      const testCase = testCases[0]!;
       const metric = new ContextualRecallMetric(model, {
         context: testCase.context,
       });
@@ -73,7 +73,7 @@ describe(
     });
 
     it('should be mixed', async () => {
-      const testCase = testCases[1];
+      const testCase = testCases[1]!;
       const metric = new ContextualRecallMetric(model, {
         context: testCase.context,
       });
@@ -84,7 +84,7 @@ describe(
     });
 
     it('should be none', async () => {
-      const testCase = testCases[2];
+      const testCase = testCases[2]!;
       const metric = new ContextualRecallMetric(model, {
         context: testCase.context,
       });
@@ -93,7 +93,7 @@ describe(
     });
 
     it('should allow non-contextual outputs', async () => {
-      const testCase = testCases[3];
+      const testCase = testCases[3]!;
       const metric = new ContextualRecallMetric(model, {
         context: testCase.context,
       });

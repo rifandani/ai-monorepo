@@ -50,18 +50,18 @@ import {
   reviewCodeSchemaV3,
   textSchema,
   usageSchema,
-} from '@/core/api/ai';
-import { CACHE_CONTENT_EXPLICIT_CONTENT } from '@/core/constants/cache';
-import type { Variables } from '@/core/types/hono';
-import { Logger } from '@/core/utils/logger';
-import { cached } from '@/core/utils/middleware';
+} from '@/core/api/ai.js';
+import { CACHE_CONTENT_EXPLICIT_CONTENT } from '@/core/constants/cache.js';
+import type { Variables } from '@/core/types/hono.js';
+import { Logger } from '@/core/utils/logger.js';
+import { cached } from '@/core/utils/middleware.js';
 import {
   answerTool,
   calculateTool,
   getCityAttractionTool,
   getWeatherTool,
   logToConsoleTool,
-} from '@/core/utils/tool';
+} from '@/core/utils/tool.js';
 
 const logger = new Logger('geminiEndpoint');
 

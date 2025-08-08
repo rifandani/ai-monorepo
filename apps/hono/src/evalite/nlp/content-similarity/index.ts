@@ -1,5 +1,5 @@
-import { Metric, type MetricResult } from '@/evalite/llm/metric';
-import { compareTwoStrings } from '@/evalite/nlp/content-similarity/string-similarity';
+import { Metric, type MetricResult } from '@/evalite/llm/metric.js';
+import { compareTwoStrings } from '@/evalite/nlp/content-similarity/string-similarity.js';
 
 interface ContentSimilarityResult extends MetricResult {
   info: {

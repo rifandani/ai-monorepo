@@ -20,16 +20,19 @@
       "@commitlint/config-conventional"
     ]
   },
-  "description": "AI Monorepo",
+  "description": "AI Monorepo Template",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
-  "packageManager": "bun@1.2.18",
+  "packageManager": "bun@1.2.19",
   "private": true,
   "scripts": {
     "prepare": "husky",
+    "compose:up": "docker compose -f ./docker/docker-compose.yml up --build",
     "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
-    "compose:up": "docker compose up --build",
+    "bump-deps": "bunx npm-check-updates --deep -u --peer -x @babel*,tamagui",
+    "cs": "changeset",
+    "cs:v": "changeset version",
     "format": "ultracite format",
     "format:unsafe": "ultracite format --unsafe",
     "lint": "ultracite lint",

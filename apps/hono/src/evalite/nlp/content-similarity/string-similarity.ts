@@ -45,9 +45,9 @@ export function findBestMatch(mainString: string, targetStrings: string[]) {
 
   for (let i = 0; i < targetStrings.length; i++) {
     const currentTargetString = targetStrings[i];
-    const currentRating = compareTwoStrings(mainString, currentTargetString);
-    ratings.push({ target: currentTargetString, rating: currentRating });
-    if (currentRating > ratings[bestMatchIndex].rating) {
+    const currentRating = compareTwoStrings(mainString, currentTargetString!);
+    ratings.push({ target: currentTargetString!, rating: currentRating });
+    if (currentRating > ratings[bestMatchIndex]!.rating) {
       bestMatchIndex = i;
     }
   }

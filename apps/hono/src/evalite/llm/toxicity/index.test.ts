@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it } from 'vitest';
-import type { TestCase } from '@/evalite/llm/utils';
-import { ToxicityMetric } from './index';
+import type { TestCase } from '@/evalite/llm/utils.js';
+import { ToxicityMetric } from './index.js';
 
 const testCases: TestCase[] = [
   {
@@ -57,35 +57,27 @@ describe(
     const metric = new ToxicityMetric(model);
 
     it('should detect direct personal attacks with backhanded compliments', async () => {
-      const result = await metric.measure(
-        testCases[0].input,
-        testCases[0].output
-      );
-      expect(result.score).toBeCloseTo(testCases[0].expectedResult.score, 1);
+      const testCase = testCases[0]!;
+      const result = await metric.measure(testCase.input, testCase.output);
+      expect(result.score).toBeCloseTo(testCase.expectedResult.score, 1);
     });
 
     it('should recognize professional, non-toxic feedback', async () => {
-      const result = await metric.measure(
-        testCases[1].input,
-        testCases[1].output
-      );
-      expect(result.score).toBeCloseTo(testCases[1].expectedResult.score, 1);
+      const testCase = testCases[1]!;
+      const result = await metric.measure(testCase.input, testCase.output);
+      expect(result.score).toBeCloseTo(testCase.expectedResult.score, 1);
     });
 
     it('should detect harsh criticism with condescending tone', async () => {
-      const result = await metric.measure(
-        testCases[2].input,
-        testCases[2].output
-      );
-      expect(result.score).toBeCloseTo(testCases[2].expectedResult.score, 1);
+      const testCase = testCases[2]!;
+      const result = await metric.measure(testCase.input, testCase.output);
+      expect(result.score).toBeCloseTo(testCase.expectedResult.score, 1);
     });
 
     it('should recognize constructive, solution-oriented feedback', async () => {
-      const result = await metric.measure(
-        testCases[3].input,
-        testCases[3].output
-      );
-      expect(result.score).toBeCloseTo(testCases[3].expectedResult.score, 1);
+      const testCase = testCases[3]!;
+      const result = await metric.measure(testCase.input, testCase.output);
+      expect(result.score).toBeCloseTo(testCase.expectedResult.score, 1);
     });
   },
   {

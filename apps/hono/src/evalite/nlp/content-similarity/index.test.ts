@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ContentSimilarityMetric } from './index';
+import { ContentSimilarityMetric } from './index.js';
 
 describe('ContentSimilarityMetric', () => {
   const metric = new ContentSimilarityMetric();

@@ -1,8 +1,8 @@
 import type { LanguageModel } from 'ai';
-import { ContextPrecisionJudge } from '@/evalite/llm/context-precision/metricJudge';
-import type { MetricResultWithReason } from '@/evalite/llm/metric';
-import { Metric } from '@/evalite/llm/metric';
-import { roundToTwoDecimals } from '@/evalite/llm/utils';
+import { ContextPrecisionJudge } from '@/evalite/llm/context-precision/metricJudge.js';
+import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
+import { Metric } from '@/evalite/llm/metric.js';
+import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface ContextPrecisionMetricOptions {
   scale?: number;

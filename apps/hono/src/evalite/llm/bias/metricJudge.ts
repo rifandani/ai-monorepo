@@ -5,7 +5,7 @@ import {
   generateEvaluatePrompt,
   generateOpinionsPrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/bias/prompts';
+} from '@/evalite/llm/bias/prompts.js';
 
 export class BiasJudge {
   private model: LanguageModel;

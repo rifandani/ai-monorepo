@@ -5,7 +5,7 @@ import {
   generateEvaluatePrompt,
   generateEvaluationStatementsPrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/answer-relevancy/prompts';
+} from '@/evalite/llm/answer-relevancy/prompts.js';
 
 export class AnswerRelevancyJudge {
   private model: LanguageModel;

@@ -14,7 +14,6 @@ export const idLocale = {
   unsavedChanges: 'Buang perubahan yang belum disimpan - anda yakin?',
   appName: 'Templat React',
   noPageContent: 'Tidak Ada Konten',
-  authorized: 'Sudah Ada Akses',
   attention: 'Perhatian',
   language: 'Bahasa',
   account: 'Akun',
@@ -27,21 +26,6 @@ export const idLocale = {
   newContentAvailable:
     'Konten baru tersedia, klik tombol muat ulang untuk memperbarui',
   // #endregion COMMON
-
-  // #region AUTH
-  username: 'Username',
-  usernamePlaceholder: 'Username anda...',
-  password: 'Password',
-  passwordPlaceholder: 'Password anda...',
-  loginLoading: 'Sedang masuk...',
-  login: 'Masuk',
-  logout: 'Keluar',
-  notFound: 'Tidak Ditemukan',
-  gone: 'Maaf, kami tidak bisa menemukan halaman yang anda cari',
-  welcome: 'Selamat Datang Kembali',
-  noAccount: 'Tidak punya akun?',
-  registerHere: 'Daftar disini',
-  // #endregion AUTH
 
   // #region HOME
   title: 'Home',

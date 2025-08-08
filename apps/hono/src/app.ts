@@ -13,11 +13,11 @@ import { rateLimiter } from 'hono-rate-limiter';
 import { HTTPError } from 'ky';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
-import { ENV } from '@/core/constants/env';
-import type { Variables } from '@/core/types/hono';
-import { Logger } from '@/core/utils/logger';
-import { routes } from '@/routes';
-import { metricsMiddleware } from '@/routes/middleware/metrics';
+import { ENV } from '@/core/constants/env.js';
+import type { Variables } from '@/core/types/hono.js';
+import { Logger } from '@/core/utils/logger.js';
+import { routes } from '@/routes/index.js';
+import { metricsMiddleware } from '@/routes/middleware/metrics.js';
 
 const logger = new Logger('honoApp');
 const app = new OpenAPIHono<{

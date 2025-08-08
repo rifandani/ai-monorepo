@@ -1,8 +1,8 @@
 import type { LanguageModel } from 'ai';
-import { FaithfulnessJudge } from '@/evalite/llm/faithfulness/metricJudge';
-import type { MetricResultWithReason } from '@/evalite/llm/metric';
-import { Metric } from '@/evalite/llm/metric';
-import { roundToTwoDecimals } from '@/evalite/llm/utils';
+import { FaithfulnessJudge } from '@/evalite/llm/faithfulness/metricJudge.js';
+import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
+import { Metric } from '@/evalite/llm/metric.js';
+import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface FaithfulnessMetricOptions {
   scale?: number;

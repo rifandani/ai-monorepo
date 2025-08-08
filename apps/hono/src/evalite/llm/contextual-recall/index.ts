@@ -1,8 +1,8 @@
 import type { LanguageModel } from 'ai';
-import { ContextualRecallJudge } from '@/evalite/llm/contextual-recall/metricJudge';
-import type { MetricResultWithReason } from '@/evalite/llm/metric';
-import { Metric } from '@/evalite/llm/metric';
-import { roundToTwoDecimals } from '@/evalite/llm/utils';
+import { ContextualRecallJudge } from '@/evalite/llm/contextual-recall/metricJudge.js';
+import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
+import { Metric } from '@/evalite/llm/metric.js';
+import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface ContextualRecallMetricOptions {
   scale?: number;

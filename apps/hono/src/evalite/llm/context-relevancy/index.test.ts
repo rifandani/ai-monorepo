@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it } from 'vitest';
-import { isCloserTo, type TestCaseWithContext } from '@/evalite/llm/utils';
-import { ContextRelevancyMetric } from './index';
+import { isCloserTo, type TestCaseWithContext } from '@/evalite/llm/utils.js';
+import { ContextRelevancyMetric } from './index.js';
 
 const testCases: TestCaseWithContext[] = [
   {
@@ -109,7 +109,7 @@ describe(
   'ContextRelevancyMetric',
   () => {
     it('should detect perfect relevancy when all context pieces directly address the question', async () => {
-      const testCase = testCases[0];
+      const testCase = testCases[0]!;
       const metric = new ContextRelevancyMetric(model, {
         context: testCase.context,
       });
@@ -118,7 +118,7 @@ describe(
     });
 
     it('should handle mixed relevancy with some relevant and some tangential context', async () => {
-      const testCase = testCases[1];
+      const testCase = testCases[1]!;
       const metric = new ContextRelevancyMetric(model, {
         context: testCase.context,
       });
@@ -129,7 +129,7 @@ describe(
     });
 
     it('should identify zero relevancy with completely unrelated context', async () => {
-      const testCase = testCases[2];
+      const testCase = testCases[2]!;
       const metric = new ContextRelevancyMetric(model, {
         context: testCase.context,
       });
@@ -138,7 +138,7 @@ describe(
     });
 
     it('should evaluate temporal relevancy with mix of current and historical context', async () => {
-      const testCase = testCases[3];
+      const testCase = testCases[3]!;
       const metric = new ContextRelevancyMetric(model, {
         context: testCase.context,
       });
@@ -147,7 +147,7 @@ describe(
     });
 
     it('should handle high relevancy with varying levels of detail', async () => {
-      const testCase = testCases[4];
+      const testCase = testCases[4]!;
       const metric = new ContextRelevancyMetric(model, {
         context: testCase.context,
       });
@@ -156,7 +156,7 @@ describe(
     });
 
     it('should detect low relevancy with misleading keyword matches', async () => {
-      const testCase = testCases[5];
+      const testCase = testCases[5]!;
       const metric = new ContextRelevancyMetric(model, {
         context: testCase.context,
       });

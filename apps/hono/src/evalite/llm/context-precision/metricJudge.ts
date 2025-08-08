@@ -4,7 +4,7 @@ import {
   CONTEXT_PRECISION_AGENT_INSTRUCTIONS,
   generateEvaluatePrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/context-precision/prompts';
+} from '@/evalite/llm/context-precision/prompts.js';
 
 export class ContextPrecisionJudge {
   private model: LanguageModel;

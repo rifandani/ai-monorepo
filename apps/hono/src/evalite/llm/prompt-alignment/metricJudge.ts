@@ -4,7 +4,7 @@ import {
   generateEvaluatePrompt,
   generateReasonPrompt,
   PROMPT_ALIGNMENT_AGENT_INSTRUCTIONS,
-} from '@/evalite/llm/prompt-alignment/prompts';
+} from '@/evalite/llm/prompt-alignment/prompts.js';
 
 export class PromptAlignmentJudge {
   private model: LanguageModel;

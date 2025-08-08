@@ -1,5 +1,6 @@
+// @ts-expect-error no types
 import { SequenceMatcher } from 'difflib';
-import { Metric, type MetricResult } from '@/evalite/llm/metric';
+import { Metric, type MetricResult } from '@/evalite/llm/metric.js';
 
 interface TextualDifferenceResult extends MetricResult {
   info: {
@@ -17,7 +18,7 @@ export class TextualDifferenceMetric extends Metric {
 
     // Get detailed operations
     const ops = matcher.getOpcodes();
-    const changes = ops.filter(([op]) => op !== 'equal').length;
+    const changes = ops.filter(([op]: [string]) => op !== 'equal').length;
 
     // Calculate confidence based on text length difference
     const maxLength = Math.max(input.length, output.length);

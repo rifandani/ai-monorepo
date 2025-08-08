@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it } from 'vitest';
-import { isCloserTo, type TestCaseWithContext } from '@/evalite/llm/utils';
-import { ContextPositionMetric } from './index';
+import { isCloserTo, type TestCaseWithContext } from '@/evalite/llm/utils.js';
+import { ContextPositionMetric } from './index.js';
 
 const testCases: TestCaseWithContext[] = [
   {
@@ -185,7 +185,7 @@ describe(
   'ContextPositionMetric',
   () => {
     it('should handle perfect ordering with all relevant pieces', async () => {
-      const testCase = testCases[0];
+      const testCase = testCases[0]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -194,7 +194,7 @@ describe(
     });
 
     it('should handle mixed relevance case', async () => {
-      const testCase = testCases[1];
+      const testCase = testCases[1]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -203,7 +203,7 @@ describe(
     });
 
     it('should handle domain knowledge relevance', async () => {
-      const testCase = testCases[2];
+      const testCase = testCases[2]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -214,7 +214,7 @@ describe(
     });
 
     it('should handle mixed relevance with good ordering', async () => {
-      const testCase = testCases[3];
+      const testCase = testCases[3]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -223,7 +223,7 @@ describe(
     });
 
     it('should handle single relevant piece at start', async () => {
-      const testCase = testCases[4];
+      const testCase = testCases[4]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -232,7 +232,7 @@ describe(
     });
 
     it('should handle single relevant piece in middle', async () => {
-      const testCase = testCases[5];
+      const testCase = testCases[5]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -241,7 +241,7 @@ describe(
     });
 
     it('should handle single relevant piece at end', async () => {
-      const testCase = testCases[6];
+      const testCase = testCases[6]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -250,7 +250,7 @@ describe(
     });
 
     it('should handle empty context', async () => {
-      const testCase = testCases[7];
+      const testCase = testCases[7]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -259,7 +259,7 @@ describe(
     });
 
     it('should handle all irrelevant context', async () => {
-      const testCase = testCases[8];
+      const testCase = testCases[8]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -268,7 +268,7 @@ describe(
     });
 
     it('should handle complex interdependent context', async () => {
-      const testCase = testCases[9];
+      const testCase = testCases[9]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -277,7 +277,7 @@ describe(
     });
 
     it('should handle single piece context', async () => {
-      const testCase = testCases[10];
+      const testCase = testCases[10]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });
@@ -286,7 +286,7 @@ describe(
     });
 
     it('should handle two relevant pieces at end', async () => {
-      const testCase = testCases[11];
+      const testCase = testCases[11]!;
       const metric = new ContextPositionMetric(model, {
         context: testCase.context,
       });

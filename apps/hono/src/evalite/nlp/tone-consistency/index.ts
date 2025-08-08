@@ -1,5 +1,6 @@
+// @ts-expect-error no types
 import Sentiment from 'sentiment';
-import { Metric, type MetricResult } from '@/evalite/llm/metric';
+import { Metric, type MetricResult } from '@/evalite/llm/metric.js';
 
 interface ToneConsitencyResult extends MetricResult {
   info:

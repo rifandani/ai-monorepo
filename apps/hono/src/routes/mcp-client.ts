@@ -8,10 +8,10 @@ import {
 } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { z as z3 } from 'zod/v3';
-import { models } from '@/core/api/ai';
-import { ENV } from '@/core/constants/env';
-import type { Variables } from '@/core/types/hono';
-import { fileToDataUri } from '@/core/utils/converter';
+import { models } from '@/core/api/ai.js';
+import { ENV } from '@/core/constants/env.js';
+import type { Variables } from '@/core/types/hono.js';
+import { fileToDataUri } from '@/core/utils/converter.js';
 
 export function mcpClientRoutes(
   app: OpenAPIHono<{

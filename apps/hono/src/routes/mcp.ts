@@ -9,7 +9,7 @@ import type {
 import { logger } from '@workspace/core/utils/logger';
 import { toFetchResponse, toReqRes } from 'fetch-to-node';
 import { z as z3 } from 'zod/v3';
-import type { Variables } from '@/core/types/hono';
+import type { Variables } from '@/core/types/hono.js';
 
 const POKE_API_BASE = 'https://pokeapi.co/api/v2';
 

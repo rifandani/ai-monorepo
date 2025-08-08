@@ -1,11 +1,11 @@
 import { generateObject, type LanguageModel } from 'ai';
 import { z } from 'zod/v3';
-import { generateClaimExtractionPrompt } from '@/evalite/llm/faithfulness/prompts';
+import { generateClaimExtractionPrompt } from '@/evalite/llm/faithfulness/prompts.js';
 import {
   generateEvaluatePrompt,
   generateReasonPrompt,
   HALLUCINATION_AGENT_INSTRUCTIONS,
-} from '@/evalite/llm/hallucination/prompts';
+} from '@/evalite/llm/hallucination/prompts.js';
 
 export class HallucinationJudge {
   private model: LanguageModel;

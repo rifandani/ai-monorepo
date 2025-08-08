@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { CompletenessMetric } from './index';
+import { CompletenessMetric } from './index.js';
 
 describe('CompletenessMetric', () => {
   let metric: CompletenessMetric;

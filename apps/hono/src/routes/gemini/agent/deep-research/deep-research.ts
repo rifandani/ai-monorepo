@@ -3,9 +3,9 @@ import { type AttributeValue, metrics, trace } from '@opentelemetry/api';
 import { generateObject, generateText, tool } from 'ai';
 import { crush } from 'radashi';
 import { z as z3 } from 'zod/v3';
-import { models } from '@/core/api/ai';
-import type { Variables } from '@/core/types/hono';
-import { recordSpan } from '@/core/utils/telemetry';
+import { models } from '@/core/api/ai.js';
+import type { Variables } from '@/core/types/hono.js';
+import { recordSpan } from '@/core/utils/telemetry.js';
 
 const tracer = trace.getTracer('deepResearchEndpoint', '1.0.0');
 const meter = metrics.getMeter('deepResearchEndpoint', '1.0.0');

@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it, vi } from 'vitest';
-import { isCloserTo, type TestCase } from '@/evalite/llm/utils';
-import { BiasMetric } from './index';
+import { isCloserTo, type TestCase } from '@/evalite/llm/utils.js';
+import { BiasMetric } from './index.js';
 
 const testCases: TestCase[] = [
   {
@@ -105,67 +105,67 @@ describe('BiasMetric', () => {
 
   it('should detect multiple severe biases (political, geographical, age)', async () => {
     const result = await metric.measure(
-      testCases[0].input,
-      testCases[0].output
+      testCases[0]!.input,
+      testCases[0]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[0].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[0]!.expectedResult.score, 1);
   });
 
   it('should recognize unbiased workplace descriptions', async () => {
     const result = await metric.measure(
-      testCases[1].input,
-      testCases[1].output
+      testCases[1]!.input,
+      testCases[1]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[1].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[1]!.expectedResult.score, 1);
   });
 
   it('should recognize balanced academic success discussion', async () => {
     const result = await metric.measure(
-      testCases[2].input,
-      testCases[2].output
+      testCases[2]!.input,
+      testCases[2]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[2].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[2]!.expectedResult.score, 1);
   });
 
   it('should detect multiple biases in STEM discussion', async () => {
     const result = await metric.measure(
-      testCases[3].input,
-      testCases[3].output
+      testCases[3]!.input,
+      testCases[3]!.output
     );
-    expect(isCloserTo(result.score, testCases[3].expectedResult.score, 1)).toBe(
-      true
-    );
+    expect(
+      isCloserTo(result.score, testCases[3]!.expectedResult.score, 1)
+    ).toBe(true);
   });
 
   it('should detect intersectional bias in leadership roles', async () => {
     const result = await metric.measure(
-      testCases[4].input,
-      testCases[4].output
+      testCases[4]!.input,
+      testCases[4]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[4].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[4]!.expectedResult.score, 1);
   });
 
   it('should detect gender and age bias in tech', async () => {
     const result = await metric.measure(
-      testCases[5].input,
-      testCases[5].output
+      testCases[5]!.input,
+      testCases[5]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[5].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[5]!.expectedResult.score, 1);
   });
 
   it('should detect geographical and socioeconomic bias in education', async () => {
     const result = await metric.measure(
-      testCases[6].input,
-      testCases[6].output
+      testCases[6]!.input,
+      testCases[6]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[6].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[6]!.expectedResult.score, 1);
   });
 
   it('should identify subtle political bias in economic policy', async () => {
     const result = await metric.measure(
-      testCases[7].input,
-      testCases[7].output
+      testCases[7]!.input,
+      testCases[7]!.output
     );
-    expect(result.score).toBeCloseTo(testCases[7].expectedResult.score, 1);
+    expect(result.score).toBeCloseTo(testCases[7]!.expectedResult.score, 1);
   });
 });

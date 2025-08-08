@@ -1,5 +1,5 @@
 import nlp from 'compromise';
-import { Metric, type MetricResult } from '@/evalite/llm/metric';
+import { Metric, type MetricResult } from '@/evalite/llm/metric.js';
 
 interface CompletenessMetricResult extends MetricResult {
   info: {

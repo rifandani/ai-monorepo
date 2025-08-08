@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it, vi } from 'vitest';
-import type { TestCaseWithContext } from '@/evalite/llm/utils';
-import { HallucinationMetric } from './index';
+import type { TestCaseWithContext } from '@/evalite/llm/utils.js';
+import { HallucinationMetric } from './index.js';
 
 vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
@@ -238,7 +238,7 @@ const model = google('gemini-2.0-flash-001');
 
 describe('HallucinationMetric', () => {
   it('should handle perfect alignment', async () => {
-    const testCase = testCases[0];
+    const testCase = testCases[0]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -247,7 +247,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle complete hallucination', async () => {
-    const testCase = testCases[1];
+    const testCase = testCases[1]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -256,7 +256,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle partial hallucination', async () => {
-    const testCase = testCases[2];
+    const testCase = testCases[2]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -265,7 +265,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle empty output', async () => {
-    const testCase = testCases[3];
+    const testCase = testCases[3]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -274,7 +274,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle speculative language', async () => {
-    const testCase = testCases[4];
+    const testCase = testCases[4]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -283,7 +283,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle empty context', async () => {
-    const testCase = testCases[5];
+    const testCase = testCases[5]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -292,7 +292,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle implicit contradictions', async () => {
-    const testCase = testCases[6];
+    const testCase = testCases[6]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -301,7 +301,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle numerical approximations', async () => {
-    const testCase = testCases[7];
+    const testCase = testCases[7]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -310,7 +310,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle out of scope additions', async () => {
-    const testCase = testCases[8];
+    const testCase = testCases[8]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -319,7 +319,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle temporal contradictions', async () => {
-    const testCase = testCases[9];
+    const testCase = testCases[9]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -328,7 +328,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle numerical contradiction despite approximation', async () => {
-    const testCase = testCases[10];
+    const testCase = testCases[10]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -338,7 +338,7 @@ describe('HallucinationMetric', () => {
 
   // New tests for stricter hallucination checking
   it('should detect additional information as hallucination', async () => {
-    const testCase = testCases[11];
+    const testCase = testCases[11]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -347,7 +347,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should detect speculative claims about unknown facts as hallucination', async () => {
-    const testCase = testCases[12];
+    const testCase = testCases[12]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -356,7 +356,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should enforce strict date matching', async () => {
-    const testCase = testCases[13];
+    const testCase = testCases[13]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -365,7 +365,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should enforce strict numerical matching', async () => {
-    const testCase = testCases[14];
+    const testCase = testCases[14]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -374,7 +374,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle mixed precision levels', async () => {
-    const testCase = testCases[15];
+    const testCase = testCases[15]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });
@@ -383,7 +383,7 @@ describe('HallucinationMetric', () => {
   });
 
   it('should handle relative comparisons', async () => {
-    const testCase = testCases[16];
+    const testCase = testCases[16]!;
     const metric = new HallucinationMetric(model, {
       context: testCase.context,
     });

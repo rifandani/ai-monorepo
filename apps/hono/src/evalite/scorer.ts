@@ -3,28 +3,29 @@ import { generateObject } from 'ai';
 import { createScorer } from 'evalite';
 import { traceAISDKModel } from 'evalite/ai-sdk';
 import { createStorage } from 'unstorage';
-import fsDriver from 'unstorage/drivers/fs';
+import fsDriver from 'unstorage/drivers/fs-lite';
 import { z as z3 } from 'zod/v3';
-import { cacheModel } from '@/evalite/cache-model';
-import { AnswerRelevancyMetric } from '@/evalite/llm/answer-relevancy';
-import { BiasMetric } from '@/evalite/llm/bias';
-import { ContextPositionMetric } from '@/evalite/llm/context-position';
-import { ContextPrecisionMetric } from '@/evalite/llm/context-precision';
-import { ContextRelevancyMetric } from '@/evalite/llm/context-relevancy';
-import { ContextualRecallMetric } from '@/evalite/llm/contextual-recall';
-import { FaithfulnessMetric } from '@/evalite/llm/faithfulness';
-import { HallucinationMetric } from '@/evalite/llm/hallucination';
-import { PromptAlignmentMetric } from '@/evalite/llm/prompt-alignment';
-import { SummarizationMetric } from '@/evalite/llm/summarization';
-import { ToxicityMetric } from '@/evalite/llm/toxicity';
-import { CompletenessMetric } from '@/evalite/nlp/completeness';
-import { ContentSimilarityMetric } from '@/evalite/nlp/content-similarity';
-import { KeywordCoverageMetric } from '@/evalite/nlp/keyword-coverage';
-import { TextualDifferenceMetric } from '@/evalite/nlp/textual-difference';
-import { ToneConsistencyMetric } from '@/evalite/nlp/tone-consistency';
-import { getFactualityPrompt } from '@/evalite/prompts';
+import { cacheModel } from '@/evalite/cache-model.js';
+import { AnswerRelevancyMetric } from '@/evalite/llm/answer-relevancy/index.js';
+import { BiasMetric } from '@/evalite/llm/bias/index.js';
+import { ContextPositionMetric } from '@/evalite/llm/context-position/index.js';
+import { ContextPrecisionMetric } from '@/evalite/llm/context-precision/index.js';
+import { ContextRelevancyMetric } from '@/evalite/llm/context-relevancy/index.js';
+import { ContextualRecallMetric } from '@/evalite/llm/contextual-recall/index.js';
+import { FaithfulnessMetric } from '@/evalite/llm/faithfulness/index.js';
+import { HallucinationMetric } from '@/evalite/llm/hallucination/index.js';
+import { PromptAlignmentMetric } from '@/evalite/llm/prompt-alignment/index.js';
+import { SummarizationMetric } from '@/evalite/llm/summarization/index.js';
+import { ToxicityMetric } from '@/evalite/llm/toxicity/index.js';
+import { CompletenessMetric } from '@/evalite/nlp/completeness/index.js';
+import { ContentSimilarityMetric } from '@/evalite/nlp/content-similarity/index.js';
+import { KeywordCoverageMetric } from '@/evalite/nlp/keyword-coverage/index.js';
+import { TextualDifferenceMetric } from '@/evalite/nlp/textual-difference/index.js';
+import { ToneConsistencyMetric } from '@/evalite/nlp/tone-consistency/index.js';
+import { getFactualityPrompt } from '@/evalite/prompts.js';
 
 const storage = createStorage({
+  // @ts-expect-error This expression is not callable. Type 'typeof import("/Users/rizeki.rifandani/Desktop/dev/nodejs/ai-monorepo/node_modules/unstorage/drivers/fs-lite")' has no call signatures.
   driver: fsDriver({
     base: '.evalite',
   }),

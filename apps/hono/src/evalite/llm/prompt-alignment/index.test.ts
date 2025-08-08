@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it } from 'vitest';
-import type { TestCase } from '@/evalite/llm/utils';
-import { PromptAlignmentMetric } from './index';
+import type { TestCase } from '@/evalite/llm/utils.js';
+import { PromptAlignmentMetric } from './index.js';
 
 export type PromptAlignmentTestCase = TestCase & {
   instructions: string[];
@@ -223,7 +223,7 @@ describe(
   'PromptAlignmentMetric',
   () => {
     it('should measure perfect alignment with single instruction', async () => {
-      const testCase = testCases[0];
+      const testCase = testCases[0]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -236,7 +236,7 @@ describe(
     });
 
     it('should measure zero alignment with single instruction', async () => {
-      const testCase = testCases[1];
+      const testCase = testCases[1]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -250,7 +250,7 @@ describe(
     });
 
     it('should measure perfect alignment with multiple instructions', async () => {
-      const testCase = testCases[2];
+      const testCase = testCases[2]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -264,7 +264,7 @@ describe(
     });
 
     it('should measure partial alignment with multiple instructions', async () => {
-      const testCase = testCases[3];
+      const testCase = testCases[3]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -278,7 +278,7 @@ describe(
     });
 
     it('should measure alignment with complex formatting instructions', async () => {
-      const testCase = testCases[4];
+      const testCase = testCases[4]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -292,7 +292,7 @@ describe(
     });
 
     it('should handle empty output', async () => {
-      const testCase = testCases[5];
+      const testCase = testCases[5]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -305,7 +305,7 @@ describe(
     });
 
     it('should handle all instructions being not applicable', async () => {
-      const testCase = testCases[6];
+      const testCase = testCases[6]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -318,7 +318,7 @@ describe(
     });
 
     it('should handle mix of applicable and not applicable instructions', async () => {
-      const testCase = testCases[7];
+      const testCase = testCases[7]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -331,7 +331,7 @@ describe(
     });
 
     it('should calculate correct score with mix of yes, no, and n/a verdicts', async () => {
-      const testCase = testCases[8];
+      const testCase = testCases[8]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });
@@ -344,7 +344,7 @@ describe(
     });
 
     it('should calculate correct score with complex formatting instructions', async () => {
-      const testCase = testCases[9];
+      const testCase = testCases[9]!;
       const metric = new PromptAlignmentMetric(model, {
         instructions: testCase.instructions,
       });

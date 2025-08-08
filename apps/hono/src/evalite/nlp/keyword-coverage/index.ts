@@ -1,5 +1,5 @@
 import keywordExtractor from 'keyword-extractor';
-import { Metric, type MetricResult } from '@/evalite/llm/metric';
+import { Metric, type MetricResult } from '@/evalite/llm/metric.js';
 
 interface KeywordCoverageResult extends MetricResult {
   info: {
@@ -22,6 +22,7 @@ export class KeywordCoverageMetric extends Metric {
     }
 
     const extractKeywords = (text: string) => {
+      // @ts-expect-error no types
       return keywordExtractor.extract(text, {
         language: 'english',
         remove_digits: true,

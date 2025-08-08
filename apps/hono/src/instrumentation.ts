@@ -13,7 +13,7 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
-import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global.js';
 
 // For troubleshooting, set the log level to DiagLogLevel.DEBUG
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);

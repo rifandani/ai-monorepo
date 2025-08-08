@@ -4,7 +4,7 @@ import {
   CONTEXT_POSITION_AGENT_INSTRUCTIONS,
   generateEvaluatePrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/context-position/prompts';
+} from '@/evalite/llm/context-position/prompts.js';
 
 export class ContextPositionJudge {
   private model: LanguageModel;

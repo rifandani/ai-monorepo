@@ -9,7 +9,7 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { createProviderRegistry } from 'ai';
 import { z as z3 } from 'zod/v3';
-import { flattenAttributes } from '@/core/utils/object';
+import { flattenAttributes } from '@/core/utils/object.js';
 
 export const multimodalRequestSchema = z.object({
   prompt: z.string().openapi({

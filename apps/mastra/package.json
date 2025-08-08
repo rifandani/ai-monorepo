@@ -9,14 +9,17 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "db:pull": "drizzle-kit pull",
-    "db:push": "drizzle-kit push",
+    "db:push": "drizzle-kit push --verbose --strict",
     "db:gen": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio --port 3003 --verbose",
     "test": "vitest",
-    "dev": "mastra dev",
-    "build": "mastra build",
-    "mcp:inspector": "npx -y @modelcontextprotocol/inspector"
+    "dev": "mastra dev -e .env.dev",
+    "dev:prod": "mastra dev -e .env.prod",
+    "build": "mastra build -e .env.dev",
+    "build:prod": "mastra build -e .env.prod",
+    "mcp:inspector": "npx -y @modelcontextprotocol/inspector",
+    "mcp:inspector-muppet": "bun muppet-kit inspector"
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.22",

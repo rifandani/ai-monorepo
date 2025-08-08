@@ -6,7 +6,7 @@ import {
   type Tracer,
   trace,
 } from '@opentelemetry/api';
-import { SERVICE_NAME } from '@/core/constants/global';
+import { SERVICE_NAME } from '@/core/constants/global.js';
 
 /**
  * Tracer implementation that does nothing (null object).
@@ -168,7 +168,7 @@ export function recordSpan<T>({
           span.recordException({
             name: error.name,
             message: error.message,
-            stack: error.stack,
+            stack: error.stack ?? '',
           });
           span.setStatus({
             code: SpanStatusCode.ERROR,

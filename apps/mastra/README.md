@@ -2,8 +2,8 @@
 
 ## 🎯 Todo
 
-- [ ] zod v4
-- [ ] ai sdk v5
+- [ ] mastra input processors (guardrails)
+- [ ] mastra scorers
 
 ## 💾 How to Database
 

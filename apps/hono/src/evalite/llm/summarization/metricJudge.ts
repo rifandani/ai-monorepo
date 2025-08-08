@@ -1,13 +1,13 @@
 import { generateObject, type LanguageModel } from 'ai';
 import { z } from 'zod/v3';
-import { generateClaimExtractionPrompt } from '@/evalite/llm/faithfulness/prompts';
+import { generateClaimExtractionPrompt } from '@/evalite/llm/faithfulness/prompts.js';
 import {
   generateAlignmentPrompt,
   generateAnswersPrompt,
   generateQuestionsPrompt,
   generateReasonPrompt,
   SUMMARIZATION_AGENT_INSTRUCTIONS,
-} from './prompts';
+} from './prompts.js';
 
 export class SummarizationJudge {
   private model: LanguageModel;

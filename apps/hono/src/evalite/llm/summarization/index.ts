@@ -1,8 +1,8 @@
 import type { LanguageModel } from 'ai';
-import type { MetricResultWithReason } from '@/evalite/llm/metric';
-import { Metric } from '@/evalite/llm/metric';
-import { SummarizationJudge } from '@/evalite/llm/summarization/metricJudge';
-import { roundToTwoDecimals } from '@/evalite/llm/utils';
+import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
+import { Metric } from '@/evalite/llm/metric.js';
+import { SummarizationJudge } from '@/evalite/llm/summarization/metricJudge.js';
+import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface SummarizationMetricOptions {
   scale?: number;

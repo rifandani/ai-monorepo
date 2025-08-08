@@ -60,7 +60,14 @@ export function llmsDocsRoutes(
       },
     }),
     async (c) => {
-      // get the content from the docs folder
+      /**
+       * get the content from the docs folder
+       * /docs
+       * ├── getting-started
+       * │   ├── installation.md
+       * │   └── ...
+       * └── ...
+       */
       const contentDir = join(process.cwd(), './docs');
       const files = await getAllFiles(contentDir);
 

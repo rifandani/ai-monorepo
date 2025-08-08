@@ -1,15 +1,14 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
 import { createMarkdownFromOpenApi } from '@scalar/openapi-to-markdown';
-import { auth } from '@/auth/libs';
-import type { Variables } from '@/core/types/hono';
-import { geminiRoutes } from '@/routes/gemini';
-import { deepResearchRoutes } from '@/routes/gemini/agent/deep-research/deep-research';
-import { imagesRoutes } from '@/routes/images';
-import { llmsDocsRoutes } from '@/routes/llms-docs';
-import { mcpRoutes } from '@/routes/mcp';
-import { mcpClientRoutes } from '@/routes/mcp-client';
-import { ventureCapitalRoutes } from '@/routes/venture-capital';
+import type { Variables } from '@/core/types/hono.js';
+import { deepResearchRoutes } from '@/routes/gemini/agent/deep-research/deep-research.js';
+import { geminiRoutes } from '@/routes/gemini.js';
+import { imagesRoutes } from '@/routes/images.js';
+import { llmsDocsRoutes } from '@/routes/llms-docs.js';
+import { mcpRoutes } from '@/routes/mcp.js';
+import { mcpClientRoutes } from '@/routes/mcp-client.js';
+import { ventureCapitalRoutes } from '@/routes/venture-capital.js';
 
 export async function routes(
   app: OpenAPIHono<{
@@ -23,11 +22,6 @@ export async function routes(
   mcpClientRoutes(app);
   imagesRoutes(app); // run `compose:up` first
   llmsDocsRoutes(app);
-
-  // betterauth routes
-  app.on(['POST', 'GET'], '/api/auth/**', (c) => {
-    return auth.handler(c.req.raw);
-  });
 
   // OpenAPI docs
   app.doc('/openapi', {

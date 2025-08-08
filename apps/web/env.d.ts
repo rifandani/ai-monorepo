@@ -27,7 +27,8 @@ declare namespace NodeJS {
     /**
      * Bundle environment variables for the browser by prefixing with NEXT_PUBLIC_
      */
-    readonly NEXT_PUBLIC_TITLE: string;
+    readonly NEXT_PUBLIC_APP_TITLE: string;
+    readonly NEXT_PUBLIC_APP_URL: string;
     readonly NEXT_PUBLIC_API_BASE_URL: string;
   }
 }

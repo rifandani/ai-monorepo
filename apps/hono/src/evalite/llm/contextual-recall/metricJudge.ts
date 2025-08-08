@@ -4,7 +4,7 @@ import {
   CONTEXT_RECALL_AGENT_INSTRUCTIONS,
   generateEvaluatePrompt,
   generateReasonPrompt,
-} from '@/evalite/llm/contextual-recall/prompts';
+} from '@/evalite/llm/contextual-recall/prompts.js';
 
 export class ContextualRecallJudge {
   private model: LanguageModel;

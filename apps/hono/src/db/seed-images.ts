@@ -2,8 +2,8 @@ import { google } from '@ai-sdk/google';
 import { logger } from '@workspace/core/utils/logger';
 import { embedMany } from 'ai';
 import { reset } from 'drizzle-seed';
-import { db } from '.';
-import { type ImageTable, imagesTable } from './schema';
+import { db } from './index.js';
+import { type ImageTable, imagesTable } from './schema.js';
 
 const textEmbedding004 = google.textEmbeddingModel('text-embedding-004');
 const mockImagesWithoutEmbedding: Omit<ImageTable, 'id'>[] = [

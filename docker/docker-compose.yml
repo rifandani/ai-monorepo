@@ -1,6 +1,14 @@
-name: ai-hono
+name: ai-monorepo
 
 services:
+  redis_cache:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_cache_data:/data
+    restart: unless-stopped
+
   pgvector_db:
     image: pgvector/pgvector:pg17 # PostgreSQL with pgvector support
     environment:
@@ -12,16 +20,8 @@ services:
       - "5432:5432"
     volumes:
       - pgvector_db_data:/var/lib/postgresql/data
-      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql # init pgvector extension
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql # init pgvector extension
     restart: always
-
-  redis_cache:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_cache_data:/data
-    restart: unless-stopped
 
   otel_lgtm:
     image: docker.io/grafana/otel-lgtm:latest
@@ -30,13 +30,13 @@ services:
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP http receiver
     volumes:
-      - ./docker/container/grafana:/data/grafana
-      - ./docker/container/prometheus:/data/prometheus
-      - ./docker/container/loki:/data/loki
+      - ./container/grafana:/data/grafana
+      - ./container/prometheus:/data/prometheus
+      - ./container/loki:/data/loki
     environment:
       - GF_PATHS_DATA=/data/grafana
     env_file:
-      - ./docker/.env
+      - ./.env
     # stdin_open: true
     # tty: true
 

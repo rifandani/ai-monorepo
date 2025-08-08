@@ -4,7 +4,7 @@ import {
   generateEvaluatePrompt,
   getReasonPrompt,
   TOXICITY_AGENT_INSTRUCTIONS,
-} from './prompts';
+} from './prompts.js';
 
 export class ToxicityJudge {
   private model: LanguageModel;

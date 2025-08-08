@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TextualDifferenceMetric } from './index';
+import { TextualDifferenceMetric } from './index.js';
 
 describe('TextualDifferenceMetric', () => {
   const metric = new TextualDifferenceMetric();

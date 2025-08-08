@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { describe, expect, it } from 'vitest';
-import type { TestCaseWithContext } from '@/evalite/llm/utils';
-import { ContextPrecisionMetric } from './index';
+import type { TestCaseWithContext } from '@/evalite/llm/utils.js';
+import { ContextPrecisionMetric } from './index.js';
 
 const testCases: TestCaseWithContext[] = [
   {
@@ -134,7 +134,7 @@ describe(
   'ContextPrecisionMetric',
   () => {
     it('should measure perfect context precision with all relevant items', async () => {
-      const testCase = testCases[0];
+      const testCase = testCases[0]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -143,7 +143,7 @@ describe(
     });
 
     it('should measure high precision with irrelevant item at end', async () => {
-      const testCase = testCases[1];
+      const testCase = testCases[1]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -152,7 +152,7 @@ describe(
     });
 
     it('should measure precision with two relevant items after irrelevant start', async () => {
-      const testCase = testCases[2];
+      const testCase = testCases[2]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -161,7 +161,7 @@ describe(
     });
 
     it('should measure precision with alternating relevant items', async () => {
-      const testCase = testCases[3];
+      const testCase = testCases[3]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -170,7 +170,7 @@ describe(
     });
 
     it('should measure precision with single relevant item at start', async () => {
-      const testCase = testCases[4];
+      const testCase = testCases[4]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -179,7 +179,7 @@ describe(
     });
 
     it('should handle completely irrelevant context', async () => {
-      const testCase = testCases[5];
+      const testCase = testCases[5]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -188,7 +188,7 @@ describe(
     });
 
     it('should handle single relevant context perfectly', async () => {
-      const testCase = testCases[6];
+      const testCase = testCases[6]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -197,7 +197,7 @@ describe(
     });
 
     it('should measure precision with single relevant item at end', async () => {
-      const testCase = testCases[7];
+      const testCase = testCases[7]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -206,7 +206,7 @@ describe(
     });
 
     it('should handle empty context', async () => {
-      const testCase = testCases[8];
+      const testCase = testCases[8]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });
@@ -215,7 +215,7 @@ describe(
     });
 
     it('should handle single irrelevant context', async () => {
-      const testCase = testCases[9];
+      const testCase = testCases[9]!;
       const metric = new ContextPrecisionMetric(model, {
         context: testCase.context,
       });

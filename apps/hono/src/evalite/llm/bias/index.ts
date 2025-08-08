@@ -1,8 +1,8 @@
 import type { LanguageModel } from 'ai';
-import { BiasJudge } from '@/evalite/llm/bias/metricJudge';
-import type { MetricResultWithReason } from '@/evalite/llm/metric';
-import { Metric } from '@/evalite/llm/metric';
-import { roundToTwoDecimals } from '@/evalite/llm/utils';
+import { BiasJudge } from '@/evalite/llm/bias/metricJudge.js';
+import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
+import { Metric } from '@/evalite/llm/metric.js';
+import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface BiasMetricOptions {
   scale?: number;

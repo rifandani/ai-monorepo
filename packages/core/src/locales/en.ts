@@ -15,8 +15,6 @@ export const enLocale = {
   unsavedChanges: 'Discard unsaved changes - are you sure?',
   appName: 'React Template',
   noPageContent: 'No Page Content',
-  unauthorized: 'Unauthorized. Please login first',
-  authorized: 'Already authorized',
   attention: 'Attention',
   language: 'Language',
   account: 'Account',
@@ -29,21 +27,6 @@ export const enLocale = {
   newContentAvailable:
     'New content available, click on reload button to update',
   // #endregion COMMON
-
-  // #region AUTH
-  username: 'Username',
-  usernamePlaceholder: 'Your username...',
-  password: 'Password',
-  passwordPlaceholder: 'Your password...',
-  loginLoading: 'Logging in...',
-  login: 'Login',
-  logout: 'Logout',
-  notFound: 'Not Found',
-  gone: "Sorry, we couldn't find the page you're looking for",
-  welcome: 'Welcome Back',
-  noAccount: "Don't have an account?",
-  registerHere: 'Register here',
-  // #endregion AUTH
 
   // #region HOME
   title: 'Home',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ToneConsistencyMetric } from './index';
+import { ToneConsistencyMetric } from './index.js';
 
 describe('ToneConsistencyMetric', () => {
   const metric = new ToneConsistencyMetric();
