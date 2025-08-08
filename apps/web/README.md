@@ -10,7 +10,7 @@
 ## 🎯 Todo
 
 - [ ] ai sdk v5
-- [ ] follow up with `fe-monorepo` latest version
+- [ ] follow up with `fe-monorepo` latest version (when we upgrade `react-aria`, we also need to update intentui)
 - [ ] implement share in chat history
 - [ ] implement rename in chat history
 - [ ] implement archive in chat history
