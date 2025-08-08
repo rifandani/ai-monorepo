@@ -14,9 +14,9 @@ import 'server-only';
  *
  * @example
  * ```ts
- * const [errLogin, resLogin] = await tryit(authRepositories(http).login)({ json: parsedInput })
- * if (errLogin) {
- *   return await repositoryErrorMapper(errLogin)
+ * const [errCreateChat, resCreateChat] = await tryit(chatRepositories(http).createChat)({ json: parsedInput })
+ * if (errCreateChat) {
+ *   return await repositoryErrorMapper(errCreateChat)
  * }
  * ```
  */

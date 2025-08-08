@@ -81,7 +81,7 @@ export function AppSidebar({ chatHistory, ...props }: AppSidebarProps) {
                             className="gap-2"
                             isDisabled={isDeleting}
                             onAction={() => {
-                              // TODO: implement share after we setup auth
+                              // TODO: implement share
                             }}
                           >
                             <Icon icon="lucide:upload" />

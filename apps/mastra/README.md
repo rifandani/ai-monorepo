@@ -2,7 +2,8 @@
 
 ## 🎯 Todo
 
-~
+- [ ] zod v4
+- [ ] ai sdk v5
 
 ## 💾 How to Database
 

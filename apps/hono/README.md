@@ -2,6 +2,10 @@
 
 ## 🎯 Todo
 
+- [ ] zod v4
+- [ ] ai sdk v5
+- [ ] replace `SERVICE_NAME` into `ENV.APP_TITLE`
+- [ ] do not use all `@opentelemetry/auto-instrumentations-node`, it will reduce performance up to 80%. Use selectively like `@opentelemetry/instrumentation-dns`, `@opentelemetry/instrumentation-http`, `@opentelemetry/instrumentation-net`, `@opentelemetry/instrumentation-pg`, `@opentelemetry/instrumentation-runtime-node`, `@opentelemetry/instrumentation-undici`.
 - [ ] example of MCP OAUTH
 - [ ] example of [Memories](https://ai-sdk.dev/providers/community-providers/mem0)
 - [ ] replace all `import { z } from 'zod'` or `import { z as z3 } from 'zod/v3'` occurences with `import { z } from 'zod/v4'` in the codebase. currently `@hono/zod-openapi@beta` works with zod 4, still waiting for [this issue](https://github.com/honojs/middleware/issues/1177) to be resolved.

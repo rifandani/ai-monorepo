@@ -9,8 +9,9 @@
 
 ## 🎯 Todo
 
-- [ ] setup auth with better-auth
-- [ ] implement share in chat history, after we setup auth
+- [ ] zod v4
+- [ ] ai sdk v5
+- [ ] implement share in chat history
 - [ ] implement rename in chat history
 - [ ] implement archive in chat history
 - [ ] Add a document/artifact/canvas mode for content creation, artifact type: text (markdown), code editor, spreadsheet, image, etc
