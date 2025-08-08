@@ -16,7 +16,7 @@ import {
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 import { logger } from '@workspace/core/utils/logger';
-import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global';
+import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global.js';
 
 export class OtelLogger extends MastraLogger {
   logger: ApiLogsLogger;
@@ -45,7 +45,7 @@ export class OtelLogger extends MastraLogger {
     this.disableConsoleLog = disableConsoleLog;
   }
 
-  debug(message: string, attributes?: AnyValueMap): void {
+  debug(message: string, attributes: AnyValueMap = {}): void {
     if (this.level === LogLevel.DEBUG) {
       this.logger.emit({
         severityNumber: SeverityNumber.DEBUG,
@@ -60,7 +60,7 @@ export class OtelLogger extends MastraLogger {
     }
   }
 
-  info(message: string, attributes?: AnyValueMap): void {
+  info(message: string, attributes: AnyValueMap = {}): void {
     if (this.level === LogLevel.INFO || this.level === LogLevel.DEBUG) {
       this.logger.emit({
         severityNumber: SeverityNumber.INFO,
@@ -75,7 +75,7 @@ export class OtelLogger extends MastraLogger {
     }
   }
 
-  warn(message: string, attributes?: AnyValueMap): void {
+  warn(message: string, attributes: AnyValueMap = {}): void {
     if (
       this.level === LogLevel.WARN ||
       this.level === LogLevel.INFO ||
@@ -94,7 +94,7 @@ export class OtelLogger extends MastraLogger {
     }
   }
 
-  error(message: string, attributes?: AnyValueMap): void {
+  error(message: string, attributes: AnyValueMap = {}): void {
     if (
       this.level === LogLevel.ERROR ||
       this.level === LogLevel.WARN ||

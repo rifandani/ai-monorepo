@@ -1,8 +1,8 @@
 import { Stagehand } from '@browserbasehq/stagehand';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { ENV } from '@/core/constants/env';
-import { OtelLogger } from '@/core/utils/logger';
+import { ENV } from '@/core/constants/env.js';
+import { OtelLogger } from '@/core/utils/logger.js';
 
 const logger = new OtelLogger({ name: 'mastra', level: 'info' });
 
@@ -311,7 +311,7 @@ const performWebExtraction = async (
   instruction?: string,
   // biome-ignore lint/suspicious/noExplicitAny: xxx
   schemaObj?: Record<string, any>,
-  useTextExtract?: boolean
+  useTextExtract = false
 ) => {
   logger.info(
     `Starting extraction${url ? ` for ${url}` : ''} with instruction: ${instruction}`

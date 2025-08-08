@@ -5,7 +5,7 @@ import { createTool } from '@mastra/core/tools';
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { crush } from 'radashi';
 import { z as v3 } from 'zod/v3';
-import { OtelLogger } from '@/core/utils/logger';
+import { OtelLogger } from '@/core/utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

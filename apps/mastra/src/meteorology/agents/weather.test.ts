@@ -1,6 +1,6 @@
 import { evaluate } from '@mastra/evals';
 import { describe, expect, it } from 'vitest';
-import { weatherAgent } from './weather';
+import { weatherAgent } from './weather.js';
 
 describe('Weather Agent Evaluations', () => {
   it('should evaluates how well an LLMs output answers or addresses the input query', async () => {

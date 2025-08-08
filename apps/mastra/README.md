@@ -4,6 +4,7 @@
 
 - [ ] mastra input processors (guardrails)
 - [ ] mastra scorers
+- [ ] replace `SERVICE_NAME` into `ENV.APP_TITLE`
 
 ## 💾 How to Database
 

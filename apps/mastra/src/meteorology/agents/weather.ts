@@ -11,9 +11,9 @@ import {
   KeywordCoverageMetric,
   ToneConsistencyMetric,
 } from '@mastra/evals/nlp';
-import { models } from '@/core/utils/ai';
-import { weatherMemory } from '@/meteorology/memory/weather';
-import { weatherTool } from '@/meteorology/tools/weather';
+import { models } from '@/core/utils/ai.js';
+import { weatherMemory } from '@/meteorology/memory/weather.js';
+import { weatherTool } from '@/meteorology/tools/weather.js';
 
 export const weatherAgent = new Agent({
   name: 'Weather Agent',

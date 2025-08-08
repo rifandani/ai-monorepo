@@ -1,7 +1,7 @@
 import { Memory } from '@mastra/memory';
 import { PgVector } from '@mastra/pg';
-import { ENV } from '@/core/constants/env';
-import { models } from '@/core/utils/ai';
+import { ENV } from '@/core/constants/env.js';
+import { models } from '@/core/utils/ai.js';
 
 const vector = new PgVector({
   connectionString: ENV.DATABASE_URL,

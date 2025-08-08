@@ -1,6 +1,6 @@
 import { Agent } from '@mastra/core/agent';
 import { MCPClient } from '@mastra/mcp';
-import { models } from '@/core/utils/ai';
+import { models } from '@/core/utils/ai.js';
 
 const notesMcpClient = new MCPClient({
   servers: {
