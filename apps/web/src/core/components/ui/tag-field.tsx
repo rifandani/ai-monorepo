@@ -122,7 +122,6 @@ function TagField({
       return;
     }
 
-    // biome-ignore lint/style/noNonNullAssertion: xxx
     const endKey = list.items.at(-1)!;
 
     if (endKey !== null) {

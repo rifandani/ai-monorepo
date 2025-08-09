@@ -8,7 +8,11 @@ Key Principles:
 5. Empty inputs or error messages should always be marked as "no"
 6. Responses that discuss the type of information being asked show partial relevance`;
 
-export function generateEvaluationStatementsPrompt({ output }: { output: string }) {
+export function generateEvaluationStatementsPrompt({
+  output,
+}: {
+  output: string;
+}) {
   return `Given the text, break it down into meaningful statements while preserving context and relationships.
 Don't split too aggressively.
 
@@ -41,7 +45,13 @@ JSON:
 `;
 }
 
-export function generateEvaluatePrompt({ input, statements }: { input: string; statements: string[] }) {
+export function generateEvaluatePrompt({
+  input,
+  statements,
+}: {
+  input: string;
+  statements: string[];
+}) {
   return `Evaluate each statement's relevance to the input question, considering direct answers, related context, and uncertain cases.
 
     Return JSON with array of verdict objects. Each verdict must include:

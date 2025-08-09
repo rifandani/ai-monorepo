@@ -48,7 +48,13 @@ JSON:
 `;
 }
 
-export function generateEvaluatePrompt({ claims, context }: { claims: string[]; context: string[] }) {
+export function generateEvaluatePrompt({
+  claims,
+  context,
+}: {
+  claims: string[];
+  context: string[];
+}) {
   return `Verify each claim against the provided context. Determine if each claim is supported by, contradicts, or is not mentioned in the context.
 
 Context:

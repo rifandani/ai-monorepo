@@ -15,7 +15,13 @@ Key Principles:
    - Omitting additional details while maintaining factual accuracy
 10. Subjective claims ("made history", "pioneering", "leading") are hallucinations unless explicitly stated in context`;
 
-export function generateEvaluatePrompt({ context, claims }: { context: string[]; claims: string[] }) {
+export function generateEvaluatePrompt({
+  context,
+  claims,
+}: {
+  context: string[];
+  claims: string[];
+}) {
   return `Verify if the claims contain any information not supported by or contradicting the provided context. A hallucination occurs when a claim either:
 1. Contradicts the context
 2. Makes assertions not supported by the context

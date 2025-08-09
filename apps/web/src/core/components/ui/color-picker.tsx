@@ -98,7 +98,6 @@ declare global {
 }
 
 function EyeDropper() {
-  // biome-ignore lint/style/noNonNullAssertion: xxx
   const state = use(ColorPickerStateContext)!;
 
   if (!window.EyeDropper) {

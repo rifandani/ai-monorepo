@@ -4,6 +4,8 @@
     "forceConsistentCasingInFileNames": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
+    "declaration": false,
+    "declarationMap": false,
     "paths": {
       "@/*": ["./src/*"],
       "@workspace/core/*": ["../../packages/core/src/*"]

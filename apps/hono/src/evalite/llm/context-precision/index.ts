@@ -1,5 +1,5 @@
 import type { LanguageModel } from 'ai';
-import { ContextPrecisionJudge } from '@/evalite/llm/context-precision/metricJudge.js';
+import { ContextPrecisionJudge } from '@/evalite/llm/context-precision/metric-judge.js';
 import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
 import { Metric } from '@/evalite/llm/metric.js';
 import { roundToTwoDecimals } from '@/evalite/llm/utils.js';

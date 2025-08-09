@@ -309,7 +309,6 @@ function SidebarHeader({
   ref,
   ...props
 }: React.ComponentProps<'div'>) {
-  // biome-ignore lint/style/noNonNullAssertion: xxx
   const { state } = use(SidebarContext)!;
   return (
     <div

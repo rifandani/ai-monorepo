@@ -1,5 +1,5 @@
 import type { LanguageModel } from 'ai';
-import { BiasJudge } from '@/evalite/llm/bias/metricJudge.js';
+import { BiasJudge } from '@/evalite/llm/bias/metric-judge.js';
 import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
 import { Metric } from '@/evalite/llm/metric.js';
 import { roundToTwoDecimals } from '@/evalite/llm/utils.js';

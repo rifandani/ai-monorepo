@@ -262,7 +262,6 @@ export async function searchAndEvaluate(
         description: 'Evaluate the search results',
         parameters: z3.object({}),
         async execute() {
-          // biome-ignore lint/style/noNonNullAssertion: xxx
           const pendingResult = pendingSearchResults.pop()!;
 
           const { object: evaluation } = await generateObject({

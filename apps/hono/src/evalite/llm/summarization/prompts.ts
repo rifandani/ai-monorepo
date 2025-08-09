@@ -81,7 +81,11 @@ export function generateAlignmentPrompt({
   `;
 }
 
-export function generateQuestionsPrompt({ originalText }: { originalText: string }) {
+export function generateQuestionsPrompt({
+  originalText,
+}: {
+  originalText: string;
+}) {
   return `
     Given the input text, generate yes/no questions to verify if key information is preserved in a summary. Follow these rules:
 

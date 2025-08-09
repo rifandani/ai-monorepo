@@ -142,7 +142,6 @@ function CommandMenuSearch({
   placeholder,
   ...props
 }: CommandMenuSearchProps) {
-  // biome-ignore lint/style/noNonNullAssertion: xxx
   const state = use(OverlayTriggerStateContext)!;
   const { isPending, escapeButton } = useCommandMenu();
   return (

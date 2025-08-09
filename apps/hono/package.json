@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "1.2.22",
-    "@dotenvx/dotenvx": "1.47.6",
+    "@dotenvx/dotenvx": "1.48.4",
     "@google/generative-ai": "0.24.1",
     "@hono/node-server": "1.14.4",
     "@hono/otel": "0.2.2",

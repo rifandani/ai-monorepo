@@ -1,7 +1,7 @@
 import type { LanguageModel } from 'ai';
 import type { MetricResultWithReason } from '@/evalite/llm/metric.js';
 import { Metric } from '@/evalite/llm/metric.js';
-import { PromptAlignmentJudge } from '@/evalite/llm/prompt-alignment/metricJudge.js';
+import { PromptAlignmentJudge } from '@/evalite/llm/prompt-alignment/metric-judge.js';
 import { roundToTwoDecimals } from '@/evalite/llm/utils.js';
 
 export interface PromptAlignmentMetricOptions {

@@ -82,7 +82,6 @@ function CalendarHeader({
   ...props
 }: React.ComponentProps<'header'> & { isRange?: boolean }) {
   const { direction } = useLocale();
-  // biome-ignore lint/style/noNonNullAssertion: xxx
   const state = use(CalendarStateContext)!;
 
   return (
