@@ -3,17 +3,17 @@
   "version": "1.0.0",
   "author": "Tri Rizeki Rifandani",
   "devDependencies": {
-    "@biomejs/biome": "2.0.5",
+    "@biomejs/biome": "2.1.4",
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
-    "@types/node": "22.15.31",
+    "@types/node": "24.2.1",
     "@workspace/typescript-config": "workspace:*",
     "husky": "9.1.7",
     "npm-run-all2": "8.0.4",
     "rimraf": "6.0.1",
     "tsx": "4.20.3",
-    "typescript": "5.8.3",
-    "ultracite": "5.0.20"
+    "typescript": "5.9.2",
+    "ultracite": "5.1.2"
   },
   "commitlint": {
     "extends": [
@@ -24,7 +24,7 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "bun@1.2.19",
+  "packageManager": "bun@1.2.20",
   "private": true,
   "scripts": {
     "prepare": "husky",

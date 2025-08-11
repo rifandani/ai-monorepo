@@ -1,5 +1,6 @@
 import { otel } from '@hono/otel';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { contextStorage } from 'hono/context-storage';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { HTTPException } from 'hono/http-exception';
@@ -8,6 +9,7 @@ import { logger as loggerMiddleware } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
+import { timeout } from 'hono/timeout';
 import { timing } from 'hono/timing';
 import { rateLimiter } from 'hono-rate-limiter';
 import { HTTPError } from 'ky';
@@ -27,10 +29,14 @@ const app = new OpenAPIHono<{
 app.use(
   '*',
   /**
-   * based on Hono's middleware system, it instruments the entire request-response lifecycle.
-   * This means that it doesn't provide fine-grained instrumentation for individual middleware.
+   * instruments the entire request-response lifecycle and metrics.
+   * it doesn't provide fine-grained instrumentation for individual middleware.
    */
   otel(),
+  /**
+   * using `AsyncLocalStorage` under the hood
+   */
+  contextStorage(),
   metricsMiddleware(),
   loggerMiddleware(),
   // reqResLogger(),
@@ -51,6 +57,7 @@ app.use(
   prettyJSON(),
   requestId(),
   timing(),
+  timeout(10_000), // 10 seconds
   languageDetector({
     supportedLanguages: ['en', 'id'],
     fallbackLanguage: 'en',

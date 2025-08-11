@@ -1,3 +1,5 @@
+import metadata from '../../../package.json' with { type: 'json' };
+
 export const PORT = 3333;
-export const SERVICE_NAME = 'aiMonorepoHono';
-export const SERVICE_VERSION = '1.0.0';
+export const SERVICE_NAME = metadata.name;
+export const SERVICE_VERSION = metadata.version;

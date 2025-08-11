@@ -2,6 +2,7 @@
 
 ## 🎯 Todo
 
+- [ ] try otel metrics
 - [ ] replace `SERVICE_NAME` into `ENV.APP_TITLE`
 - [ ] do not use all `@opentelemetry/auto-instrumentations-node`, it will reduce performance up to 80%. Use selectively like `@opentelemetry/instrumentation-dns`, `@opentelemetry/instrumentation-http`, `@opentelemetry/instrumentation-net`, `@opentelemetry/instrumentation-pg`, `@opentelemetry/instrumentation-runtime-node`, `@opentelemetry/instrumentation-undici`.
 - [ ] example of MCP OAUTH

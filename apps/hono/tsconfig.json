@@ -4,12 +4,12 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "baseUrl": ".",
+    "resolveJsonModule": true,
     "paths": {
       "@/*": ["./src/*"],
       "@workspace/core/*": ["../../packages/core/src/*"]
-    },
-    "types": ["bun-types"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "vitest.config.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.spec.ts", "**/*.json", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

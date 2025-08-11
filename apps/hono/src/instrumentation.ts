@@ -1,10 +1,16 @@
 // import * as fs from 'node:fs';
 // import * as path from 'node:path';
 
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { DiagConsoleLogger, DiagLogLevel, diag } from '@opentelemetry/api';
 // import { type ExportResult, ExportResultCode } from '@opentelemetry/core';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { NetInstrumentation } from '@opentelemetry/instrumentation-net';
+import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node';
+import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -13,10 +19,21 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
+import { ENV } from '@/core/constants/env.js';
 import { SERVICE_NAME, SERVICE_VERSION } from '@/core/constants/global.js';
 
+const logLevelMap: Record<string, DiagLogLevel> = {
+  ALL: DiagLogLevel.ALL,
+  VERBOSE: DiagLogLevel.VERBOSE,
+  DEBUG: DiagLogLevel.DEBUG,
+  INFO: DiagLogLevel.INFO, // default
+  WARN: DiagLogLevel.WARN,
+  ERROR: DiagLogLevel.ERROR,
+  NONE: DiagLogLevel.NONE,
+};
+
 // For troubleshooting, set the log level to DiagLogLevel.DEBUG
-// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+diag.setLogger(new DiagConsoleLogger(), logLevelMap[ENV.OTEL_LOG_LEVEL]);
 
 // Custom File Span Exporter
 // class FileSpanExporter implements SpanExporter {
@@ -91,20 +108,28 @@ const sdk = new NodeSDK({
     exporter: new OTLPMetricExporter(),
   }),
   instrumentations: [
-    getNodeAutoInstrumentations({
-      '@opentelemetry/instrumentation-pg': {
-        enhancedDatabaseReporting: true,
-      },
-      '@opentelemetry/instrumentation-http': {
-        ignoreIncomingRequestHook: (request) => {
-          return (
-            request.url === '/favicon.ico' ||
-            request.url === '/openapi' ||
-            (request.url?.startsWith('/openapi/') ?? false)
-          );
-        },
+    new DnsInstrumentation(),
+    // new FsInstrumentation(), too verbose
+    new HttpInstrumentation({
+      ignoreIncomingRequestHook: (request) => {
+        const openApiRegex = /^\/openapi(?:\/.*)?$/;
+        const wellKnownRegex = /^\/\.well-known\/.*/;
+        const imageRegex = /\.(?:png|jpg|jpeg|gif|svg|ico|webp)$/i;
+
+        return (
+          openApiRegex.test(request.url ?? '') ||
+          wellKnownRegex.test(request.url ?? '') ||
+          imageRegex.test(request.url ?? '')
+        );
       },
     }),
+    new NetInstrumentation(),
+    new PgInstrumentation({
+      enhancedDatabaseReporting: true,
+      addSqlCommenterCommentToQueries: true,
+    }),
+    new RuntimeNodeInstrumentation(),
+    new UndiciInstrumentation(),
   ],
 });
 
