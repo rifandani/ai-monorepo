@@ -1,49 +1,40 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import React from 'react';
+import type React from 'react';
 import type {
   ComboBoxProps as ComboboxPrimitiveProps,
   InputProps,
   ListBoxProps,
-  ValidationResult,
+  PopoverProps,
 } from 'react-aria-components';
 import {
-  Button as ButtonPrimitive,
   ComboBoxContext,
-  ComboBoxStateContext,
   ComboBox as ComboboxPrimitive,
+  ListBox,
   useSlottedContext,
 } from 'react-aria-components';
-import { tv } from 'tailwind-variants';
-import { Button } from './button';
-import { DropdownItem, DropdownLabel, DropdownSection } from './dropdown';
-import { Description, FieldError, FieldGroup, Input, Label } from './field';
-import { ListBox } from './list-box';
-import type { PopoverContentProps } from './popover';
-import { PopoverContent } from './popover';
-import { composeTailwindRenderProps } from './primitive';
-
-const comboboxStyles = tv({
-  slots: {
-    base: 'group flex w-full flex-col gap-y-1.5',
-    chevronButton:
-      'h-7 w-8 rounded pressed:bg-transparent outline-offset-0 hover:bg-transparent active:bg-transparent **:data-[slot=icon]:pressed:text-fg **:data-[slot=icon]:text-muted-fg **:data-[slot=icon]:hover:text-fg',
-    chevronIcon:
-      'size-4 shrink-0 transition duration-200 group-open:rotate-180 group-open:text-fg',
-    clearButton:
-      'absolute inset-y-0 right-0 flex items-center pr-2 text-muted-fg hover:text-fg focus:outline-hidden',
-  },
-});
-
-const { base, chevronButton, chevronIcon, clearButton } = comboboxStyles();
+import { Button } from '@/core/components/ui/button';
+import {
+  DropdownDescription,
+  DropdownItem,
+  DropdownLabel,
+  DropdownSection,
+} from '@/core/components/ui/dropdown';
+import type { FieldProps } from '@/core/components/ui/field';
+import {
+  Description,
+  FieldError,
+  FieldGroup,
+  Input,
+  Label,
+} from '@/core/components/ui/field';
+import { PopoverContent } from '@/core/components/ui/popover';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 interface ComboBoxProps<T extends object>
-  extends Omit<ComboboxPrimitiveProps<T>, 'children'> {
-  label?: string;
-  placeholder?: string;
-  description?: string | null;
-  errorMessage?: string | ((validation: ValidationResult) => string);
+  extends Omit<ComboboxPrimitiveProps<T>, 'children'>,
+    FieldProps {
   children: React.ReactNode;
 }
 
@@ -57,8 +48,12 @@ function ComboBox<T extends object>({
 }: ComboBoxProps<T>) {
   return (
     <ComboboxPrimitive
+      data-slot="combo-box"
       {...props}
-      className={composeTailwindRenderProps(className, base())}
+      className={composeTailwindRenderProps(
+        className,
+        'group flex w-full flex-col gap-y-1'
+      )}
     >
       {label && <Label>{label}</Label>}
       {children}
@@ -69,32 +64,34 @@ function ComboBox<T extends object>({
 }
 
 interface ComboBoxListProps<T extends object>
-  extends ListBoxProps<T>,
-    Pick<PopoverContentProps, 'placement'> {
-  popoverClassName?: PopoverContentProps['className'];
+  extends Omit<ListBoxProps<T>, 'layout' | 'orientation'>,
+    Pick<PopoverProps, 'placement'> {
+  popover?: Omit<PopoverProps, 'children'>;
 }
 
 function ComboBoxList<T extends object>({
   children,
   items,
   className,
-  popoverClassName,
+  popover,
   ...props
 }: ComboBoxListProps<T>) {
   return (
     <PopoverContent
       className={composeTailwindRenderProps(
-        popoverClassName,
-        'sm:min-w-(--trigger-width)'
+        popover?.className,
+        'min-w-(--trigger-width) scroll-py-1 overflow-y-auto overscroll-contain'
       )}
-      isNonModal
-      placement={props.placement}
-      respectScreen={false}
-      showArrow={false}
+      {...popover}
     >
       <ListBox
-        className={composeTailwindRenderProps(className, 'border-0')}
+        className={composeTailwindRenderProps(
+          className,
+          "grid max-h-96 w-full grid-cols-[auto_1fr] flex-col gap-y-1 p-1 outline-hidden *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1"
+        )}
         items={items}
+        layout="stack"
+        orientation="vertical"
         {...props}
       >
         {children}
@@ -104,46 +101,39 @@ function ComboBoxList<T extends object>({
 }
 
 function ComboBoxInput(props: InputProps) {
-  const context = useSlottedContext(ComboBoxContext);
+  const context = useSlottedContext(ComboBoxContext)!;
   return (
-    <FieldGroup className="relative pl-0">
+    <FieldGroup>
       <Input {...props} placeholder={props?.placeholder} />
-      <Button className={chevronButton()} intent="plain" size="square-petite">
+      <Button
+        className={
+          'rounded pressed:bg-transparent outline-offset-0 hover:bg-transparent active:bg-transparent **:data-[slot=icon]:pressed:text-fg **:data-[slot=icon]:text-muted-fg **:data-[slot=icon]:hover:text-fg forced-colors:group-disabled:border-[GrayText] forced-colors:group-disabled:text-[GrayText]'
+        }
+        intent="plain"
+        size="sq-xs"
+      >
         {!context?.inputValue && (
-          <Icon className={chevronIcon()} icon="mdi:chevron-down" />
+          <Icon
+            className={'size-4 shrink-0 text-muted-fg group-open:text-fg'}
+            data-slot="chevron"
+            icon="lucide:chevron-down"
+          />
         )}
       </Button>
-      {context?.inputValue && <ComboBoxClearButton />}
     </FieldGroup>
   );
 }
 
-function ComboBoxClearButton() {
-  const state = React.use(ComboBoxStateContext);
-
-  return (
-    <ButtonPrimitive
-      aria-label="Clear"
-      className={clearButton()}
-      onPress={() => {
-        state?.setSelectedKey(null);
-        state?.open();
-      }}
-      slot={null}
-    >
-      <Icon className="size-4 animate-in" icon="mdi:close" />
-    </ButtonPrimitive>
-  );
-}
-
+const ComboBoxSection = DropdownSection;
 const ComboBoxOption = DropdownItem;
 const ComboBoxLabel = DropdownLabel;
-const ComboBoxSection = DropdownSection;
+const ComboBoxDescription = DropdownDescription;
 
 ComboBox.Input = ComboBoxInput;
 ComboBox.List = ComboBoxList;
 ComboBox.Option = ComboBoxOption;
 ComboBox.Label = ComboBoxLabel;
+ComboBox.Description = ComboBoxDescription;
 ComboBox.Section = ComboBoxSection;
 
 export type { ComboBoxListProps, ComboBoxProps };

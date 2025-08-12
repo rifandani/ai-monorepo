@@ -13,7 +13,10 @@ import {
   Text,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
-import { CalendarGridHeader, CalendarHeader } from './calendar';
+import {
+  CalendarGridHeader,
+  CalendarHeader,
+} from '@/core/components/ui/calendar';
 
 interface RangeCalendarProps<T extends DateValue>
   extends RangeCalendarPrimitiveProps<T> {
@@ -30,7 +33,11 @@ function RangeCalendar<T extends DateValue>({
   return (
     <RangeCalendarPrimitive visibleDuration={visibleDuration} {...props}>
       <CalendarHeader isRange />
-      <div className="flex snap-x items-start justify-stretch gap-6 overflow-auto sm:gap-10">
+      <div
+        className={
+          'flex snap-x items-start justify-stretch gap-6 overflow-auto sm:gap-10'
+        }
+      >
         {Array.from({ length: visibleDuration?.months ?? 1 }).map(
           (_, index) => {
             const id = index + 1;
@@ -48,7 +55,7 @@ function RangeCalendar<T extends DateValue>({
                       className={twMerge([
                         'shrink-0 [--cell-fg:var(--color-primary)] [--cell:color-mix(in_oklab,var(--color-primary)_15%,white_85%)]',
                         'dark:[--cell-fg:color-mix(in_oklab,var(--color-primary)_80%,white_20%)] dark:[--cell:color-mix(in_oklab,var(--color-primary)_30%,black_45%)]',
-                        'group/calendar-cell relative size-10 cursor-default outline-hidden [line-height:2.286rem] selection-start:rounded-s-lg data-selection-end:rounded-e-lg data-outside-month:text-muted-fg sm:size-9 sm:text-sm',
+                        'group/calendar-cell relative size-12 cursor-default outline-hidden [line-height:2.286rem] selection-start:rounded-s-lg data-selection-end:rounded-e-lg data-outside-month:text-muted-fg sm:size-9 sm:text-sm',
                         'selected:bg-(--cell)/70 selected:text-(--cell-fg) dark:selected:bg-(--cell)',
                         'selected:after:bg-primary-fg invalid:selected:bg-danger/10 focus-visible:after:bg-primary-fg dark:invalid:selected:bg-danger/13',
                         '[td:first-child_&]:rounded-s-lg [td:last-child_&]:rounded-e-lg',

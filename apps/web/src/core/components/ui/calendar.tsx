@@ -1,12 +1,11 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: xxx */
 'use client';
 
 import { Icon } from '@iconify/react';
 import type { CalendarDate } from '@internationalized/date';
 import { getLocalTimeZone, today } from '@internationalized/date';
-import { useDateFormatter } from '@react-aria/i18n';
-import type { CalendarState } from '@react-stately/calendar';
-import type React from 'react';
 import { use } from 'react';
+import { useDateFormatter } from 'react-aria';
 import type {
   CalendarProps as CalendarPrimitiveProps,
   DateValue,
@@ -24,9 +23,10 @@ import {
   Text,
   useLocale,
 } from 'react-aria-components';
+import type { CalendarState } from 'react-stately';
 import { twMerge } from 'tailwind-merge';
-import { Button } from './button';
-import { Select } from './select';
+import { Button } from '@/core/components/ui/button';
+import { Select } from '@/core/components/ui/select';
 
 interface CalendarProps<T extends DateValue>
   extends Omit<CalendarPrimitiveProps<T>, 'visibleDuration'> {
@@ -44,22 +44,22 @@ function Calendar<T extends DateValue>({
   return (
     <CalendarPrimitive {...props}>
       <CalendarHeader />
-      <CalendarGrid className="[&_td]:border-collapse [&_td]:px-0 [&_td]:py-0.5">
+      <CalendarGrid>
         <CalendarGridHeader />
         <CalendarGridBody>
           {(date) => (
             <CalendarCell
               className={composeRenderProps(
                 className,
-                (_className, { isSelected, isDisabled }) =>
+                (className, { isSelected, isDisabled }) =>
                   twMerge(
-                    'relative flex size-10 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:size-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0',
+                    'relative flex size-12 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:size-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0',
                     isSelected &&
                       'bg-primary pressed:bg-primary text-primary-fg hover:bg-primary/90 data-invalid:bg-danger data-invalid:text-danger-fg forced-colors:bg-[Highlight] forced-colors:text-[Highlight] forced-colors:data-invalid:bg-[Mark]',
                     isDisabled && 'text-muted-fg forced-colors:text-[GrayText]',
                     date.compare(now) === 0 &&
-                      'after:-translate-x-1/2 after:pointer-events-none after:absolute after:start-1/2 after:bottom-1 after:z-10 after:size-[3px] after:rounded-full after:bg-primary selected:after:bg-primary-fg data-focus-visible:after:bg-primary-fg',
-                    _className
+                      'after:-translate-x-1/2 after:pointer-events-none after:absolute after:start-1/2 after:bottom-1 after:z-10 after:size-[3px] after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg',
+                    className
                   )
               )}
               date={date}
@@ -87,17 +87,17 @@ function CalendarHeader({
   return (
     <header
       className={twMerge(
-        'flex w-full justify-center gap-1.5 pt-1 pr-1 pb-5 pl-1.5 sm:pb-4',
+        'flex w-full justify-between gap-1.5 pt-1 pr-1 pb-5 pl-1.5 sm:pb-4',
         className
       )}
       data-slot="calendar-header"
       {...props}
     >
       {!isRange && (
-        <>
+        <div className="flex items-center gap-1.5">
           <SelectMonth state={state} />
           <SelectYear state={state} />
-        </>
+        </div>
       )}
       <Heading
         className={twMerge(
@@ -108,29 +108,29 @@ function CalendarHeader({
       />
       <div className="flex items-center gap-1">
         <Button
-          className="size-8 **:data-[slot=icon]:text-fg sm:size-7"
+          className={'size-8 **:data-[slot=icon]:text-fg sm:size-7'}
           intent="plain"
-          shape="circle"
-          size="square-petite"
+          isCircle
+          size="sq-sm"
           slot="previous"
         >
           {direction === 'rtl' ? (
-            <Icon className="size-4" icon="mdi:chevron-right" />
+            <Icon icon="lucide:chevron-right" />
           ) : (
-            <Icon className="size-4" icon="mdi:chevron-left" />
+            <Icon icon="lucide:chevron-left" />
           )}
         </Button>
         <Button
-          className="size-8 **:data-[slot=icon]:text-fg sm:size-7"
+          className={'size-8 **:data-[slot=icon]:text-fg sm:size-7'}
           intent="plain"
-          shape="circle"
-          size="square-petite"
+          isCircle
+          size="sq-sm"
           slot="next"
         >
           {direction === 'rtl' ? (
-            <Icon className="size-4" icon="mdi:chevron-right" />
+            <Icon icon="lucide:chevron-left" />
           ) : (
-            <Icon className="size-4" icon="mdi:chevron-left" />
+            <Icon icon="lucide:chevron-right" />
           )}
         </Button>
       </div>
@@ -165,16 +165,15 @@ function SelectMonth({ state }: { state: CalendarState }) {
         (new Date().getMonth() + 1).toString()
       }
     >
-      <Select.Trigger className="h-8 w-22 text-xs focus:ring-3 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate group-data-open:ring-3" />
-      <Select.List
-        className="w-34 min-w-34 max-w-34"
-        popoverClassName="w-34 max-w-34 min-w-34"
-      >
+      <Select.Trigger
+        className={
+          'w-22 text-sm/5 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate sm:px-2.5 sm:py-1.5 sm:*:text-sm/5'
+        }
+      />
+      <Select.List className="min-w-0">
         {months.map((month, index) => (
-          // eslint-disable-next-line react/no-array-index-key
           <Select.Option
             id={(index + 1).toString()}
-            // biome-ignore lint/suspicious/noArrayIndexKey: xxx
             key={index}
             textValue={month}
           >
@@ -204,18 +203,15 @@ function SelectYear({ state }: { state: CalendarState }) {
     <Select
       aria-label="Select year"
       onSelectionChange={(value) => {
-        // @ts-expect-error from justd
-        state.setFocusedDate(years[Number(value)]?.value);
+        state.setFocusedDate(years[Number(value)]?.value as CalendarDate);
       }}
       selectedKey={20}
     >
-      <Select.Trigger className="h-8 text-xs focus:ring-3 group-data-open:ring-3" />
-      <Select.List
-        className="w-34 min-w-34 max-w-34"
-        popoverClassName="w-34 max-w-34 min-w-34"
-      >
+      <Select.Trigger
+        className={'text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5'}
+      />
+      <Select.List>
         {years.map((year, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: xxx
           <Select.Option id={i} key={i} textValue={year.formatted}>
             <Select.Label>{year.formatted}</Select.Label>
           </Select.Option>
@@ -229,7 +225,11 @@ function CalendarGridHeader() {
   return (
     <CalendarGridHeaderPrimitive>
       {(day) => (
-        <CalendarHeaderCell className="pb-2 font-semibold text-muted-fg text-sm sm:px-0 sm:py-0.5 lg:text-xs">
+        <CalendarHeaderCell
+          className={
+            'pb-2 text-center font-semibold text-muted-fg text-sm/6 sm:px-0 sm:py-0.5 lg:text-xs'
+          }
+        >
           {day}
         </CalendarHeaderCell>
       )}

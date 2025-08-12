@@ -1,336 +1,285 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import type React from 'react';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { useFilter } from 'react-aria';
+import type { KeyboardEvent, RefObject } from 'react';
+import { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import type {
-  ComboBoxProps as ComboBoxPrimitiveProps,
+  ComboBoxProps,
+  GroupProps,
   Key,
-  ValidationResult,
+  ListBoxProps,
+  Selection,
 } from 'react-aria-components';
-import { ComboBox } from 'react-aria-components';
-import type { ListData } from 'react-stately';
-import { useListData } from 'react-stately';
-import { twMerge } from 'tailwind-merge';
-import { Button } from './button';
-import type { FieldProps } from './field';
-import { Description, FieldError, Input, Label } from './field';
-import { ListBox } from './list-box';
-import { PopoverContent } from './popover';
-import type { RestrictedIntent, TagGroupProps } from './tag-group';
-import { Tag, TagGroup, TagList } from './tag-group';
-import { VisuallyHidden } from './visually-hidden';
+import { Button, ComboBox, Group, ListBox } from 'react-aria-components';
+import {
+  DropdownItem,
+  DropdownLabel,
+  DropdownSection,
+} from '@/core/components/ui/dropdown';
+import type { FieldProps } from '@/core/components/ui/field';
+import {
+  Description,
+  FieldGroup,
+  Input,
+  Label,
+} from '@/core/components/ui/field';
 
-interface SelectedKey {
-  id: Key;
-  name: string;
-}
+import { PopoverContent } from '@/core/components/ui/popover';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
+import { Tag, TagGroup, TagList } from '@/core/components/ui/tag-group';
 
-interface MultipleSelectProps<T extends object>
-  extends FieldProps,
-    Omit<
-      ComboBoxPrimitiveProps<T>,
-      | 'children'
-      | 'validate'
-      | 'allowsEmptyCollection'
-      | 'inputValue'
-      | 'selectedKey'
-      | 'className'
-      | 'value'
-      | 'onSelectionChange'
-      | 'onInputChange'
+interface MultipleSelectProps<T>
+  extends Omit<ListBoxProps<T>, 'renderEmptyState'>,
+    Pick<
+      ComboBoxProps<T & { selectedKeys: Selection }>,
+      'isRequired' | 'validate' | 'validationBehavior'
     >,
-    Pick<TagGroupProps, 'shape'> {
-  intent?: RestrictedIntent;
-  items: T[];
-  selectedItems: ListData<T>;
+    FieldProps,
+    Pick<GroupProps, 'isDisabled' | 'isInvalid'> {
   className?: string;
-  onItemInserted?: (key: Key) => void;
-  onItemCleared?: (key: Key) => void;
+  errorMessage?: string;
+  maxItems?: number;
   renderEmptyState?: (inputValue: string) => React.ReactNode;
-  tag: (item: T) => React.ReactNode;
-  children: React.ReactNode | ((item: T) => React.ReactNode);
-  errorMessage?: string | ((validation: ValidationResult) => string);
 }
 
-function MultipleSelect<T extends SelectedKey>({
-  children,
-  items,
-  selectedItems,
-  onItemCleared,
-  onItemInserted,
+function mapToNewObject<T extends object>(
+  array: T[]
+): { id: T[keyof T]; textValue: T[keyof T] }[] {
+  return array.map((item) => {
+    const idProperty = Object.keys(item).find(
+      (key) => key === 'id' || key === 'key'
+    );
+    const textProperty = Object.keys(item).find(
+      (key) => key !== 'id' && key !== 'key'
+    );
+    return {
+      id: item[idProperty as keyof T],
+      textValue: item[textProperty as keyof T],
+    };
+  });
+}
+
+function MultipleSelect<T extends object>({
   className,
-  name,
+  maxItems = Number.POSITIVE_INFINITY,
   renderEmptyState,
-  errorMessage,
+  children,
   ...props
 }: MultipleSelectProps<T>) {
-  const tagGroupIdentifier = useId();
-  const triggerRef = useRef<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState(0);
-
-  const { contains } = useFilter({ sensitivity: 'base' });
-  const selectedKeys = selectedItems.items.map((i) => i.id);
-
-  const filter = useCallback(
-    (item: T, filterText: string) => {
-      return !selectedKeys.includes(item.id) && contains(item.name, filterText);
-    },
-    [contains, selectedKeys]
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const triggerButtonRef = useRef<HTMLButtonElement>(null);
+  const [inputValue, setInputValue] = useState('');
+  const [selectedKeys, onSelectionChange] = useState<Selection>(
+    new Set(props.selectedKeys)
   );
 
-  const accessibleList = useListData({
-    initialItems: items,
-    filter,
-  });
-
-  const [fieldState, setFieldState] = useState<{
-    selectedKey: Key | null;
-    inputValue: string;
-  }>({
-    selectedKey: null,
-    inputValue: '',
-  });
-
-  const onRemove = useCallback(
-    (keys: Set<Key>) => {
-      const key = keys.values().next().value;
-      if (key) {
-        selectedItems.remove(key);
-        setFieldState({
-          inputValue: '',
-          selectedKey: null,
-        });
-        onItemCleared?.(key);
-      }
-    },
-    [selectedItems, onItemCleared]
-  );
-
-  const onSelectionChange = (id: Key | null) => {
-    if (!id) {
-      return;
-    }
-
-    const item = accessibleList.getItem(id);
-
-    if (!item) {
-      return;
-    }
-
-    if (!selectedKeys.includes(id)) {
-      selectedItems.append(item);
-      setFieldState({
-        inputValue: '',
-        selectedKey: id,
-      });
-      onItemInserted?.(id);
-    }
-
-    accessibleList.setFilterText('');
-  };
-
-  const onInputChange = (value: string) => {
-    setFieldState((prev) => ({
-      inputValue: value,
-      selectedKey: value === '' ? null : prev.selectedKey,
-    }));
-
-    accessibleList.setFilterText(value);
-  };
-
-  const popLast = useCallback(() => {
-    if (selectedItems.items.length === 0) {
-      return;
-    }
-
-    const endKey = selectedItems.items.at(-1);
-
-    if (endKey) {
-      selectedItems.remove(endKey.id);
-      onItemCleared?.(endKey.id);
-    }
-
-    setFieldState({
-      inputValue: '',
-      selectedKey: null,
-    });
-  }, [selectedItems, onItemCleared]);
-
-  const onKeyDownCapture = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Backspace' && fieldState.inputValue === '') {
-        popLast();
-      }
-    },
-    [popLast, fieldState.inputValue]
-  );
+  const isMax = [...selectedKeys].length >= maxItems;
 
   useEffect(() => {
-    const trigger = triggerRef.current;
-    if (!trigger) {
-      return;
-    }
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setWidth(entry.target.clientWidth);
-      }
-    });
-
-    observer.observe(trigger);
+    setInputValue('');
     return () => {
-      observer.unobserve(trigger);
+      inputRef.current?.focus();
     };
   }, []);
 
-  const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
+  const addItem = (e: Key | null) => {
+    if (!e || isMax) {
+      return;
+    }
+    onSelectionChange?.((s) => new Set([...s, e!]));
+    // @ts-expect-error incompatible type Key and Selection
+    props.onSelectionChange?.((s) => new Set([...s, e!]));
+  };
+
+  const removeItem = (e: Set<Key>) => {
+    onSelectionChange?.(
+      (s) => new Set([...s].filter((i) => i !== e.values().next().value))
+    );
+    props.onSelectionChange?.(
+      // @ts-expect-error incompatible type Key and Selection
+      (s) => new Set([...s].filter((i) => i !== e.values().next().value))
+    );
+  };
+
+  const onKeyDownCapture = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && inputValue === '') {
+      onSelectionChange?.((s) => new Set([...s].slice(0, -1)));
+      // @ts-expect-error incompatible type Key and Selection
+      props.onSelectionChange?.((s) => new Set([...s].slice(0, -1)));
+    }
+  };
+
+  const parsedItems = props.items
+    ? mapToNewObject(props.items as T[])
+    : mapToNewObject(
+        Children.map(
+          children as React.ReactNode,
+          (child) => isValidElement(child) && child.props
+        ) as T[]
+      );
+
+  const availableItemsToSelect = props.items
+    ? parsedItems.filter((item) => ![...selectedKeys].includes(item.id as Key))
+    : parsedItems;
+
+  const filteredChildren = props.items
+    ? parsedItems.filter((item) => ![...selectedKeys].includes(item.id as Key))
+    : Children.map(
+        children as React.ReactNode,
+        (child) => isValidElement(child) && child.props
+        // biome-ignore lint/suspicious/noExplicitAny: xxx
+      )?.filter((item: T & any) => ![...selectedKeys].includes(item.id));
 
   return (
-    <div className={twMerge('group flex w-full min-w-80 flex-col', className)}>
-      {props.label && <Label className="mb-1">{props.label}</Label>}
-      <div className={props.isDisabled ? 'opacity-50' : ''}>
-        <div
-          className={twMerge(
-            [
-              'relative flex min-h-10 flex-row flex-wrap items-center rounded-lg border px-1 shadow-xs transition',
-              'has-[input[focus=true]]:border-ring/70',
-              'has-[input[data-invalid=true][focus=true]]:border-blue-500',
-              'has-[input[data-invalid=true]]:border-danger',
-              'has-[input[focus=true]]:ring-4 has-[input[focus=true]]:ring-ring/20',
-            ],
-            className
-          )}
-          ref={triggerRef}
-        >
-          <TagGroup
-            aria-label="Selected items"
-            id={tagGroupIdentifier}
-            intent={props.intent}
-            onRemove={onRemove}
-            shape={props.shape}
-          >
-            <TagList
-              className={twMerge(
-                selectedItems.items.length !== 0 && 'px-1 py-1.5',
-                '[&_.jdt3lr2x]:last:-mr-1 gap-1.5 outline-hidden',
-                props.shape === 'square' &&
-                  '[&_.jdt3lr2x]:rounded-[calc(var(--radius-lg)-4px)]'
-              )}
-              items={selectedItems.items}
-            >
-              {props.tag}
-            </TagList>
-          </TagGroup>
-          <ComboBox
-            {...props}
-            allowsEmptyCollection
-            aria-label="Available items"
-            className="group peer flex flex-1"
-            inputValue={fieldState.inputValue}
-            items={accessibleList.items}
-            onInputChange={onInputChange}
-            onSelectionChange={onSelectionChange}
-            selectedKey={fieldState.selectedKey}
-          >
-            <div
-              className={twMerge(
-                'inline-flex flex-1 flex-wrap items-center px-0',
-                className
-              )}
-            >
-              <Input
-                className="ml-1 flex-1 px-0.5 py-1 shadow-none ring-0"
-                onBlur={() => {
-                  setFieldState({
-                    inputValue: '',
-                    selectedKey: null,
-                  });
-                  accessibleList.setFilterText('');
-                }}
-                onKeyDownCapture={onKeyDownCapture}
-                placeholder={props.placeholder}
-              />
-
-              <VisuallyHidden>
-                <Button
-                  aria-label="Remove"
-                  intent="plain"
-                  ref={triggerButtonRef}
-                  size="square-petite"
-                  slot="remove"
-                  type="button"
-                >
-                  <Icon icon="mdi:chevron-down" />
-                </Button>
-              </VisuallyHidden>
-            </div>
-            <PopoverContent
-              className="max-w-none"
-              isNonModal
-              respectScreen={false}
-              style={{ width: `${width}px` }}
-              trigger="ComboBox"
-              triggerRef={triggerRef}
-            >
-              <ListBox
-                renderEmptyState={() =>
-                  renderEmptyState ? (
-                    renderEmptyState(fieldState.inputValue)
-                  ) : (
-                    <Description className="block p-3">
-                      {fieldState.inputValue ? (
-                        <>
-                          No results found for:{' '}
-                          <strong className="font-medium text-fg">
-                            {fieldState.inputValue}
-                          </strong>
-                        </>
-                      ) : (
-                        'No options'
-                      )}
-                    </Description>
-                  )
-                }
-                selectionMode="multiple"
-              >
-                {children}
-              </ListBox>
-            </PopoverContent>
-          </ComboBox>
-          <div
-            aria-hidden
-            className="relative ml-auto flex items-center justify-center px-1"
-          >
-            <button
-              className="-mr-2 grid size-8 place-content-center rounded-sm text-muted-fg hover:text-fg focus:text-fg"
-              onClick={() => triggerButtonRef.current?.click()}
-              tabIndex={-1}
-              type="button"
-            >
-              <Icon
-                className="size-4 peer/[data-open]:rotate-180"
-                icon="mdi:chevron-down"
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-      {props.description && <Description>{props.description}</Description>}
-      <FieldError>{errorMessage}</FieldError>
-      {name && (
-        <input hidden name={name} readOnly value={selectedKeys.join(',')} />
+    <Group
+      className={composeTailwindRenderProps(
+        className,
+        'group flex h-fit min-w-[16rem] flex-col gap-y-1'
       )}
-    </div>
+      isDisabled={props.isDisabled}
+      isInvalid={props.isInvalid}
+    >
+      {({ isInvalid, isDisabled }) => (
+        <>
+          {props.label && (
+            <Label onClick={() => inputRef.current?.focus()}>
+              {props.label}
+            </Label>
+          )}
+          <FieldGroup
+            isDisabled={isDisabled}
+            isInvalid={isInvalid}
+            ref={triggerRef as RefObject<HTMLDivElement>}
+          >
+            <TagGroup
+              aria-hidden
+              aria-label="Selected items"
+              onRemove={removeItem}
+            >
+              <TagList
+                className={`[[role='row']]:last:-mr-1 gap-1 px-1.5 py-1 outline-hidden`}
+                items={[...selectedKeys].map((key) => ({
+                  id: key,
+                  textValue: parsedItems.find((item) => item.id === key)
+                    ?.textValue as string,
+                }))}
+              >
+                {(item: { id: Key; textValue: Key }) => (
+                  <Tag
+                    className={
+                      'rounded-[calc(var(--radius-sm)-1px)] bg-secondary/50 text-secondary-fg'
+                    }
+                    isDisabled={isDisabled}
+                    textValue={item.textValue as string}
+                  >
+                    {item.textValue as string}
+                  </Tag>
+                )}
+              </TagList>
+            </TagGroup>
+            <ComboBox
+              aria-label="Search"
+              className="flex flex-1"
+              inputValue={inputValue}
+              isDisabled={isDisabled}
+              isReadOnly={isMax}
+              isRequired={props.isRequired}
+              onInputChange={isMax ? undefined : setInputValue}
+              onSelectionChange={addItem}
+              validate={props.validate}
+              validationBehavior={props.validationBehavior}
+            >
+              <div
+                className={
+                  'flex w-full flex-row items-center justify-between pr-2'
+                }
+              >
+                <Input
+                  className={'px-0 sm:px-0'}
+                  onBlur={() => {
+                    setInputValue('');
+                  }}
+                  onFocus={() => triggerButtonRef.current?.click()}
+                  onKeyDownCapture={onKeyDownCapture}
+                  placeholder={isMax ? 'Maximum reached' : props.placeholder}
+                  ref={inputRef as RefObject<HTMLInputElement>}
+                />
+                <Button
+                  aria-label="Open"
+                  className={
+                    'ml-auto inline-flex items-center justify-center rounded-lg text-muted-fg outline-hidden'
+                  }
+                  ref={triggerButtonRef}
+                >
+                  <Icon
+                    className={'size-4 text-muted-fg group-open:text-fg'}
+                    data-slot="chevron"
+                    icon="lucide:chevron-down"
+                  />
+                </Button>
+              </div>
+              <PopoverContent
+                className={
+                  'min-w-(--trigger-width) scroll-py-1 overflow-y-auto overscroll-contain'
+                }
+                triggerRef={triggerRef}
+              >
+                <ListBox
+                  className={composeTailwindRenderProps(
+                    className,
+                    "grid max-h-96 w-full grid-cols-[auto_1fr] flex-col gap-y-1 p-1 outline-hidden *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1"
+                  )}
+                  items={(availableItemsToSelect as T[]) ?? props.items}
+                  renderEmptyState={() =>
+                    renderEmptyState ? (
+                      renderEmptyState(inputValue)
+                    ) : (
+                      <Description className="block p-3">
+                        {inputValue ? (
+                          <>
+                            No results found for:{' '}
+                            <strong className="font-medium text-fg">
+                              {inputValue}
+                            </strong>
+                          </>
+                        ) : (
+                          'No options'
+                        )}
+                      </Description>
+                    )
+                  }
+                  {...props}
+                >
+                  {/** biome-ignore lint/suspicious/noExplicitAny: xxx */}
+                  {filteredChildren?.map((item: any) => (
+                    <MultipleSelect.Item
+                      id={item.id as Key}
+                      key={item.id as Key}
+                      textValue={item.textValue as string}
+                    >
+                      {item.textValue as string}
+                    </MultipleSelect.Item>
+                  )) ?? children}
+                </ListBox>
+              </PopoverContent>
+            </ComboBox>
+          </FieldGroup>
+          {props.description && <Description>{props.description}</Description>}
+          {props.errorMessage && isInvalid && (
+            <Description className="text-danger text-sm/5">
+              {props.errorMessage}
+            </Description>
+          )}
+        </>
+      )}
+    </Group>
   );
 }
 
-const MultipleSelectTag = Tag;
-const MultipleSelectOption = ListBox.Item;
+MultipleSelect.Item = DropdownItem;
+MultipleSelect.Label = DropdownLabel;
+MultipleSelect.Section = DropdownSection;
 
-MultipleSelect.Tag = MultipleSelectTag;
-MultipleSelect.Option = MultipleSelectOption;
-
-export type { MultipleSelectProps, SelectedKey };
 export { MultipleSelect };
+export type { MultipleSelectProps };

@@ -1,10 +1,9 @@
 'use client';
 
-import type React from 'react';
 import { createContext, use, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import type { MenuContentProps } from './menu';
-import { Menu } from './menu';
+import type { MenuContentProps } from '@/core/components/ui/menu';
+import { Menu } from '@/core/components/ui/menu';
 
 interface ContextMenuTriggerContextType {
   buttonRef: React.RefObject<HTMLButtonElement | null>;
@@ -91,14 +90,16 @@ function ContextMenuContent<T extends object>(
     useContextMenuTrigger();
   return contextMenuOffset ? (
     <Menu.Content
-      crossOffset={contextMenuOffset?.crossOffset}
-      isOpen={!!contextMenuOffset}
-      offset={contextMenuOffset?.offset}
       onClose={() => setContextMenuOffset(null)}
-      onOpenChange={() => setContextMenuOffset(null)}
-      placement="bottom left"
-      shouldFlip={false}
-      triggerRef={buttonRef}
+      popover={{
+        isOpen: !!contextMenuOffset,
+        shouldFlip: false,
+        triggerRef: buttonRef,
+        onOpenChange: () => setContextMenuOffset(null),
+        placement: 'bottom left',
+        offset: contextMenuOffset.offset,
+        crossOffset: contextMenuOffset.crossOffset,
+      }}
       {...props}
     />
   ) : null;
@@ -106,7 +107,7 @@ function ContextMenuContent<T extends object>(
 
 const ContextMenuItem = Menu.Item;
 const ContextMenuSeparator = Menu.Separator;
-const ContextMenuItemDetails = Menu.ItemDetails;
+const ContextMenuDescription = Menu.Description;
 const ContextMenuSection = Menu.Section;
 const ContextMenuHeader = Menu.Header;
 const ContextMenuKeyboard = Menu.Keyboard;
@@ -117,7 +118,7 @@ ContextMenu.Content = ContextMenuContent;
 ContextMenu.Item = ContextMenuItem;
 ContextMenu.Label = ContextMenuLabel;
 ContextMenu.Separator = ContextMenuSeparator;
-ContextMenu.ItemDetails = ContextMenuItemDetails;
+ContextMenu.Description = ContextMenuDescription;
 ContextMenu.Section = ContextMenuSection;
 ContextMenu.Header = ContextMenuHeader;
 ContextMenu.Keyboard = ContextMenuKeyboard;

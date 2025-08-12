@@ -1,12 +1,16 @@
 'use client';
 
-import type React from 'react';
 import { composeRenderProps, Text, ToggleButton } from 'react-aria-components';
 import { tv } from 'tailwind-variants';
-import { buttonStyles } from './button';
+
+import { buttonStyles } from '@/core/components/ui/button';
 
 const showMoreStyles = tv({
-  base: 'text-sm leading-6 before:border-muted after:border-muted',
+  base: `
+    text-sm leading-6
+    before:border-border
+    after:border-border
+  `,
   variants: {
     orientation: {
       vertical: 'mx-1 h-auto self-stretch',
@@ -16,13 +20,19 @@ const showMoreStyles = tv({
   compoundVariants: [
     {
       orientation: 'vertical',
-      className:
-        'mx-2 flex flex-col items-center before:mb-2 before:flex-1 before:border-l after:mt-2 after:flex-1 after:border-r',
+      className: `
+          mx-2 flex flex-col items-center
+          before:mb-2 before:flex-1 before:border-l
+          after:mt-2 after:flex-1 after:border-r
+        `,
     },
     {
       orientation: 'horizontal',
-      className:
-        'my-2 flex items-center self-stretch before:mr-2 before:flex-1 before:border-t after:ml-2 after:flex-1 after:border-t',
+      className: `
+          my-2 flex items-center self-stretch
+          before:mr-2 before:flex-1 before:border-t
+          after:ml-2 after:flex-1 after:border-t
+        `,
     },
   ],
   defaultVariants: {
@@ -39,6 +49,7 @@ interface ShowMoreProps extends React.ComponentProps<typeof ToggleButton> {
 
 function ShowMore({
   as = 'button',
+  children,
   orientation = 'horizontal',
   className,
   ...props
@@ -49,14 +60,12 @@ function ShowMore({
         <ToggleButton
           {...props}
           className={buttonStyles({
-            shape: 'circle',
+            isCircle: true,
             intent: 'outline',
-            size: 'small',
+            size: 'sm',
           })}
         >
-          {composeRenderProps(props.children, (children) => (
-            <>{children}</>
-          ))}
+          {composeRenderProps(children, (children) => children)}
         </ToggleButton>
       ) : (
         <Text slot="description">{props.text}</Text>

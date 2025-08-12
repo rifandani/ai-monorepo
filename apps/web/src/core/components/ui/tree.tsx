@@ -1,19 +1,18 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import type React from 'react';
 import type { TreeItemProps, TreeProps } from 'react-aria-components';
 import {
   Button,
   composeRenderProps,
-  TreeItemContent as TreeItemContentPrimitive,
+  TreeItemContent as TreeContentPrimitive,
   TreeItem as TreeItemPrimitive,
   Tree as TreePrimitive,
 } from 'react-aria-components';
-import { twJoin } from 'tailwind-merge';
+import { twJoin, twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
-import { Checkbox } from './checkbox';
-import { composeTailwindRenderProps } from './primitive';
+import { Checkbox } from '@/core/components/ui/checkbox';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 function Tree<T extends object>({ className, ...props }: TreeProps<T>) {
   return (
@@ -26,27 +25,46 @@ function Tree<T extends object>({ className, ...props }: TreeProps<T>) {
         )
       )}
       {...props}
-    >
-      {props.children}
-    </TreePrimitive>
+    />
   );
 }
 
-const itemStyles = tv({
+const treeItemStyles = tv({
   base: [
-    'p-[0.286rem_0.286rem_0.286rem_0.571rem] pl-[calc((var(--tree-item-level)-1)*20px+0.571rem+var(--padding))] outline-hidden [--padding:20px] [&_[data-expanded]_[slot=chevron]_[data-slot=icon]]:rotate-90',
-    '[&_[slot=chevron]]:outline-hidden [&_[slot=chevron]_[data-slot=icon]]:text-muted-fg',
+    `
+      p-[0.286rem_0.286rem_0.286rem_0.571rem]
+      pl-[calc((var(--tree-item-level)-1)*20px+0.571rem+var(--padding))]
+      outline-hidden
+      [--padding:20px]
+      [&_[data-expanded]_[slot=chevron]_[data-slot=icon]]:rotate-90
+    `,
+    `
+      [&_[slot=chevron]]:outline-hidden
+      [&_[slot=chevron]_[data-slot=icon]]:text-muted-fg
+    `,
     'data-has-child-rows:[--padding:0px]',
   ],
   variants: {
     isExpanded: {
-      true: '[&_[slot=chevron]_[data-slot=icon]]:rotate-90 [&_[slot=chevron]_[data-slot=icon]]:text-fg [&_[slot=chevron]_[data-slot=icon]]:transition [&_[slot=chevron]_[data-slot=icon]]:duration-200',
+      true: `
+        [&_[slot=chevron]_[data-slot=icon]]:rotate-90
+        [&_[slot=chevron]_[data-slot=icon]]:text-fg
+        [&_[slot=chevron]_[data-slot=icon]]:transition
+        [&_[slot=chevron]_[data-slot=icon]]:duration-200
+      `,
     },
     isFocusVisible: {
-      true: 'focus:outline-hidden data-focus-visible:ring-1 data-focus-visible:ring-primary [&_[slot=chevron]_[data-slot=icon]]:text-fg',
+      true: `
+        focus:outline-hidden
+        focus-visible:ring-1 focus-visible:ring-primary
+        [&_[slot=chevron]_[data-slot=icon]]:text-fg
+      `,
     },
     isDisabled: {
-      true: 'opacity-50 forced-colors:text-[GrayText]',
+      true: `
+        opacity-50
+        forced-colors:text-[GrayText]
+      `,
     },
   },
 });
@@ -54,10 +72,10 @@ const itemStyles = tv({
 function TreeItem<T extends object>({ className, ...props }: TreeItemProps<T>) {
   return (
     <TreeItemPrimitive
-      className={composeRenderProps(className, (_className, renderProps) =>
-        itemStyles({
+      className={composeRenderProps(className, (className, renderProps) =>
+        treeItemStyles({
           ...renderProps,
-          className: _className,
+          className,
         })
       )}
       {...props}
@@ -67,38 +85,36 @@ function TreeItem<T extends object>({ className, ...props }: TreeItemProps<T>) {
   );
 }
 
-function TreeItemContent(
-  props: React.ComponentProps<typeof TreeItemContentPrimitive>
-) {
+interface TreeContentProps
+  extends React.ComponentProps<typeof TreeContentPrimitive> {
+  className?: string;
+}
+
+function TreeContent({ className, ...props }: TreeContentProps) {
   return (
-    <TreeItemContentPrimitive {...props}>
-      <div className="flex items-center">
+    <TreeContentPrimitive {...props}>
+      <div className={twMerge('flex items-center', className)}>
         {props.children as React.ReactNode}
       </div>
-    </TreeItemContentPrimitive>
+    </TreeContentPrimitive>
   );
 }
 
 function TreeIndicator() {
   return (
     <Button className="relative shrink-0" slot="chevron">
-      <Icon className="size-5" icon="mdi:chevron-right" />
+      <Icon className="size-5" icon="lucide:chevron-right" />
     </Button>
   );
 }
 
-function TreeItemCheckbox() {
+function TreeCheckbox() {
   return <Checkbox slot="selection" />;
 }
 
-function TreeItemLabel(props: React.ComponentProps<'span'>) {
+function TreeLabel(props: React.ComponentProps<'span'>) {
   return <span {...props} />;
 }
 
-TreeItem.Label = TreeItemLabel;
-TreeItem.Indicator = TreeIndicator;
-TreeItem.Checkbox = TreeItemCheckbox;
-TreeItem.Content = TreeItemContent;
-
 export type { TreeItemProps, TreeProps };
-export { Tree, TreeItem };
+export { Tree, TreeCheckbox, TreeContent, TreeIndicator, TreeItem, TreeLabel };

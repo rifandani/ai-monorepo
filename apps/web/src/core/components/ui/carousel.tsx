@@ -3,31 +3,11 @@
 import { Icon } from '@iconify/react';
 import type { UseEmblaCarouselType } from 'embla-carousel-react';
 import useEmblaCarousel from 'embla-carousel-react';
-import type React from 'react';
-import type { HTMLAttributes } from 'react';
-import {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import type {
-  ListBoxItemProps,
-  ListBoxSectionProps,
-} from 'react-aria-components';
-import {
-  composeRenderProps,
-  ListBox,
-  ListBoxItem,
-  ListBoxSection,
-} from 'react-aria-components';
+import { createContext, use, useCallback, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { tv } from 'tailwind-variants';
-import type { ButtonProps } from './button';
-import { Button } from './button';
-import { composeTailwindRenderProps } from './primitive';
+import type { ButtonProps } from '@/core/components/ui/button';
+import { Button } from '@/core/components/ui/button';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -63,7 +43,7 @@ interface CarouselRootProps {
 }
 
 interface CarouselProps
-  extends HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     CarouselRootProps {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
@@ -90,13 +70,13 @@ function Carousel({
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
-  const onSelect = useCallback((_api: CarouselApi) => {
-    if (!_api) {
+  const onSelect = useCallback((api: CarouselApi) => {
+    if (!api) {
       return;
     }
 
-    setCanScrollPrev(_api.canScrollPrev());
-    setCanScrollNext(_api.canScrollNext());
+    setCanScrollPrev(api.canScrollPrev());
+    setCanScrollNext(api.canScrollNext());
   }, []);
 
   const scrollPrev = useCallback(() => {
@@ -118,30 +98,6 @@ function Carousel({
       }
     },
     [scrollPrev, scrollNext]
-  );
-
-  const value = useMemo(
-    () => ({
-      carouselRef,
-      api,
-      opts,
-      orientation:
-        orientation || (opts?.axis === 'y' ? 'vertical' : 'horizontal'),
-      scrollPrev,
-      scrollNext,
-      canScrollPrev,
-      canScrollNext,
-    }),
-    [
-      carouselRef,
-      api,
-      opts,
-      orientation,
-      scrollPrev,
-      scrollNext,
-      canScrollPrev,
-      canScrollNext,
-    ]
   );
 
   useEffect(() => {
@@ -167,12 +123,24 @@ function Carousel({
   }, [api, onSelect]);
 
   return (
-    <CarouselContext value={value}>
+    <CarouselContext
+      value={{
+        carouselRef,
+        api,
+        opts,
+        orientation:
+          orientation || (opts?.axis === 'y' ? 'vertical' : 'horizontal'),
+        scrollPrev,
+        scrollNext,
+        canScrollPrev,
+        canScrollNext,
+      }}
+    >
+      {/** biome-ignore lint/a11y/useSemanticElements: xxx */}
       <div
         aria-roledescription="carousel"
         className={twMerge('relative', className)}
         onKeyDownCapture={handleKeyDown}
-        // biome-ignore lint/a11y/useSemanticElements: xxx
         role="region"
         {...props}
       >
@@ -182,21 +150,12 @@ function Carousel({
   );
 }
 
-function CarouselContent<T extends object>({
-  className,
-  ...props
-}: ListBoxSectionProps<T>) {
+function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <ListBox
-      aria-label="Slides"
-      className="overflow-hidden"
-      layout={orientation === 'vertical' ? 'stack' : 'grid'}
-      orientation={orientation}
-      ref={carouselRef}
-    >
-      <ListBoxSection
+    <div className="overflow-hidden" ref={carouselRef}>
+      <div
         className={twMerge(
           'flex',
           orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col',
@@ -204,36 +163,19 @@ function CarouselContent<T extends object>({
         )}
         {...props}
       />
-    </ListBox>
+    </div>
   );
 }
 
-const carouselItem = tv({
-  base: [
-    'xd24r min-w-0 shrink-0 grow-0 basis-full focus:outline-hidden data-focus-visible:outline-hidden',
-    'group relative',
-  ],
-  variants: {
-    orientation: {
-      horizontal: 'pl-4',
-      vertical: 'pt-4',
-    },
-  },
-});
-
-function CarouselItem({ className, ...props }: ListBoxItemProps) {
+function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
   const { orientation } = useCarousel();
 
   return (
-    <ListBoxItem
-      aria-label={`Slide ${props.id}`}
-      aria-roledescription="slide"
-      className={composeRenderProps(className, (_className, renderProps) =>
-        carouselItem({
-          ...renderProps,
-          orientation,
-          className: _className,
-        })
+    <div
+      className={twMerge(
+        'xd24r group relative min-w-0 shrink-0 grow-0 basis-full focus:outline-hidden focus-visible:outline-hidden',
+        orientation === 'horizontal' ? 'pl-4' : 'pt-4',
+        className
       )}
       {...props}
     />
@@ -264,8 +206,8 @@ function CarouselButton({
   segment,
   className,
   intent = 'outline',
-  shape = 'circle',
-  size = 'square-petite',
+  isCircle = true,
+  size = 'sq-sm',
   ref,
   ...props
 }: ButtonProps & { segment: 'previous' | 'next' }) {
@@ -284,18 +226,16 @@ function CarouselButton({
       )}
       data-handler={segment}
       intent={intent}
+      isCircle={isCircle}
       isDisabled={!canScroll}
       onPress={scroll}
       ref={ref}
-      shape={shape}
       size={size}
       {...props}
     >
       <Icon
         className="size-4"
-        icon={
-          isNext ? 'ion:chevron-forward-outline' : 'ion:chevron-back-outline'
-        }
+        icon={isNext ? 'lucide:chevron-right' : 'lucide:chevron-left'}
       />
     </Button>
   );
@@ -307,4 +247,10 @@ Carousel.Item = CarouselItem;
 Carousel.Button = CarouselButton;
 
 export type { CarouselApi };
-export { Carousel };
+export {
+  Carousel,
+  CarouselButton,
+  CarouselContent,
+  CarouselHandler,
+  CarouselItem,
+};

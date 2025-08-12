@@ -1,6 +1,5 @@
 'use client';
 
-import type React from 'react';
 import type { ProgressBarProps } from 'react-aria-components';
 import { ProgressBar } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
@@ -32,7 +31,9 @@ function ProgressCircle({ className, ref, ...props }: ProgressCircleProps) {
           />
           {isIndeterminate ? (
             <circle
-              className="origin-center animate-[spin_1s_cubic-bezier(0.4,_0,_0.2,_1)_infinite]"
+              className={
+                'origin-center animate-[spin_1s_cubic-bezier(0.4,_0,_0.2,_1)_infinite]'
+              }
               cx={c}
               cy={c}
               pathLength={100}

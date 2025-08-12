@@ -1,39 +1,34 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import type { TextInputDOMProps } from '@react-types/shared';
-import type React from 'react';
 import { useState } from 'react';
-import type { TextFieldProps as TextFieldPrimitiveProps } from 'react-aria-components';
-import {
-  Button as ButtonPrimitive,
-  TextField as TextFieldPrimitive,
+import type {
+  InputProps,
+  TextFieldProps as TextFieldPrimitiveProps,
 } from 'react-aria-components';
-import type { FieldProps } from './field';
-import { Description, FieldError, FieldGroup, Input, Label } from './field';
-import { Loader } from './loader';
-import { composeTailwindRenderProps } from './primitive';
+import { TextField as TextFieldPrimitive } from 'react-aria-components';
+import type { FieldProps } from '@/core/components/ui/field';
+import {
+  Description,
+  FieldError,
+  FieldGroup,
+  Input,
+  Label,
+} from '@/core/components/ui/field';
+import { Loader } from '@/core/components/ui/loader';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
-type InputType = Exclude<TextInputDOMProps['type'], 'password'>;
+type InputType = Exclude<InputProps['type'], 'password'>;
 
 interface BaseTextFieldProps extends TextFieldPrimitiveProps, FieldProps {
-  prefix?: React.ReactNode;
-  suffix?: React.ReactNode;
+  prefix?: React.ReactNode | string;
+  suffix?: React.ReactNode | string;
   isPending?: boolean;
-  className?: string;
 }
 
-interface RevealableTextFieldProps extends BaseTextFieldProps {
-  isRevealable: true;
-  type: 'password';
-}
-
-interface NonRevealableTextFieldProps extends BaseTextFieldProps {
-  isRevealable?: never;
-  type?: InputType;
-}
-
-type TextFieldProps = RevealableTextFieldProps | NonRevealableTextFieldProps;
+type TextFieldProps =
+  | (BaseTextFieldProps & { isRevealable: true; type: 'password' })
+  | (BaseTextFieldProps & { isRevealable?: never; type?: InputType });
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx
 function TextField({
@@ -64,7 +59,7 @@ function TextField({
       {...props}
       className={composeTailwindRenderProps(
         className,
-        'group flex flex-col gap-y-1'
+        'group flex flex-col gap-y-1 *:data-[slot=label]:font-medium'
       )}
     >
       {props.children ? (
@@ -78,24 +73,27 @@ function TextField({
             isInvalid={!!errorMessage}
           >
             {prefix && typeof prefix === 'string' ? (
-              <span className="ml-2 text-muted-fg">{prefix}</span>
+              <span className="pl-2 text-muted-fg">{prefix}</span>
             ) : (
               prefix
             )}
             <Input placeholder={placeholder} />
             {isRevealable ? (
-              <ButtonPrimitive
+              <button
                 aria-label="Toggle password visibility"
-                className="relative mr-1 grid shrink-0 place-content-center rounded-sm border-transparent outline-hidden data-focus-visible:*:data-[slot=icon]:text-primary *:data-[slot=icon]:text-muted-fg"
-                onPress={handleTogglePasswordVisibility}
+                className={
+                  'relative mr-0.5 grid shrink-0 place-content-center rounded-sm border-transparent outline-hidden *:data-[slot=icon]:text-muted-fg focus-visible:*:data-[slot=icon]:text-primary'
+                }
+                onClick={handleTogglePasswordVisibility}
+                tabIndex={-1}
                 type="button"
               >
                 {isPasswordVisible ? (
-                  <Icon className="size-4" icon="mdi:eye-off" />
+                  <Icon icon="lucide:eye-off" />
                 ) : (
-                  <Icon className="size-4" icon="mdi:eye" />
+                  <Icon icon="lucide:eye" />
                 )}
-              </ButtonPrimitive>
+              </button>
             ) : isPending ? (
               <Loader variant="spin" />
             ) : suffix ? (

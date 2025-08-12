@@ -11,26 +11,14 @@ import {
   SliderOutput,
   Slider as SliderPrimitive,
   SliderStateContext,
-  SliderThumb,
-  SliderTrack,
+  SliderThumb as SliderThumbPrimitive,
+  SliderTrack as SliderTrackPrimitive,
 } from 'react-aria-components';
+import { twJoin, twMerge } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
-
-import { Description, Label } from './field';
-import { Tooltip } from './tooltip';
-
-const sliderStyles = tv({
-  base: 'group relative flex touch-none select-none flex-col',
-  variants: {
-    orientation: {
-      horizontal: 'w-full min-w-56 gap-y-2',
-      vertical: 'h-full min-h-56 w-1.5 items-center gap-y-2',
-    },
-    isDisabled: {
-      true: 'disabled:opacity-50',
-    },
-  },
-});
+import { Description, Label } from '@/core/components/ui/field';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
+import { Tooltip } from '@/core/components/ui/tooltip';
 
 interface SliderProps extends SliderPrimitiveProps {
   output?: 'inline' | 'tooltip' | 'none';
@@ -75,7 +63,7 @@ function Slider({
 
   const renderThumb = (value: number) => {
     const thumb = (
-      <Thumb
+      <SliderThumb
         aria-label={props.thumbLabels?.[value]}
         index={value}
         onFocusChange={onFocusChange}
@@ -109,8 +97,14 @@ function Slider({
 
   return (
     <SliderPrimitive
-      className={composeRenderProps(className, (_className, renderProps) =>
-        sliderStyles({ ...renderProps, className: _className })
+      className={composeRenderProps(className, (className, { orientation }) =>
+        twMerge([
+          'group relative flex touch-none select-none flex-col disabled:opacity-50',
+          orientation === 'horizontal' && 'w-full min-w-56 gap-y-2',
+          orientation === 'vertical' &&
+            'h-full min-h-56 w-1.5 items-center gap-y-2',
+          className,
+        ])
       )}
       orientation={orientation}
       {...props}
@@ -118,7 +112,11 @@ function Slider({
       <div className="flex text-fg">
         {props.label && <Label>{props.label}</Label>}
         {output === 'inline' && (
-          <SliderOutput className="text-muted-fg text-sm tabular-nums data-[orientation=vertical]:mx-auto data-[orientation=horizontal]:ml-auto">
+          <SliderOutput
+            className={
+              'text-muted-fg text-sm tabular-nums data-[orientation=vertical]:mx-auto data-[orientation=horizontal]:ml-auto'
+            }
+          >
             {({ state }) =>
               state.values
                 .map((_, i) => state.getThumbValueLabel(i))
@@ -127,51 +125,43 @@ function Slider({
           </SliderOutput>
         )}
       </div>
-      <Track>
+      <SliderTrack>
         {({ state }) => (
           <>
-            <Filler />
+            <SliderFiller />
             {state.values.map((_, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: xxx
               <React.Fragment key={i}>{renderThumb(i)}</React.Fragment>
             ))}
           </>
         )}
-      </Track>
+      </SliderTrack>
       {props.description && <Description>{props.description}</Description>}
     </SliderPrimitive>
   );
 }
 
-const controlsStyles = tv({
-  slots: {
-    filler: [
-      'rounded-full bg-primary group-data-disabled/track:opacity-60',
-      'group-data-[orientation=horizontal]/top-0 pointer-events-none absolute group-data-[orientation=vertical]/track:bottom-0 group-data-[orientation=horizontal]/track:h-full group-data-[orientation=vertical]/track:w-full',
-    ],
-    track: [
-      '[--slider:color-mix(in_oklab,var(--color-muted)_90%,black_10%)] dark:[--slider:color-mix(in_oklab,var(--color-muted)_90%,white_10%)]',
-      'group/track relative cursor-pointer rounded-full bg-(--slider) disabled:cursor-default disabled:opacity-60',
-      'grow group-data-[orientation=horizontal]:h-1.5 group-data-[orientation=horizontal]:w-full group-data-[orientation=vertical]:w-1.5 group-data-[orientation=vertical]:flex-1',
-    ],
-  },
-});
-
-const { track, filler } = controlsStyles();
-
-function Track(props: SliderTrackProps) {
+function SliderTrack({ className, ...props }: SliderTrackProps) {
   return (
-    <SliderTrack
+    <SliderTrackPrimitive
       {...props}
-      className={composeRenderProps(props.className, (className) =>
-        track({ className })
+      className={composeTailwindRenderProps(
+        className,
+        twJoin([
+          '[--slider:color-mix(in_oklab,var(--color-muted)_90%,black_10%)] dark:[--slider:color-mix(in_oklab,var(--color-muted)_90%,white_10%)]',
+          'group/track relative cursor-default rounded-full bg-(--slider) disabled:cursor-default disabled:opacity-60',
+          'grow group-data-[orientation=horizontal]:h-1.5 group-data-[orientation=horizontal]:w-full group-data-[orientation=vertical]:w-1.5 group-data-[orientation=vertical]:flex-1',
+        ])
       )}
     />
   );
 }
 
-function Filler({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  const state = React.useContext(SliderStateContext);
+function SliderFiller({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  const state = React.use(SliderStateContext);
   const { orientation, getThumbPercent, values } = state || {};
 
   const getStyle = () => {
@@ -190,36 +180,49 @@ function Filler({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   };
 
   return (
-    <div {...props} className={filler({ className })} style={getStyle()} />
+    <div
+      {...props}
+      className={twMerge(
+        'group-data-[orientation=horizontal]/top-0 pointer-events-none absolute rounded-full bg-primary group-disabled/track:opacity-60 group-data-[orientation=vertical]/track:bottom-0 group-data-[orientation=horizontal]/track:h-full group-data-[orientation=vertical]/track:w-full',
+        className
+      )}
+      style={getStyle()}
+    />
   );
 }
 
 const thumbStyles = tv({
   base: [
-    'top-[50%] left-[50%] size-[1.25rem] rounded-full border border-fg/10 bg-white outline-hidden ring-black transition-[width,height]',
+    `
+      top-[50%] left-[50%] size-[1.25rem] rounded-full border border-fg/10
+      bg-white ring-black outline-hidden transition-[width,height]
+    `,
   ],
   variants: {
     isFocusVisible: {
-      true: 'border-primary outline-hidden ring-primary/20',
+      true: 'border-primary outline-hidden ring-ring/20',
     },
     isDragging: {
       true: 'size-[1.35rem] cursor-grabbing border-primary',
     },
     isDisabled: {
-      true: 'opacity-50 forced-colors:border-[GrayText]',
+      true: `
+        opacity-50
+        forced-colors:border-[GrayText]
+      `,
     },
   },
 });
-function Thumb({ className, ...props }: SliderThumbProps) {
+function SliderThumb({ className, ...props }: SliderThumbProps) {
   return (
-    <SliderThumb
+    <SliderThumbPrimitive
       {...props}
-      className={composeRenderProps(className, (_className, renderProps) =>
-        thumbStyles({ ...renderProps, className: _className })
+      className={composeRenderProps(className, (className, renderProps) =>
+        thumbStyles({ ...renderProps, className })
       )}
     />
   );
 }
 
 export type { SliderProps };
-export { Slider };
+export { Slider, SliderFiller, SliderThumb, SliderTrack };

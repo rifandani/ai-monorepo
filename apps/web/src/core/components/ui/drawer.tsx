@@ -20,7 +20,8 @@ import {
   Text,
 } from 'react-aria-components';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { Button, type ButtonProps } from '@/core/components/ui/button';
+import type { ButtonProps } from '@/core/components/ui/button';
+import { Button } from '@/core/components/ui/button';
 
 const DrawerRoot = motion.create(ModalPrimitive);
 const DrawerOverlay = motion.create(ModalOverlay);
@@ -44,13 +45,13 @@ interface DrawerContentProps
 function DrawerContent({
   side = 'bottom',
   isFloat = false,
-  isBlurred,
+  isBlurred: _isBlurred = true,
   notch = true,
   children,
   className,
   ...props
 }: DrawerContentProps) {
-  const state = use(OverlayTriggerStateContext);
+  const state = use(OverlayTriggerStateContext)!;
 
   return (
     <AnimatePresence>
@@ -58,19 +59,19 @@ function DrawerContent({
         <DrawerOverlay
           animate={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
           className={
-            'fixed inset-0 z-50 will-change-auto [--visual-viewport-vertical-padding:32px] '
+            'fixed inset-0 z-50 will-change-auto [--visual-viewport-vertical-padding:32px]'
           }
           exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
           isDismissable
           isOpen={props?.isOpen || state?.isOpen}
           onOpenChange={props?.onOpenChange || state?.setOpen}
         >
-          {/* biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx */}
-          {({ state: _state }) => (
+          {/** biome-ignore lint/complexity/noExcessiveCognitiveComplexity: xxx */}
+          {({ state }) => (
             <DrawerRoot
               animate={{ x: 0, y: 0 }}
               className={twJoin(
-                'fixed max-h-full touch-none overflow-hidden bg-bg align-middle text-fg ring ring-input will-change-transform ',
+                'fixed max-h-full touch-none overflow-hidden bg-bg align-middle text-fg ring ring-input will-change-transform',
                 side === 'top' &&
                   (isFloat
                     ? 'inset-x-2 top-2 rounded-lg'
@@ -121,19 +122,19 @@ function DrawerContent({
                   side === 'bottom' &&
                   (velocity.y > 150 || offset.y > screen.height * 0.25)
                 ) {
-                  _state.close();
+                  state.close();
                 }
                 if (
                   side === 'top' &&
                   (velocity.y < -150 || offset.y < screen.height * 0.25)
                 ) {
-                  _state.close();
+                  state.close();
                 }
                 if (side === 'left' && velocity.x < -150) {
-                  _state.close();
+                  state.close();
                 }
                 if (side === 'right' && velocity.x > 150) {
-                  _state.close();
+                  state.close();
                 }
               }}
               transition={{ duration: 0.15, ease: 'easeInOut' }}
@@ -142,9 +143,9 @@ function DrawerContent({
               <Dialog
                 aria-label="Drawer"
                 className={twJoin(
-                  'relative flex flex-col overflow-hidden outline-hidden will-change-auto ',
+                  'relative flex flex-col overflow-hidden outline-hidden will-change-auto',
                   side === 'top' || side === 'bottom'
-                    ? 'mx-auto max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] max-w-lg '
+                    ? 'mx-auto max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] max-w-lg'
                     : 'h-full'
                 )}
                 role="dialog"
@@ -152,7 +153,7 @@ function DrawerContent({
                 {notch && side === 'bottom' && (
                   <div
                     className={
-                      'notch sticky top-0 mx-auto mt-2.5 h-1.5 w-10 shrink-0 touch-pan-y rounded-full bg-fg/20 '
+                      'notch sticky top-0 mx-auto mt-2.5 h-1.5 w-10 shrink-0 touch-pan-y rounded-full bg-fg/20'
                     }
                   />
                 )}
@@ -160,7 +161,7 @@ function DrawerContent({
                 {notch && side === 'top' && (
                   <div
                     className={
-                      'notch sticky bottom-0 mx-auto mb-2.5 h-1.5 w-10 shrink-0 touch-pan-y rounded-full bg-fg/20 '
+                      'notch sticky bottom-0 mx-auto mb-2.5 h-1.5 w-10 shrink-0 touch-pan-y rounded-full bg-fg/20'
                     }
                   />
                 )}
@@ -180,7 +181,7 @@ function DrawerHeader({
   return (
     <div
       className={twMerge(
-        'flex flex-col p-4 text-center sm:text-left ',
+        'flex flex-col p-4 text-center sm:text-left',
         className
       )}
       slot="header"
@@ -216,7 +217,7 @@ function DrawerBody({
   return (
     <div
       className={twMerge(
-        'isolate flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] flex-col overflow-auto px-4 py-1 will-change-scroll ',
+        'isolate flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] flex-col overflow-auto px-4 py-1 will-change-scroll',
         className
       )}
       slot="body"
@@ -232,7 +233,7 @@ function DrawerFooter({
   return (
     <div
       className={twMerge(
-        'isolate mt-auto flex flex-col-reverse justify-end gap-2 p-4 sm:flex-row ',
+        'isolate mt-auto flex flex-col-reverse justify-end gap-2 p-4 sm:flex-row',
         className
       )}
       slot="footer"

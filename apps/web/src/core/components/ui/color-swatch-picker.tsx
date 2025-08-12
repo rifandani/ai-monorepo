@@ -9,8 +9,8 @@ import {
   ColorSwatchPicker as ColorSwatchPickerPrimitive,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
-import { ColorSwatch } from './color-swatch';
-import { composeTailwindRenderProps } from './primitive';
+import { ColorSwatch } from '@/core/components/ui/color-swatch';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 function ColorSwatchPicker({
   children,
@@ -38,7 +38,7 @@ function ColorSwatchPickerItem({
     <ColorSwatchPickerItemPrimitive
       className={composeTailwindRenderProps(
         className,
-        'relative overflow-hidden rounded-md outline-hidden disabled:opacity-50'
+        'relative overflow-hidden rounded-sm outline-hidden disabled:opacity-50'
       )}
       {...props}
     >
@@ -62,7 +62,9 @@ function ColorSwatchPickerItem({
               {(values.isSelected || values.isFocused || values.isPressed) && (
                 <span
                   aria-hidden
-                  className="absolute right-1 bottom-1 size-1 rounded-full bg-fg"
+                  className={
+                    'absolute right-1 bottom-1 size-1 rounded-full bg-fg'
+                  }
                 />
               )}
             </>

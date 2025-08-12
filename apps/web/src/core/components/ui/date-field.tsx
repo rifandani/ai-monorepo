@@ -1,6 +1,5 @@
 'use client';
 
-import type React from 'react';
 import type {
   DateFieldProps as DateFieldPrimitiveProps,
   DateInputProps,
@@ -12,9 +11,14 @@ import {
   DateInput as DateInputPrimitive,
   DateSegment,
 } from 'react-aria-components';
-import { tv } from 'tailwind-variants';
-import { Description, FieldError, FieldGroup, Label } from './field';
-import { composeTailwindRenderProps } from './primitive';
+import { twJoin } from 'tailwind-merge';
+import {
+  Description,
+  FieldError,
+  FieldGroup,
+  Label,
+} from '@/core/components/ui/field';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 interface DateFieldProps<T extends DateValue>
   extends DateFieldPrimitiveProps<T> {
@@ -38,7 +42,7 @@ function DateField<T extends DateValue>({
       {...props}
       className={composeTailwindRenderProps(
         props.className,
-        'group flex flex-col gap-y-1.5'
+        'group flex flex-col gap-y-1'
       )}
     >
       {label && <Label>{label}</Label>}
@@ -63,37 +67,28 @@ function DateField<T extends DateValue>({
   );
 }
 
-const segmentStyles = tv({
-  base: 'inline shrink-0 rounded p-0.5 type-literal:px-0 text-fg tabular-nums tracking-wider caret-transparent outline-0 forced-color-adjust-none sm:text-sm forced-colors:text-[ButtonText]',
-  variants: {
-    isPlaceholder: {
-      true: 'text-muted-fg',
-    },
-    isDisabled: {
-      true: 'text-fg/50 forced-colors:text-[GrayText]',
-    },
-    isFocused: {
-      true: [
-        'bg-accent text-accent-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]',
-        'data-invalid:bg-danger data-invalid:text-danger-fg',
-      ],
-    },
-  },
-});
-
 function DateInput({ className, ...props }: Omit<DateInputProps, 'children'>) {
   return (
     <DateInputPrimitive
       className={composeTailwindRenderProps(
         className,
-        'bg-transparent p-2 text-base text-fg placeholder-muted-fg'
+        'px-3 py-2 text-base text-fg placeholder-muted-fg outline-hidden sm:px-2.5 sm:py-1.5 sm:text-sm/6'
       )}
       {...props}
     >
-      {(segment) => <DateSegment className={segmentStyles} segment={segment} />}
+      {(segment) => (
+        <DateSegment
+          className={twJoin(
+            'inline shrink-0 rounded px-1.5 type-literal:px-0 text-fg tracking-wider caret-transparent outline-0 forced-color-adjust-none data-placeholder:not-data-focused:text-muted-fg sm:p-0.5 sm:py-0.5 sm:text-sm forced-colors:text-[ButtonText]',
+            'focus:bg-accent focus:text-accent-fg focus:data-invalid:bg-danger focus:data-invalid:text-danger-fg forced-colors:focus:bg-[Highlight] forced-colors:focus:text-[HighlightText]',
+            'disabled:opacity-50 forced-colors:disabled:text-[GrayText]'
+          )}
+          segment={segment}
+        />
+      )}
     </DateInputPrimitive>
   );
 }
 
 export type { DateFieldProps };
-export { DateField, DateInput, segmentStyles };
+export { DateField, DateInput };

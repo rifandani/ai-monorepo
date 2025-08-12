@@ -5,7 +5,8 @@ import {
   ColorWheel as ColorWheelPrimitive,
   ColorWheelTrack,
 } from 'react-aria-components';
-import { ColorThumb } from './color-thumb';
+
+import { ColorThumb } from '@/core/components/ui/color-thumb';
 
 type ColorWheelProps = Omit<
   ColorWheelPrimitiveProps,
@@ -16,7 +17,7 @@ function ColorWheel(props: ColorWheelProps) {
   return (
     <ColorWheelPrimitive {...props} innerRadius={74} outerRadius={100}>
       <ColorWheelTrack
-        className="disabled:bg-muted/75 forced-colors:disabled:bg-[GrayText]"
+        className={'disabled:bg-muted/75 forced-colors:disabled:bg-[GrayText]'}
         style={({ defaultStyle, isDisabled }) => ({
           ...defaultStyle,
           background: isDisabled

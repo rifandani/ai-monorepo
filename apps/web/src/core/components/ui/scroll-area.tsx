@@ -1,3 +1,5 @@
+'use client';
+
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 import type * as React from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -72,7 +74,9 @@ function ScrollBar({
       ref={ref}
       {...props}
     >
-      <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-fd-border" />
+      <ScrollAreaPrimitive.ScrollAreaThumb
+        className={'relative flex-1 rounded-full bg-fd-border'}
+      />
     </ScrollAreaPrimitive.Scrollbar>
   );
 }

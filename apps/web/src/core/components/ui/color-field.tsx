@@ -1,22 +1,21 @@
 'use client';
 
-import type React from 'react';
-import type {
-  ColorFieldProps as ColorFieldPrimitiveProps,
-  ValidationResult,
-} from 'react-aria-components';
+import type { ColorFieldProps as ColorFieldPrimitiveProps } from 'react-aria-components';
 import { ColorField as ColorFieldPrimitive } from 'react-aria-components';
 import { twJoin } from 'tailwind-merge';
-import { ColorPicker } from './color-picker';
-import { ColorSwatch } from './color-swatch';
-import { Description, FieldError, FieldGroup, Input, Label } from './field';
-import { composeTailwindRenderProps } from './primitive';
+import { ColorPicker } from '@/core/components/ui/color-picker';
+import { ColorSwatch } from '@/core/components/ui/color-swatch';
+import type { FieldProps } from '@/core/components/ui/field';
+import {
+  Description,
+  FieldError,
+  FieldGroup,
+  Input,
+  Label,
+} from '@/core/components/ui/field';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
-interface ColorFieldProps extends ColorFieldPrimitiveProps {
-  label?: string;
-  description?: string;
-  errorMessage?: string | ((validation: ValidationResult) => string);
-  placeholder?: string;
+interface ColorFieldProps extends ColorFieldPrimitiveProps, FieldProps {
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
   isLoading?: boolean;
@@ -42,7 +41,7 @@ function ColorField({
       aria-label={props['aria-label'] ?? 'Color field'}
       className={composeTailwindRenderProps(
         className,
-        '**:data-[slot=color-swatch]:-ml-0.5 group flex w-full flex-col gap-y-1'
+        '**:data-[slot=color-swatch]:-ml-0.5 group flex w-full flex-col gap-y-1 *:data-[slot=label]:font-medium'
       )}
     >
       {label && <Label>{label}</Label>}
@@ -57,7 +56,9 @@ function ColorField({
             <span className="ml-1">
               {enableColorPicker ? (
                 <ColorPicker
-                  className="*:[button]:size-8 *:[button]:rounded-sm *:[button]:ring-0"
+                  className={
+                    '*:[button]:size-8 *:[button]:rounded-sm *:[button]:ring-0'
+                  }
                   defaultValue={value}
                   onChange={props.onChange}
                 />

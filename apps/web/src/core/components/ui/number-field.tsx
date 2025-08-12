@@ -11,15 +11,28 @@ import {
   Button,
   NumberField as NumberFieldPrimitive,
 } from 'react-aria-components';
+import { twJoin } from 'tailwind-merge';
 import { tv } from 'tailwind-variants';
-import { Description, FieldError, FieldGroup, Input, Label } from './field';
-import { composeTailwindRenderProps } from './primitive';
+import {
+  Description,
+  FieldError,
+  FieldGroup,
+  Input,
+  Label,
+} from '@/core/components/ui/field';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 const fieldBorderStyles = tv({
-  base: 'group-focus:border-primary/70 forced-colors:border-[Highlight]',
+  base: `
+    group-focus:border-primary/70
+    forced-colors:border-[Highlight]
+  `,
   variants: {
     isInvalid: {
-      true: 'group-focus:border-danger/70 forced-colors:border-[Mark]',
+      true: `
+        group-focus:border-danger/70
+        forced-colors:border-[Mark]
+      `,
     },
     isDisabled: {
       true: 'group-focus:border-input/70',
@@ -52,28 +65,34 @@ function NumberField({
       )}
     >
       {label && <Label>{label}</Label>}
-      <FieldGroup className="overflow-hidden">
+      <FieldGroup
+        className={twJoin(
+          isMobile && [
+            '**:[button]:inset-ring **:[button]:inset-ring-fg/5 **:[button]:grid **:[button]:size-8 **:[button]:place-content-center',
+            '*:[button]:first:ml-1 *:[button]:last:mr-1',
+            '**:[button]:bg-secondary **:[button]:pressed:bg-secondary/80',
+          ]
+        )}
+      >
         {(renderProps) => (
           <>
-            {isMobile ? (
-              <StepperButton className="border-r" slot="decrement" />
-            ) : null}
+            {isMobile ? <StepperButton slot="decrement" /> : null}
             <Input
-              className="px-13 tabular-nums sm:px-2.5"
+              className="px-[calc(--spacing(12)-1px)] tabular-nums"
               placeholder={placeholder}
             />
-            <div
-              className={fieldBorderStyles({
-                ...renderProps,
-                className: 'grid h-10 place-content-center border-s',
-              })}
-            >
-              {isMobile ? (
-                <StepperButton slot="increment" />
-              ) : (
+            {isMobile ? (
+              <StepperButton slot="increment" />
+            ) : (
+              <div
+                className={fieldBorderStyles({
+                  ...renderProps,
+                  className: 'grid place-content-center sm:border-s',
+                })}
+              >
                 <div className="flex h-full flex-col">
                   <StepperButton
-                    className="h-5 px-1"
+                    className="h-4 px-1"
                     emblemType="chevron"
                     slot="increment"
                   />
@@ -84,13 +103,13 @@ function NumberField({
                     })}
                   />
                   <StepperButton
-                    className="h-5 px-1"
+                    className="h-4 px-1"
                     emblemType="chevron"
                     slot="decrement"
                   />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </FieldGroup>
@@ -115,20 +134,20 @@ function StepperButton({
   const icon =
     emblemType === 'chevron' ? (
       slot === 'increment' ? (
-        <Icon className="size-4" icon="mdi:chevron-up" />
+        <Icon className="size-5" icon="lucide:chevron-up" />
       ) : (
-        <Icon className="size-4" icon="mdi:chevron-down" />
+        <Icon className="size-5" icon="lucide:chevron-down" />
       )
     ) : slot === 'increment' ? (
-      <Icon className="size-4" icon="mdi:plus" />
+      <Icon icon="lucide:plus" />
     ) : (
-      <Icon className="size-4" icon="mdi:minus" />
+      <Icon icon="lucide:minus" />
     );
   return (
     <Button
       className={composeTailwindRenderProps(
         className,
-        'h-10 cursor-default pressed:bg-primary px-3 pressed:text-primary-fg text-muted-fg group-disabled:bg-secondary/70 forced-colors:group-disabled:text-[GrayText]'
+        'h-10 cursor-default pressed:text-primary-fg text-muted-fg group-disabled:bg-secondary/70 sm:pressed:bg-primary forced-colors:group-disabled:text-[GrayText]'
       )}
       slot={slot}
       {...props}

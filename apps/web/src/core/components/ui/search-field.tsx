@@ -1,26 +1,28 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import type {
-  SearchFieldProps as SearchFieldPrimitiveProps,
-  ValidationResult,
+import type { SearchFieldProps as SearchFieldPrimitiveProps } from 'react-aria-components';
+import {
+  Button,
+  SearchField as SearchFieldPrimitive,
 } from 'react-aria-components';
-import { SearchField as SearchFieldPrimitive } from 'react-aria-components';
+import type { FieldProps } from '@/core/components/ui/field';
+import {
+  Description,
+  FieldError,
+  FieldGroup,
+  Input,
+  Label,
+} from '@/core/components/ui/field';
+import { Loader } from '@/core/components/ui/loader';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
-import { Button } from './button';
-import { Description, FieldError, FieldGroup, Input, Label } from './field';
-import { Loader } from './loader';
-import { composeTailwindRenderProps } from './primitive';
-
-interface SearchFieldProps extends SearchFieldPrimitiveProps {
-  label?: string;
-  placeholder?: string;
-  description?: string;
-  errorMessage?: string | ((validation: ValidationResult) => string);
+interface SearchFieldProps extends SearchFieldPrimitiveProps, FieldProps {
   isPending?: boolean;
 }
 
 function SearchField({
+  children,
   className,
   placeholder,
   label,
@@ -35,31 +37,34 @@ function SearchField({
       {...props}
       className={composeTailwindRenderProps(
         className,
-        'group/search-field flex flex-col gap-y-1'
+        'group/search-field relative flex flex-col gap-y-1 *:data-[slot=label]:font-medium'
       )}
     >
-      {props.children ? (
-        props.children
-      ) : (
+      {(values) => (
         <>
-          {label && <Label>{label}</Label>}
-          <FieldGroup>
-            {isPending ? (
-              <Loader variant="spin" />
-            ) : (
-              <Icon className="size-4" icon="mdi:magnify" />
-            )}
-            <Input placeholder={placeholder ?? 'Search...'} />
+          {typeof children === 'function'
+            ? children(values)
+            : children || (
+                <FieldGroup>
+                  {label && <Label>{label}</Label>}
+                  {isPending ? (
+                    <Loader variant="spin" />
+                  ) : (
+                    <Icon icon="lucide:search" />
+                  )}
+                  <Input placeholder={placeholder ?? 'Search...'} />
 
-            <Button
-              className="size-8 pressed:bg-transparent pressed:text-fg text-muted-fg hover:bg-transparent hover:text-fg group-data-empty/search-field:invisible"
-              intent="plain"
-            >
-              <Icon className="size-4" icon="mdi:close" />
-            </Button>
-          </FieldGroup>
-          {description && <Description>{description}</Description>}
-          <FieldError>{errorMessage}</FieldError>
+                  <Button
+                    className={
+                      'grid place-content-center pressed:text-fg text-muted-fg hover:text-fg group-empty/search-field:invisible'
+                    }
+                  >
+                    <Icon icon="lucide:x" />
+                  </Button>
+                  {description && <Description>{description}</Description>}
+                  <FieldError>{errorMessage}</FieldError>
+                </FieldGroup>
+              )}
         </>
       )}
     </SearchFieldPrimitive>

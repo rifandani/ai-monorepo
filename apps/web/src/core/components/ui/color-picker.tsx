@@ -1,23 +1,22 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import { parseColor } from '@react-stately/color';
-import type React from 'react';
 import { use } from 'react';
 import type { ColorPickerProps as ColorPickerPrimitiveProps } from 'react-aria-components';
 import {
   ColorPicker as ColorPickerPrimitive,
   ColorPickerStateContext,
 } from 'react-aria-components';
+import { parseColor } from 'react-stately';
 import { twJoin, twMerge } from 'tailwind-merge';
-import { Button } from './button';
-import { ColorArea } from './color-area';
-import { ColorField } from './color-field';
-import { ColorSlider } from './color-slider';
-import { ColorSwatch } from './color-swatch';
-import { Description } from './field';
-import type { PopoverContentProps } from './popover';
-import { Popover, PopoverContent } from './popover';
+import { Button } from '@/core/components/ui/button';
+import { ColorArea } from '@/core/components/ui/color-area';
+import { ColorField } from '@/core/components/ui/color-field';
+import { ColorSlider } from '@/core/components/ui/color-slider';
+import { ColorSwatch } from '@/core/components/ui/color-swatch';
+import { Description } from '@/core/components/ui/field';
+import type { PopoverContentProps } from '@/core/components/ui/popover';
+import { Popover, PopoverContent } from '@/core/components/ui/popover';
 
 interface ColorPickerProps
   extends ColorPickerPrimitiveProps,
@@ -43,23 +42,25 @@ function ColorPicker({
   ...props
 }: ColorPickerProps) {
   return (
-    <div className={twMerge('flex flex-col items-start gap-y-1.5', className)}>
+    <div className={twMerge('flex flex-col items-start gap-y-1', className)}>
       <ColorPickerPrimitive {...props}>
         <Popover>
           <Button
             className={twJoin(
-              '*:data-[slot=color-swatch]:-mx-0.5 w-auto px-2.5',
+              '*:data-[slot=color-swatch]:-mx-0.5 w-auto px-2.5 *:data-[slot=color-swatch]:size-5',
               !label && 'size-10'
             )}
             intent="plain"
             isDisabled={isDisabled}
-            size={label ? 'medium' : 'square-petite'}
+            size={label ? 'md' : 'sq-sm'}
           >
-            <ColorSwatch className="size-6" />
+            <ColorSwatch />
             {label && label}
           </Button>
           <PopoverContent
-            className="overflow-auto **:data-[slot=color-area]:w-full **:data-[slot=color-slider]:w-full sm:min-w-min sm:max-w-56 sm:**:data-[slot=color-area]:size-56 *:[[role=dialog]]:p-4 sm:*:[[role=dialog]]:p-3"
+            className={
+              'overflow-auto **:data-[slot=color-area]:w-full **:data-[slot=color-slider]:w-full sm:min-w-min sm:max-w-56 sm:**:data-[slot=color-area]:size-56 *:[[role=dialog]]:p-4 sm:*:[[role=dialog]]:p-3'
+            }
             placement={placement}
             showArrow={showArrow}
           >
@@ -114,9 +115,9 @@ function EyeDropper() {
           ?.open()
           .then((result) => state.setColor(parseColor(result.sRGBHex)));
       }}
-      size="square-petite"
+      size="sq-sm"
     >
-      <Icon className="size-4" icon="mdi:eyedropper" />
+      <Icon icon="mdi:eyedropper" />
     </Button>
   );
 }

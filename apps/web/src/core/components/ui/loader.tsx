@@ -1,6 +1,5 @@
 'use client';
 
-import type React from 'react';
 import { ProgressBar } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
 import type { VariantProps } from 'tailwind-variants';
@@ -18,15 +17,15 @@ const loaderStyles = tv({
       danger: 'text-danger',
     },
     size: {
-      small: 'size-4',
-      medium: 'size-6',
-      large: 'size-8',
-      'extra-large': 'size-10',
+      sm: 'size-4',
+      md: 'size-6',
+      lg: 'size-8',
+      xl: 'size-10',
     },
   },
   defaultVariants: {
     intent: 'current',
-    size: 'small',
+    size: 'sm',
   },
 });
 
@@ -206,6 +205,7 @@ function Loader({ isIndeterminate = true, ref, ...props }: LoaderProps) {
   return (
     <ProgressBar
       aria-label={props['aria-label'] ?? 'Loading...'}
+      data-slot="loader"
       formatOptions={props.formatOptions}
       isIndeterminate={isIndeterminate}
     >

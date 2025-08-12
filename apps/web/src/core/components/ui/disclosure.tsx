@@ -1,7 +1,6 @@
 'use client';
 
 import { Icon } from '@iconify/react';
-import type React from 'react';
 import type {
   DisclosureGroupProps as AccordionProps,
   ButtonProps,
@@ -15,7 +14,7 @@ import {
   DisclosurePanel as CollapsiblePanel,
   Heading,
 } from 'react-aria-components';
-import { composeTailwindRenderProps } from './primitive';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 interface DisclosureGroupProps extends AccordionProps {
   ref?: React.RefObject<HTMLDivElement>;
@@ -33,7 +32,7 @@ function DisclosureGroup({
       {...props}
       className={composeTailwindRenderProps(
         className,
-        'peer cursor-pointer disabled:cursor-not-allowed disabled:opacity-75'
+        'peer cursor-default disabled:cursor-not-allowed disabled:opacity-75'
       )}
     >
       {(values) => (
@@ -89,9 +88,11 @@ function DisclosureTrigger({
               ? props.children(values)
               : props.children}
             <Icon
-              className="internal-chevron ml-auto size-4 shrink-0 transition duration-300"
+              className={
+                'internal-chevron ml-auto size-4 shrink-0 transition duration-300'
+              }
               data-slot="disclosure-chevron"
-              icon="mdi:chevron-left"
+              icon="lucide:chevron-left"
             />
           </>
         )}
@@ -115,7 +116,9 @@ function DisclosurePanel({ className, ref, ...props }: DisclosurePanelProps) {
       {...props}
     >
       <div
-        className="pt-0 not-has-data-[slot=disclosure-group]:group-data-expanded/disclosure:pb-3 [&:has([data-slot=disclosure-group])_&]:px-11"
+        className={
+          'pt-0 not-has-data-[slot=disclosure-group]:group-data-expanded/disclosure:pb-3 [&:has([data-slot=disclosure-group])_&]:px-11'
+        }
         data-slot="disclosure-panel-content"
       >
         {props.children}

@@ -1,4 +1,3 @@
-import type React from 'react';
 import { twMerge } from 'tailwind-merge';
 
 function DescriptionList({

@@ -1,11 +1,11 @@
 'use client';
 
 import { motion } from 'motion/react';
-import type React from 'react';
 import type { ProgressBarProps as ProgressBarPrimitiveProps } from 'react-aria-components';
 import { ProgressBar as ProgressBarPrimitive } from 'react-aria-components';
-import { Label } from './field';
-import { composeTailwindRenderProps } from './primitive';
+
+import { Label } from '@/core/components/ui/field';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 interface ProgressBarProps extends ProgressBarPrimitiveProps {
   label?: string;
@@ -27,11 +27,17 @@ function ProgressBar({ label, ref, className, ...props }: ProgressBarProps) {
               {valueText}
             </span>
           </div>
-          <div className="-outline-offset-1 relative mt-1 h-2 min-w-64 overflow-hidden rounded-full bg-secondary outline-1 outline-transparent">
+          <div
+            className={
+              '-outline-offset-1 relative mt-1 h-2 min-w-64 overflow-hidden rounded-full bg-secondary outline-1 outline-transparent'
+            }
+          >
             {isIndeterminate ? (
               <motion.div
                 animate={{ left: ['0%', '100%', '0%'] }}
-                className="absolute top-0 h-full rounded-full bg-primary forced-colors:bg-[Highlight]"
+                className={
+                  'absolute top-0 h-full rounded-full bg-primary forced-colors:bg-[Highlight]'
+                }
                 data-slot="progress-content"
                 initial={{ left: '0%', width: '40%' }}
                 transition={{
@@ -43,7 +49,9 @@ function ProgressBar({ label, ref, className, ...props }: ProgressBarProps) {
             ) : (
               <motion.div
                 animate={{ width: `${percentage}%` }}
-                className="absolute top-0 left-0 h-full rounded-full bg-primary forced-colors:bg-[Highlight]"
+                className={
+                  'absolute top-0 left-0 h-full rounded-full bg-primary forced-colors:bg-[Highlight]'
+                }
                 data-slot="progress-content"
                 initial={{ width: '0%' }}
                 transition={{ duration: 0.5, ease: 'easeInOut' }}

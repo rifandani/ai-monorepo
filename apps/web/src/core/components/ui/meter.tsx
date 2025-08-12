@@ -4,8 +4,9 @@ import { Icon } from '@iconify/react';
 import { motion } from 'motion/react';
 import type { MeterProps as MeterPrimitiveProps } from 'react-aria-components';
 import { Meter as MeterPrimitive } from 'react-aria-components';
-import { Label } from './field';
-import { composeTailwindRenderProps } from './primitive';
+
+import { Label } from '@/core/components/ui/field';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
 
 interface MeterProps extends MeterPrimitiveProps {
   label?: string;
@@ -25,25 +26,36 @@ function Meter({ label, className, ...props }: MeterProps) {
           <div className="flex w-full justify-between gap-2">
             <Label>{label}</Label>
             <span
-              className={`text-sm tabular-nums ${percentage >= 80 ? 'text-danger' : 'text-muted-fg'}`}
+              className={`text-sm tabular-nums ${
+                percentage >= 80 ? 'text-danger' : 'text-muted-fg'
+              }
+              `}
             >
               {percentage >= 80 && (
                 <Icon
                   aria-label="Alert"
-                  className="inline-block size-4 fill-danger/20 align-text-bottom text-danger"
-                  icon="mdi:alert-circle-outline"
+                  className={
+                    'inline-block size-4 fill-danger/20 align-text-bottom text-danger'
+                  }
+                  icon="lucide:alert-circle"
                 />
               )}
               {` ${valueText}`}
             </span>
           </div>
-          <div className="-outline-offset-1 relative h-2 rounded-full bg-muted outline outline-transparent">
+          <div
+            className={
+              '-outline-offset-1 relative h-2 rounded-full bg-muted outline outline-transparent'
+            }
+          >
             <motion.div
               animate={{
                 width: `${percentage}%`,
                 backgroundColor: getColor(percentage),
               }}
-              className="absolute top-0 left-0 h-full rounded-full forced-colors:bg-[Highlight]"
+              className={
+                'absolute top-0 left-0 h-full rounded-full forced-colors:bg-[Highlight]'
+              }
               initial={{ width: '0%', backgroundColor: getColor(0) }}
               transition={{ duration: 0.5 }}
             />

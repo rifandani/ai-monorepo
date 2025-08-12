@@ -18,7 +18,8 @@
         "noSvgWithoutTitle": "off"
       },
       "nursery": {
-        "noAwaitInLoop": "off"
+        "noAwaitInLoop": "off",
+        "noShadow": "off"
       },
       "style": {
         "noExportedImports": "off",

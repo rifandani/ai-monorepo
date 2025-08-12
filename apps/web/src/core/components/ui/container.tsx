@@ -1,9 +1,8 @@
-import type React from 'react';
 import { twMerge } from 'tailwind-merge';
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   constrained?: boolean;
-  ref?: React.Ref<HTMLDivElement>;
+  ref?: React.RefObject<HTMLDivElement>;
 }
 
 function Container({
@@ -15,8 +14,8 @@ function Container({
   return (
     <div
       className={twMerge(
-        'mx-auto w-full max-w-7xl lg:max-w-(--breakpoint-xl) 2xl:max-w-(--breakpoint-2xl)',
-        constrained ? 'sm:px-6 lg:px-8' : 'px-4 sm:px-6 lg:px-8',
+        'mx-auto w-full max-w-7xl 2xl:max-w-(--breakpoint-2xl)',
+        constrained ? 'sm:px-6' : 'px-4 sm:px-6',
         className
       )}
       {...props}

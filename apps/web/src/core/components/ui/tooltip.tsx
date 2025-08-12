@@ -1,6 +1,5 @@
 'use client';
 
-import type React from 'react';
 import type { TooltipProps as TooltipPrimitiveProps } from 'react-aria-components';
 import {
   Button,
@@ -14,25 +13,48 @@ import { tv } from 'tailwind-variants';
 
 const tooltipStyles = tv({
   base: [
-    'group rounded-lg border px-2.5 py-1.5 text-sm will-change-transform dark:shadow-none [&_strong]:font-medium',
+    `
+      group rounded-lg border px-2.5 py-1.5 text-sm/6 will-change-transform
+      dark:shadow-none
+      *:[strong]:font-medium
+    `,
   ],
   variants: {
     intent: {
-      default:
-        'bg-overlay text-overlay-fg [&_.arx]:fill-overlay [&_.arx]:stroke-border',
-      inverse:
-        'border-transparent bg-fg text-bg [&_.arx]:fill-fg [&_.arx]:stroke-transparent dark:[&_.arx]:fill-white [&_.text-muted-fg]:text-bg/70 dark:[&_.text-muted-fg]:text-fg/70',
+      default: `
+          bg-overlay text-overlay-fg
+          *:data-[slot=overlay-arrow]:fill-overlay
+          *:data-[slot=overlay-arrow]:stroke-border
+        `,
+      inverse: `
+          border-transparent bg-fg text-bg
+          *:data-[slot=overlay-arrow]:fill-fg
+          *:data-[slot=overlay-arrow]:stroke-transparent
+          dark:*:data-[slot=overlay-arrow]:fill-white
+          dark:[&_.text-muted-fg]:text-fg/70
+          [&_.text-muted-fg]:text-bg/70
+        `,
     },
     isEntering: {
       true: [
         'fade-in animate-in',
-        'data-[placement=left]:slide-in-from-right-1 data-[placement=right]:slide-in-from-left-1 data-[placement=top]:slide-in-from-bottom-1 data-[placement=bottom]:slide-in-from-top-1',
+        `
+          placement-left:slide-in-from-right-1
+          placement-right:slide-in-from-left-1
+          placement-top:slide-in-from-bottom-1
+          placement-bottom:slide-in-from-top-1
+        `,
       ],
     },
     isExiting: {
       true: [
-        'fade-in direction-reverse animate-in',
-        'data-[placement=left]:slide-out-to-right-1 data-[placement=right]:slide-out-to-left-1 data-[placement=top]:slide-out-to-bottom-1 data-[placement=bottom]:slide-out-to-top-1',
+        'direction-reverse fade-in animate-in',
+        `
+          placement-left:slide-out-to-right-1
+          placement-right:slide-out-to-left-1
+          placement-top:slide-out-to-bottom-1
+          placement-bottom:slide-out-to-top-1
+        `,
       ],
     },
   },
@@ -73,7 +95,10 @@ function TooltipContent({
       {showArrow && (
         <OverlayArrow>
           <svg
-            className="arx group-data-[placement=left]:-rotate-90 group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
+            className={
+              'group-placement-left:-rotate-90 group-placement-bottom:rotate-180 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]'
+            }
+            data-slot="overlay-arrow"
             height={12}
             viewBox="0 0 12 12"
             width={12}
@@ -87,9 +112,7 @@ function TooltipContent({
   );
 }
 
-const TooltipTrigger = Button;
-
-Tooltip.Trigger = TooltipTrigger;
+Tooltip.Trigger = Button;
 Tooltip.Content = TooltipContent;
 
 export type { TooltipContentProps, TooltipProps };

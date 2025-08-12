@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 import type {
   GroupProps,
   SeparatorProps,
@@ -12,10 +12,10 @@ import {
   Toolbar as ToolbarPrimitive,
 } from 'react-aria-components';
 import { twMerge } from 'tailwind-merge';
-import { composeTailwindRenderProps } from './primitive';
-import { Separator } from './separator';
-import type { ToggleProps } from './toggle';
-import { Toggle } from './toggle';
+import { composeTailwindRenderProps } from '@/core/components/ui/primitive';
+import { Separator } from '@/core/components/ui/separator';
+import type { ToggleProps } from '@/core/components/ui/toggle';
+import { Toggle } from '@/core/components/ui/toggle';
 
 const ToolbarContext = createContext<{
   orientation?: ToolbarProps['orientation'];
@@ -33,15 +33,14 @@ function Toolbar({
       <ToolbarPrimitive
         orientation={orientation}
         {...props}
-        className={composeRenderProps(
-          className,
-          (_, { orientation: _orientation }) =>
-            twMerge(
-              'group flex flex-row gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-              _orientation === 'horizontal'
-                ? 'flex-row [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-                : 'flex-col items-start'
-            )
+        className={composeRenderProps(className, (className, { orientation }) =>
+          twMerge(
+            'group flex flex-row gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+            orientation === 'horizontal'
+              ? 'flex-row items-center [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              : 'flex-col items-start',
+            className
+          )
         )}
       />
     </ToolbarContext>
@@ -57,7 +56,7 @@ function ToolbarGroup({ isDisabled, className, ...props }: ToolbarGroupProps) {
       <Group
         className={composeTailwindRenderProps(
           className,
-          'flex gap-2 group-data-[orientation=vertical]:flex-col group-data-[orientation=vertical]:items-start'
+          'flex gap-2 group-orientation-vertical:flex-col group-orientation-vertical:items-start group-orientation-horizontal:items-center'
         )}
         {...props}
       >
@@ -68,21 +67,35 @@ function ToolbarGroup({ isDisabled, className, ...props }: ToolbarGroupProps) {
 }
 
 type ToggleItemProps = ToggleProps;
-function ToolbarItem({ isDisabled, ref, ...props }: ToggleItemProps) {
-  const context = useContext(ToolbarGroupContext);
+function ToolbarItem({
+  isDisabled,
+  size = 'sm',
+  intent = 'outline',
+  ref,
+  ...props
+}: ToggleItemProps) {
+  const context = use(ToolbarGroupContext);
   const effectiveIsDisabled = isDisabled || context.isDisabled;
 
-  return <Toggle isDisabled={effectiveIsDisabled} ref={ref} {...props} />;
+  return (
+    <Toggle
+      intent={intent}
+      isDisabled={effectiveIsDisabled}
+      ref={ref}
+      size={size}
+      {...props}
+    />
+  );
 }
 type ToolbarSeparatorProps = SeparatorProps;
 function ToolbarSeparator({ className, ...props }: ToolbarSeparatorProps) {
-  const { orientation } = useContext(ToolbarContext);
+  const { orientation } = use(ToolbarContext);
   const effectiveOrientation =
     orientation === 'vertical' ? 'horizontal' : 'vertical';
   return (
     <Separator
       className={twMerge(
-        effectiveOrientation === 'vertical' ? 'mx-1.5' : 'my-1.5 w-9',
+        effectiveOrientation === 'vertical' ? 'mx-1.5' : 'my-1.5 w-8',
         className
       )}
       orientation={effectiveOrientation}
