@@ -59,7 +59,7 @@
     "@types/unist": "3.0.3",
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "0.31.4",
-    "tsx": "4.20.3",
+    "tsx": "4.20.4",
     "typescript": "5.9.2",
     "vitest": "3.2.4"
   }

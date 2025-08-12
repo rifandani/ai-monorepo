@@ -4,6 +4,7 @@
 
 ## 🎯 Todo
 
+- [ ] remove `@workspace/hono` and move it's code to `@workspace/web`
 - [ ] zod v4
 - [ ] ai sdk v5
 - [ ] Consider using Bun `catalog` to manage monorepo dependencies (waiting for bun updates, to support updating catalog when running `bun update --latest`)
