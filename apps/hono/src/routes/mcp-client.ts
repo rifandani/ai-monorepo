@@ -1,4 +1,4 @@
-import { createRoute, type OpenAPIHono, z } from '@hono/zod-openapi';
+import { createRoute, type OpenAPIHono } from '@hono/zod-openapi';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { logger } from '@workspace/core/utils/logger';
 import {
@@ -7,7 +7,7 @@ import {
   generateText,
 } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
-import { z as z3 } from 'zod/v3';
+import { z } from 'zod';
 import { models } from '@/core/api/ai.js';
 import { ENV } from '@/core/constants/env.js';
 import type { Variables } from '@/core/types/hono.js';
@@ -67,20 +67,20 @@ export function mcpClientRoutes(
       const tools = await mcpClient.tools({
         schemas: {
           'start-notification-stream': {
-            parameters: z3.object({
-              interval: z3
+            parameters: z.object({
+              interval: z
                 .number()
                 .describe('Interval in milliseconds between notifications')
                 .default(100),
-              count: z3
+              count: z
                 .number()
                 .describe('Number of notifications to send (0 for 100)')
                 .default(10),
             }),
           },
           'get-pokemon': {
-            parameters: z3.object({
-              name: z3.string().describe('The name of the Pokemon to get'),
+            parameters: z.object({
+              name: z.string().describe('The name of the Pokemon to get'),
             }),
           },
         },
@@ -178,8 +178,8 @@ export function mcpClientRoutes(
       const tools = await mcpClient.tools({
         schemas: {
           convert_to_markdown: {
-            parameters: z3.object({
-              uri: z3
+            parameters: z.object({
+              uri: z
                 .string()
                 .describe(
                   'The URI in which to convert the resource described by an http:, https:, file: or data: into markdown'

@@ -64,7 +64,7 @@ export class Logger {
       processors: [new BatchLogRecordProcessor(new OTLPLogExporter())],
     });
 
-    this.logger = loggerProvider.getLogger('default', '1.0.0');
+    this.logger = loggerProvider.getLogger(SERVICE_NAME, SERVICE_VERSION);
   }
 
   log(message: string, attributes?: AnyValueMap) {

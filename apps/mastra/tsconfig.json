@@ -4,14 +4,14 @@
     "forceConsistentCasingInFileNames": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
+    "resolveJsonModule": true,
     "declaration": false,
     "declarationMap": false,
     "paths": {
       "@/*": ["./src/*"],
       "@workspace/core/*": ["../../packages/core/src/*"]
-    },
-    "types": ["bun-types"]
+    }
   },
-  "include": ["**/*.ts", "**/*.spec.ts", "vitest.config.ts"],
+  "include": ["**/*.ts", "**/*.spec.ts", "**/*.json", "vitest.config.ts"],
   "exclude": ["node_modules", "dist", ".mastra"]
 }

@@ -30,7 +30,7 @@
     "prepare": "husky",
     "compose:up": "docker compose -f ./docker/docker-compose.yml up --build",
     "clean": "rimraf --glob \"**/node_modules\" \"**/dev-dist\" \"**/dist\" \"**/build\" \"**/html\" \"**/playwright\" \"**/playwright-report\" \"**/playwright-test-results\" \"**/bun.lock\" \"**/.next\" && bun install",
-    "bump-deps": "bunx npm-check-updates --deep -u --peer -x @babel*,tamagui",
+    "bump-deps": "bunx npm-check-updates --deep -u --peer --dep prod,dev,optional,packageManager,peer -x @babel*,tamagui",
     "cs": "changeset",
     "cs:v": "changeset version",
     "format": "ultracite format",

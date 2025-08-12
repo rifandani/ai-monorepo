@@ -1,8 +1,8 @@
-import { createRoute, type OpenAPIHono, z } from '@hono/zod-openapi';
+import { createRoute, type OpenAPIHono } from '@hono/zod-openapi';
 import { type AttributeValue, metrics, trace } from '@opentelemetry/api';
-import { generateObject, generateText, tool } from 'ai';
+import { generateObject, generateText, stepCountIs, tool } from 'ai';
 import { crush } from 'radashi';
-import { z as z3 } from 'zod/v3';
+import { z } from 'zod';
 import { models } from '@/core/api/ai.js';
 import type { Variables } from '@/core/types/hono.js';
 import { recordSpan } from '@/core/utils/telemetry.js';
@@ -12,40 +12,40 @@ const meter = metrics.getMeter('deepResearchEndpoint', '1.0.0');
 const queriesCounter = meter.createCounter('deepResearch.queries');
 const searchResultsCounter = meter.createCounter('deepResearch.searchResults');
 
-const searchResultSchema = z3.object({
-  title: z3.string().describe('The title of the search result'),
-  content: z3.string().describe('The content of the search result'),
-  url: z3.string().describe('The url of the search result source'),
+const searchResultSchema = z.object({
+  title: z.string().describe('The title of the search result'),
+  content: z.string().describe('The content of the search result'),
+  url: z.string().describe('The url of the search result source'),
 });
-export type SearchResult = z3.infer<typeof searchResultSchema>;
+export type SearchResult = z.infer<typeof searchResultSchema>;
 
-const learningSchema = z3.object({
-  learning: z3.string().describe('The learning from the search result'),
-  followUpQuestions: z3
-    .array(z3.string())
+const learningSchema = z.object({
+  learning: z.string().describe('The learning from the search result'),
+  followUpQuestions: z
+    .array(z.string())
     .describe('The follow-up questions from the search result'),
 });
 
-const researchSchema = z3.object({
-  query: z3.string().optional().describe('The current query to research'),
-  queries: z3
-    .array(z3.string())
+const researchSchema = z.object({
+  query: z.string().optional().describe('The current query to research'),
+  queries: z
+    .array(z.string())
     .describe('The current relevant search queries based on query'),
-  searchResults: z3
+  searchResults: z
     .array(searchResultSchema)
     .describe('The accumulated search results'),
-  learnings: z3.array(learningSchema).describe('The accumulated learnings'),
-  completedQueries: z3
-    .array(z3.string())
+  learnings: z.array(learningSchema).describe('The accumulated learnings'),
+  completedQueries: z
+    .array(z.string())
     .describe('The accumulated completed queries'),
 });
-type Research = z3.infer<typeof researchSchema>;
+type Research = z.infer<typeof researchSchema>;
 
-const searchWebParamsSchema = z3.object({
-  query: z3.string().min(1).describe('The query to search the web for'),
+const searchWebParamsSchema = z.object({
+  query: z.string().min(1).describe('The query to search the web for'),
 });
-const searchWebSchema = z3.object({
-  results: z3.array(searchResultSchema).describe('The search results'),
+const searchWebSchema = z.object({
+  results: z.array(searchResultSchema).describe('The search results'),
 });
 
 const accumulatedResearch: Research = {
@@ -218,7 +218,7 @@ export async function searchAndEvaluate(
     system:
       'You are a researcher. For each query, search the web and then evaluate if the results are relevant and will help answer the following query',
     prompt: `Search the web for information about ${query}`,
-    maxSteps: 10,
+    stopWhen: stepCountIs(10),
     tools: {
       searchWeb: tool({
         description: 'Search the web for information about a given query',
@@ -260,7 +260,7 @@ export async function searchAndEvaluate(
       // LLM as a judge
       evaluate: tool({
         description: 'Evaluate the search results',
-        parameters: z3.object({}),
+        parameters: z.object({}),
         async execute() {
           const pendingResult = pendingSearchResults.pop()!;
 
@@ -321,8 +321,8 @@ export async function generateSearchQueries(query: string, depth = 1) {
     model: models.flash25,
     // search query should not be too long/detailed to avoid not being able to find results
     prompt: `Generate ${depth} relevant search queries for the following query: ${query}`,
-    schema: z3.object({
-      queries: z3.array(z3.string()).min(depth).max(5),
+    schema: z.object({
+      queries: z.array(z.string()).min(depth).max(5),
     }),
     experimental_telemetry: {
       isEnabled: true,

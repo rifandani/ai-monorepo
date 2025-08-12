@@ -48,7 +48,7 @@ app.use(
     // store: ... , // To support multi-instance apps that runs behind load balancer, use centralized store like Redis (default is MemoryStore)
   }),
   cors({
-    origin: [ENV.APP_URL, 'http://localhost:3002'],
+    origin: [ENV.APP_URL],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Content-Length'],
@@ -62,11 +62,7 @@ app.use(
     supportedLanguages: ['en', 'id'],
     fallbackLanguage: 'en',
   }),
-  csrf(
-    // {
-    //   origin: ['localhost:3000'],
-    // },
-  ),
+  csrf({ origin: [ENV.APP_URL] }),
   secureHeaders()
 );
 
