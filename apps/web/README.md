@@ -9,6 +9,7 @@
 
 ## 🎯 Todo
 
+- [ ] use Elements UI and `streamdown` (fix performance issue in mermaid rendering, chat field input)
 - [ ] change `SERVICE_NAME` and `SERVICE_VERSION` to `ENV.APP_TITLE` and `ENV.APP_VERSION`
 - [ ] follow up with `fe-monorepo` latest version (when we upgrade `react-aria`, we also need to update intentui)
 - [ ] implement share in chat history
