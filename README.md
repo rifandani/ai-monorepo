@@ -55,6 +55,12 @@ gh secret set WEB_ENV_FILE -e prod -f ./apps/web/.env.prod
 
 Everytime there is a change in the local env variables, you need to also push those changes to the github repo by running the command above. -->
 
+## 📂 File Storage
+
+We are using [MinIO](https://min.io/) as our file storage.
+To access the MinIO browser, you can visit `http://localhost:9001/`.
+To login, you can use the following credentials that are defined in the `docker-compose.yml` file.
+
 ## 📱 Apps
 
 ### @workspace/hono

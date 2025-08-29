@@ -1,6 +1,18 @@
 name: ai-monorepo
 
 services:
+  minio:
+    image: bitnami/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio_root_user
+      MINIO_ROOT_PASSWORD: minio_root_password
+      MINIO_BROWSER: on
+    volumes:
+      - minio_data:/bitnami/minio/data
+
   redis_cache:
     image: redis:latest
     ports:
@@ -44,3 +56,4 @@ services:
 volumes:
   pgvector_db_data:
   redis_cache_data: 
+  minio_data:
