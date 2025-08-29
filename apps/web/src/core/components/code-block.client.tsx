@@ -73,22 +73,20 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
         <span className="text-xs lowercase">{language}</span>
         <div className="flex items-center space-x-1">
           <Button
-            appearance="plain"
             className="focus-visible:ring-1"
             intent="plain"
             onClick={handleDownload}
-            size="square-petite"
+            size="sq-xs"
             type="button"
           >
             <Icon className="h-4 w-4" icon="lucide:download" />
             <span className="sr-only">Download</span>
           </Button>
           <Button
-            appearance="plain"
             className="text-xs focus-visible:ring-1 focus-visible:ring-offset-0"
             intent="plain"
             onClick={handleCopy}
-            size="square-petite"
+            size="sq-xs"
             type="button"
           >
             {isCopied ? (

@@ -1,0 +1,271 @@
+'use client';
+
+import { Icon } from '@iconify/react';
+import type { ComponentProps } from 'react';
+import * as React from 'react';
+import { twMerge } from 'tailwind-merge';
+import { Badge } from '@/core/components/ui/badge';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  useCarousel,
+} from '@/core/components/ui/carousel';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/core/components/ui/hover-card';
+
+export type InlineCitationProps = ComponentProps<'span'>;
+
+export const InlineCitation = ({
+  className,
+  ...props
+}: InlineCitationProps) => (
+  <span
+    className={twMerge('group inline items-center gap-1', className)}
+    {...props}
+  />
+);
+
+export type InlineCitationTextProps = ComponentProps<'span'>;
+
+export const InlineCitationText = ({
+  className,
+  ...props
+}: InlineCitationTextProps) => (
+  <span
+    className={twMerge('transition-colors group-hover:bg-accent', className)}
+    {...props}
+  />
+);
+
+export type InlineCitationCardProps = ComponentProps<typeof HoverCard>;
+
+export const InlineCitationCard = (props: InlineCitationCardProps) => (
+  <HoverCard closeDelay={0} openDelay={0} {...props} />
+);
+
+export type InlineCitationCardTriggerProps = ComponentProps<typeof Badge> & {
+  sources: string[];
+};
+
+export const InlineCitationCardTrigger = ({
+  sources,
+  className,
+  ...props
+}: InlineCitationCardTriggerProps) => (
+  <HoverCardTrigger asChild>
+    <Badge
+      className={twMerge('ml-1 rounded-full', className)}
+      intent="secondary"
+      {...props}
+    >
+      {sources.length ? (
+        <>
+          {new URL(sources[0] ?? '').hostname}{' '}
+          {sources.length > 1 && `+${sources.length - 1}`}
+        </>
+      ) : (
+        'unknown'
+      )}
+    </Badge>
+  </HoverCardTrigger>
+);
+
+export type InlineCitationCardBodyProps = ComponentProps<'div'>;
+
+export const InlineCitationCardBody = ({
+  className,
+  ...props
+}: InlineCitationCardBodyProps) => (
+  <HoverCardContent
+    className={twMerge('relative w-80 p-0', className)}
+    {...props}
+  />
+);
+
+export type InlineCitationCarouselProps = ComponentProps<typeof Carousel>;
+
+export const InlineCitationCarousel = ({
+  className,
+  ...props
+}: InlineCitationCarouselProps) => (
+  <Carousel className={twMerge('w-full', className)} {...props} />
+);
+
+export type InlineCitationCarouselContentProps = ComponentProps<'div'>;
+
+export const InlineCitationCarouselContent = (
+  props: InlineCitationCarouselContentProps
+) => <CarouselContent {...props} />;
+
+export type InlineCitationCarouselItemProps = ComponentProps<'div'>;
+
+export const InlineCitationCarouselItem = ({
+  className,
+  ...props
+}: InlineCitationCarouselItemProps) => (
+  <CarouselItem
+    className={twMerge('w-full space-y-2 p-4', className)}
+    {...props}
+  />
+);
+
+export type InlineCitationCarouselHeaderProps = ComponentProps<'div'>;
+
+export const InlineCitationCarouselHeader = ({
+  className,
+  ...props
+}: InlineCitationCarouselHeaderProps) => (
+  <div
+    className={twMerge(
+      'flex items-center justify-between gap-2 rounded-t-md bg-secondary p-2',
+      className
+    )}
+    {...props}
+  />
+);
+
+export type InlineCitationCarouselIndexProps = ComponentProps<'div'>;
+
+export const InlineCitationCarouselIndex = ({
+  children,
+  className,
+  ...props
+}: InlineCitationCarouselIndexProps) => {
+  const { api } = useCarousel();
+  const [current, setCurrent] = React.useState(0);
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
+  return (
+    <div
+      className={twMerge(
+        'flex flex-1 items-center justify-end px-3 py-1 text-muted-foreground text-xs',
+        className
+      )}
+      {...props}
+    >
+      {children ?? `${current}/${count}`}
+    </div>
+  );
+};
+
+export type InlineCitationCarouselPrevProps = ComponentProps<'button'>;
+
+export const InlineCitationCarouselPrev = ({
+  className,
+  ...props
+}: InlineCitationCarouselPrevProps) => {
+  const { api } = useCarousel();
+
+  const handleClick = React.useCallback(() => {
+    if (api) {
+      api.scrollPrev();
+    }
+  }, [api]);
+
+  return (
+    <button
+      aria-label="Previous"
+      className={twMerge('shrink-0', className)}
+      onClick={handleClick}
+      type="button"
+      {...props}
+    >
+      <Icon className="size-4 text-muted-foreground" icon="lucide:arrow-left" />
+    </button>
+  );
+};
+
+export type InlineCitationCarouselNextProps = ComponentProps<'button'>;
+
+export const InlineCitationCarouselNext = ({
+  className,
+  ...props
+}: InlineCitationCarouselNextProps) => {
+  const { api } = useCarousel();
+
+  const handleClick = React.useCallback(() => {
+    if (api) {
+      api.scrollNext();
+    }
+  }, [api]);
+
+  return (
+    <button
+      aria-label="Next"
+      className={twMerge('shrink-0', className)}
+      onClick={handleClick}
+      type="button"
+      {...props}
+    >
+      <Icon
+        className="size-4 text-muted-foreground"
+        icon="lucide:arrow-right"
+      />
+    </button>
+  );
+};
+
+export type InlineCitationSourceProps = ComponentProps<'div'> & {
+  title?: string;
+  url?: string;
+  description?: string;
+};
+
+export const InlineCitationSource = ({
+  title,
+  url,
+  description,
+  className,
+  children,
+  ...props
+}: InlineCitationSourceProps) => (
+  <div className={twMerge('space-y-1', className)} {...props}>
+    {title && (
+      <h4 className="truncate font-medium text-sm leading-tight">{title}</h4>
+    )}
+    {url && (
+      <p className="truncate break-all text-muted-foreground text-xs">{url}</p>
+    )}
+    {description && (
+      <p className="line-clamp-3 text-muted-foreground text-sm leading-relaxed">
+        {description}
+      </p>
+    )}
+    {children}
+  </div>
+);
+
+export type InlineCitationQuoteProps = ComponentProps<'blockquote'>;
+
+export const InlineCitationQuote = ({
+  children,
+  className,
+  ...props
+}: InlineCitationQuoteProps) => (
+  <blockquote
+    className={twMerge(
+      'border-muted border-l-2 pl-3 text-muted-foreground text-sm italic',
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </blockquote>
+);

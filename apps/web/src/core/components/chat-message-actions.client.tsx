@@ -25,7 +25,7 @@ export function ChatMessageActions({
           aria-label="Copy message"
           className={buttonStyles({
             intent: 'plain',
-            size: 'square-petite',
+            size: 'sq-sm',
           })}
           onClick={() => {
             copyToClipboard(text);
@@ -45,7 +45,7 @@ export function ChatMessageActions({
           aria-label="Retry"
           className={buttonStyles({
             intent: 'plain',
-            size: 'square-petite',
+            size: 'sq-sm',
           })}
           onClick={onRetry}
         >
