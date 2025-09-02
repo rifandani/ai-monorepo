@@ -79,7 +79,7 @@
     "hono": "4.9.1",
     "hono-rate-limiter": "0.4.2",
     "keyword-extractor": "0.0.28",
-    "ky": "1.8.2",
+    "ky": "1.9.1",
     "mathjs": "14.6.0",
     "pg": "8.16.3",
     "radashi": "12.6.1",

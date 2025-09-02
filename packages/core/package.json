@@ -7,7 +7,7 @@
     "@types/node": "24.2.1",
     "@types/react": "19.1.10",
     "@workspace/typescript-config": "workspace:*",
-    "ky": "1.8.2",
+    "ky": "1.9.1",
     "radashi": "12.6.1",
     "type-fest": "4.41.0",
     "typescript": "5.9.2",
@@ -15,7 +15,7 @@
   },
   "peerDependencies": {
     "@internationalized/date": "3.8.2",
-    "ky": "1.8.2",
+    "ky": "1.9.1",
     "radashi": "12.6.1",
     "type-fest": "4.41.0",
     "zod": "4.0.17"
