@@ -17,7 +17,7 @@ jobs:
     name: Lint monorepos
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5.0.0
       - uses: QuiiBz/sherif@v1.6.1
         # with:
         # args: '--ignore-rule root-package-manager-field'
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5.0.0
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
