@@ -34,7 +34,7 @@ jobs:
           bun-version: latest
 
       - name: Install deps
-        run: bun i
+        run: bun ci
 
       - name: Lint
         run: bun lint-typecheck
