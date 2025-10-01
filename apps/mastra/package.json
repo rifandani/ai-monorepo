@@ -30,7 +30,7 @@
     "@mastra/evals": "0.12.0",
     "@mastra/mcp": "0.10.10",
     "@mastra/memory": "0.12.1",
-    "@mastra/pg": "0.13.3",
+    "@mastra/pg": "0.17.0",
     "@opentelemetry/api-logs": "0.203.0",
     "@opentelemetry/exporter-logs-otlp-http": "0.203.0",
     "@opentelemetry/resources": "2.0.1",
