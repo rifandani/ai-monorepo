@@ -69,7 +69,7 @@
     "@scalar/openapi-to-markdown": "0.2.26",
     "@t3-oss/env-core": "0.13.8",
     "@workspace/core": "workspace:*",
-    "ai": "5.0.10",
+    "ai": "5.0.59",
     "compromise": "14.14.4",
     "difflib": "0.2.4",
     "drizzle-orm": "0.44.4",
