@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.2.2
-      - uses: QuiiBz/sherif@v1.6.1
+      - uses: QuiiBz/sherif@v1.8.0
         # with:
         # args: '--ignore-rule root-package-manager-field'
 
